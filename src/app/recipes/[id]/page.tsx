@@ -4,6 +4,7 @@ import { RecipeDetailClient } from "./recipeDetailClient";
 import { Button } from "@/components/ui/Button";
 import { getGeneratedRecipes } from "@/lib/recipes/generatedRecipes";
 import { stableRecipeIdFromName } from "@/lib/recipes/stableRecipeId";
+import { recipeEditHref } from "@/lib/recipes/recipeRoutes";
 
 export function generateStaticParams() {
   const recipes = getGeneratedRecipes();
@@ -25,7 +26,7 @@ export default async function RecipeDetailPage({
         <Link href="/recipes/all">
           <Button variant="ghost">← 返回</Button>
         </Link>
-        <Link href={`/recipes/${id}/edit`}>
+        <Link href={recipeEditHref(id)}>
           <Button variant="outline">编辑</Button>
         </Link>
       </div>

@@ -3,6 +3,7 @@
 import * as React from "react";
 import type { Recipe } from "@/lib/recipes/types";
 import { recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
+import { recipeDetailHref } from "@/lib/recipes/recipeRoutes";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { useTodayCookbook } from "@/lib/today/useTodayCookbook";
@@ -317,7 +318,7 @@ export function InspirationStack({ recipes }: { recipes: Recipe[] }) {
                       isFront
                         ? () => {
                             if (dragging) return;
-                            router.push(`/recipes/${r.id}`);
+                            router.push(recipeDetailHref(r.id));
                           }
                         : undefined
                     }
@@ -326,7 +327,7 @@ export function InspirationStack({ recipes }: { recipes: Recipe[] }) {
                         ? (e) => {
                             if (e.key === "Enter" || e.key === " ") {
                               e.preventDefault();
-                              router.push(`/recipes/${r.id}`);
+                              router.push(recipeDetailHref(r.id));
                             }
                           }
                         : undefined

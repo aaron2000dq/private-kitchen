@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { useTodayCookbook } from "@/lib/today/useTodayCookbook";
 import { recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
+import { recipeDetailHref } from "@/lib/recipes/recipeRoutes";
 
 export function TodayRecommendationClient() {
   const { recipes, hydrated } = useRecipes();
@@ -72,7 +73,7 @@ export function TodayRecommendationClient() {
             return (
             <Link
               key={r.id}
-              href={`/recipes/${r.id}`}
+              href={recipeDetailHref(r.id)}
               className="overflow-hidden rounded-2xl border border-[color:var(--line)] bg-black/[0.02] text-[13px] transition-colors hover:bg-black/[0.03] dark:bg-white/[0.04] dark:hover:bg-white/[0.06]"
             >
               {r.images?.[0] ? (

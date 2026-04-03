@@ -5,6 +5,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import type { Recipe } from "@/lib/recipes/types";
 import { recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
+import { recipeDetailHref } from "@/lib/recipes/recipeRoutes";
 import { Badge } from "@/components/ui/Badge";
 import { StarRating } from "@/components/ui/StarRating";
 import { Button } from "@/components/ui/Button";
@@ -63,7 +64,7 @@ export function RecipeCard({
     return () => document.removeEventListener("pointerdown", onDocPointerDown);
   }, [catMenuOpen]);
 
-  const href = `/recipes/${recipe.id}`;
+  const href = recipeDetailHref(recipe.id);
   const Wrapper: any = categoryEditable ? "div" : Link;
   const wrapperProps = categoryEditable
     ? {

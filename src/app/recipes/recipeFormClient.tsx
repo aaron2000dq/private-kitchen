@@ -4,6 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useRecipes } from "@/lib/recipes/useRecipes";
 import { Recipe, RecipeDifficulty, RecipeIngredient, RecipeStep } from "@/lib/recipes/types";
+import { recipeDetailHref } from "@/lib/recipes/recipeRoutes";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
@@ -139,12 +140,12 @@ export function RecipeFormClient({
 
       if (mode === "create") {
         const r = await create(input);
-        router.push(`/recipes/${r.id}`);
+        router.push(recipeDetailHref(r.id));
       } else {
         const id = initial?.id;
         if (!id) return;
         const updated = await update(id, input);
-        router.push(`/recipes/${updated?.id ?? id}`);
+        router.push(recipeDetailHref(updated?.id ?? id));
       }
     } finally {
       setBusy(false);

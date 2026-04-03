@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { EditRecipeClient } from "./editRecipeClient";
 import { getGeneratedRecipes } from "@/lib/recipes/generatedRecipes";
 import { stableRecipeIdFromName } from "@/lib/recipes/stableRecipeId";
+import { recipeDetailHref } from "@/lib/recipes/recipeRoutes";
 
 export function generateStaticParams() {
   const recipes = getGeneratedRecipes();
@@ -22,7 +23,7 @@ export default async function EditRecipePage({
   return (
     <AppShell>
       <div className="flex items-center justify-between gap-4">
-        <Link href={`/recipes/${id}`}>
+        <Link href={recipeDetailHref(id)}>
           <Button variant="ghost">← 返回</Button>
         </Link>
       </div>
