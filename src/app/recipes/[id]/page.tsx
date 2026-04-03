@@ -1,0 +1,30 @@
+import Link from "next/link";
+import { AppShell } from "@/components/layout/AppShell";
+import { RecipeDetailClient } from "./recipeDetailClient";
+import { Button } from "@/components/ui/Button";
+
+export default async function RecipeDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+
+  return (
+    <AppShell>
+      <div className="flex items-center justify-between gap-4">
+        <Link href="/recipes/all">
+          <Button variant="ghost">← 返回</Button>
+        </Link>
+        <Link href={`/recipes/${id}/edit`}>
+          <Button variant="outline">编辑</Button>
+        </Link>
+      </div>
+
+      <div className="mt-6">
+        <RecipeDetailClient id={id} />
+      </div>
+    </AppShell>
+  );
+}
+

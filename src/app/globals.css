@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f6f6f3;
+  --foreground: #141614;
+  --paper: #fbfbf8;
+  --muted: #5d6a60;
+  --muted-2: #7d8a81;
+  --line: rgba(20, 22, 20, 0.12);
+  --ring: rgba(107, 142, 107, 0.45);
+  --accent: #6b8e6b;
+  --accent-2: #a3b18a;
+  --warm: #c98a63;
+  --shadow: 0 1px 0 rgba(20, 22, 20, 0.06), 0 18px 40px rgba(20, 22, 20, 0.07);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-paper: var(--paper);
+  --color-muted: var(--muted);
+  --color-muted-2: var(--muted-2);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-warm: var(--warm);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0b0d0b;
+    --foreground: #eceee9;
+    --paper: rgba(255, 255, 255, 0.06);
+    --muted: rgba(236, 238, 233, 0.72);
+    --muted-2: rgba(236, 238, 233, 0.52);
+    --line: rgba(236, 238, 233, 0.14);
+    --ring: rgba(163, 177, 138, 0.38);
+    --accent: #a3b18a;
+    --accent-2: #6b8e6b;
+    --warm: #c98a63;
+    --shadow: 0 1px 0 rgba(0, 0, 0, 0.35), 0 18px 40px rgba(0, 0, 0, 0.55);
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+::selection {
+  background: rgba(163, 177, 138, 0.35);
+}
+
+a {
+  text-underline-offset: 3px;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.grain {
+  position: relative;
+}
+.grain::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.10;
+  mix-blend-mode: multiply;
+  background-image: radial-gradient(circle at 20% 10%, rgba(0, 0, 0, 0.06), transparent 45%),
+    radial-gradient(circle at 80% 20%, rgba(0, 0, 0, 0.045), transparent 55%),
+    radial-gradient(circle at 30% 80%, rgba(0, 0, 0, 0.05), transparent 50%),
+    radial-gradient(circle at 70% 90%, rgba(0, 0, 0, 0.035), transparent 60%);
+}
+
+@media (prefers-color-scheme: dark) {
+  .grain::before {
+    opacity: 0.16;
+    mix-blend-mode: screen;
+    background-image: radial-gradient(circle at 20% 10%, rgba(255, 255, 255, 0.07), transparent 45%),
+      radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.06), transparent 55%),
+      radial-gradient(circle at 30% 80%, rgba(255, 255, 255, 0.055), transparent 50%),
+      radial-gradient(circle at 70% 90%, rgba(255, 255, 255, 0.05), transparent 60%);
+  }
+}
+
