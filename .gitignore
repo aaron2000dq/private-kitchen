@@ -24,6 +24,9 @@
 .DS_Store
 *.pem
 
+# Copied from ./images at build/dev time (see scripts/copy-images-to-public.mjs)
+/public/images/
+
 # debug
 npm-debug.log*
 yarn-debug.log*

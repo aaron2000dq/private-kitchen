@@ -137,6 +137,20 @@ export function useWeeklyRecommendation(recipes: Recipe[]) {
         return;
       }
 
+      // GitHub Pages / static export: no server API routes; use local rules only.
+      if (process.env.NEXT_PUBLIC_STATIC_EXPORT === "1") {
+        if (!cancelled) {
+          const fb = localFallbackDay(today, recipes);
+          setData({
+            ...fb,
+            reason:
+              "当前为静态站点（GitHub Pages），无服务端大模型接口；时令推荐使用本地规则。",
+          });
+          setLoading(false);
+        }
+        return;
+      }
+
       setLoading(true);
 
       try {

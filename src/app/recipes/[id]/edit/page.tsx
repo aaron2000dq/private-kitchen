@@ -2,6 +2,15 @@ import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/Button";
 import { EditRecipeClient } from "./editRecipeClient";
+import { getGeneratedRecipes } from "@/lib/recipes/generatedRecipes";
+import { stableRecipeIdFromName } from "@/lib/recipes/stableRecipeId";
+
+export function generateStaticParams() {
+  const recipes = getGeneratedRecipes();
+  return recipes.map((r) => ({
+    id: stableRecipeIdFromName(String(r.name ?? "").trim()),
+  }));
+}
 
 export default async function EditRecipePage({
   params,

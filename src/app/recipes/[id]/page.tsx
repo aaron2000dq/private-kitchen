@@ -2,6 +2,15 @@ import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { RecipeDetailClient } from "./recipeDetailClient";
 import { Button } from "@/components/ui/Button";
+import { getGeneratedRecipes } from "@/lib/recipes/generatedRecipes";
+import { stableRecipeIdFromName } from "@/lib/recipes/stableRecipeId";
+
+export function generateStaticParams() {
+  const recipes = getGeneratedRecipes();
+  return recipes.map((r) => ({
+    id: stableRecipeIdFromName(String(r.name ?? "").trim()),
+  }));
+}
 
 export default async function RecipeDetailPage({
   params,

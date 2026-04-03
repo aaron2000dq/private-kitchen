@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import type { Recipe } from "@/lib/recipes/types";
+import { recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { useTodayCookbook } from "@/lib/today/useTodayCookbook";
@@ -30,7 +31,7 @@ function CardFace({
         {r.images?.[0] ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={r.images[0]}
+            src={recipeImageUrl(r.images[0])}
             alt=""
             className="h-full w-full object-cover"
             draggable={false}

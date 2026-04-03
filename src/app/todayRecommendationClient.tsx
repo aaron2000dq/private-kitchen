@@ -7,6 +7,7 @@ import { useWeeklyRecommendation } from "@/lib/recommendation/useWeeklyRecommend
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { useTodayCookbook } from "@/lib/today/useTodayCookbook";
+import { recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
 
 export function TodayRecommendationClient() {
   const { recipes, hydrated } = useRecipes();
@@ -78,7 +79,7 @@ export function TodayRecommendationClient() {
                 <div className="border-b border-[color:var(--line)] bg-black/[0.02] dark:bg-white/[0.04]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={r.images[0]}
+                    src={recipeImageUrl(r.images[0])}
                     alt={r.name}
                     className="h-28 w-full object-cover"
                   />

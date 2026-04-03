@@ -4,14 +4,16 @@ import { RECIPE_CATEGORY_RULE_VERSION, reclassifyRecipe } from "./classify";
 import {
   RECIPE_DESCRIPTION_RULE_VERSION,
   withGeneratedDescription,
-  isGenericDescription,
 } from "./describe";
 import { getGeneratedRecipes, getGeneratedRecipesSignature } from "./generatedRecipes";
+import { stableRecipeIdFromName } from "./stableRecipeId";
+import { TodayCookbookRepository } from "@/lib/today/todayCookbookRepository";
 
 const LEGACY_STORAGE_KEY = "private-kitchen:recipes";
 const CATEGORY_VERSION_KEY = "private-kitchen:category-rule-version";
 const DESCRIPTION_VERSION_KEY = "private-kitchen:description-rule-version";
 const GENERATED_DESC_SYNC_KEY = "private-kitchen:generated-desc-sync-sig";
+const STABLE_ID_MIGRATION_KEY = "private-kitchen:stable-id-migration-v1";
 
 interface PrivateKitchenDB extends DBSchema {
   recipes: {
@@ -123,6 +125,57 @@ async function maybeMigrateRecipeDescriptionsIfNeeded(): Promise<void> {
   );
 }
 
+async function maybeMigrateStableRecipeIds(): Promise<void> {
+  if (!isBrowser()) return;
+  if (window.localStorage.getItem(STABLE_ID_MIGRATION_KEY) === "1") return;
+
+  const db = await getDb();
+  const all = await db.getAll("recipes");
+  if (all.length === 0) {
+    window.localStorage.setItem(STABLE_ID_MIGRATION_KEY, "1");
+    return;
+  }
+
+  const oldToNew = new Map<string, string>();
+  for (const r of all) {
+    oldToNew.set(r.id, stableRecipeIdFromName(r.name));
+  }
+
+  const bestByName = new Map<string, Recipe>();
+  for (const r of all) {
+    const prev = bestByName.get(r.name);
+    if (!prev || new Date(r.updatedAt) >= new Date(prev.updatedAt)) {
+      const nid = stableRecipeIdFromName(r.name);
+      bestByName.set(r.name, { ...r, id: nid });
+    }
+  }
+
+  const out = Array.from(bestByName.values());
+
+  const tx = db.transaction("recipes", "readwrite");
+  for (const r of all) {
+    await tx.store.delete(r.id);
+  }
+  for (const r of out) {
+    await tx.store.put(r);
+  }
+  await tx.done;
+
+  const idSet = new Set(out.map((x) => x.id));
+  const tc = await TodayCookbookRepository.load();
+  if (tc?.ids?.length) {
+    const newIds = tc.ids
+      .map((oid) => oldToNew.get(oid) ?? oid)
+      .filter((id) => idSet.has(id));
+    await TodayCookbookRepository.save({
+      ids: [...new Set(newIds)],
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
+  window.localStorage.setItem(STABLE_ID_MIGRATION_KEY, "1");
+}
+
 async function maybeSyncDescriptionsFromGeneratedJson(): Promise<void> {
   if (!isBrowser()) return;
   const sig = getGeneratedRecipesSignature();
@@ -169,9 +222,22 @@ async function maybeSyncDescriptionsFromGeneratedJson(): Promise<void> {
   window.localStorage.setItem(GENERATED_DESC_SYNC_KEY, sig);
 }
 
+async function ensureRecipeMigrations(): Promise<void> {
+  if (!isBrowser()) return;
+  await migrateFromLocalStorageIfNeeded();
+  await maybeMigrateStableRecipeIds();
+  await maybeMigrateRecipeCategoriesIfNeeded();
+  await maybeMigrateRecipeDescriptionsIfNeeded();
+  await maybeSyncDescriptionsFromGeneratedJson();
+}
+
 function normalizeRecipe(input: RecipeInput, base?: Recipe): Recipe {
   const now = new Date().toISOString();
-  const id = base?.id ?? input.id ?? generateId();
+  const nameTrim = String(input.name ?? base?.name ?? "").trim();
+  const id =
+    base?.id ??
+    input.id ??
+    (nameTrim ? stableRecipeIdFromName(nameTrim) : generateId());
   const createdAt = base?.createdAt ?? now;
 
   return {
@@ -193,10 +259,7 @@ function normalizeRecipe(input: RecipeInput, base?: Recipe): Recipe {
 export const RecipeRepository = {
   async list(): Promise<Recipe[]> {
     if (!isBrowser()) return [];
-    await migrateFromLocalStorageIfNeeded();
-    await maybeMigrateRecipeCategoriesIfNeeded();
-    await maybeMigrateRecipeDescriptionsIfNeeded();
-    await maybeSyncDescriptionsFromGeneratedJson();
+    await ensureRecipeMigrations();
     const db = await getDb();
     const all = await db.getAll("recipes");
     return all.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
@@ -204,14 +267,14 @@ export const RecipeRepository = {
 
   async get(id: string): Promise<Recipe | null> {
     if (!isBrowser()) return null;
-    await migrateFromLocalStorageIfNeeded();
+    await ensureRecipeMigrations();
     const db = await getDb();
     return (await db.get("recipes", id)) ?? null;
   },
 
   async create(input: RecipeInput): Promise<Recipe> {
     if (!isBrowser()) throw new Error("Not in browser");
-    await migrateFromLocalStorageIfNeeded();
+    await ensureRecipeMigrations();
     const db = await getDb();
     const recipe = normalizeRecipe(input);
     await db.put("recipes", recipe);
@@ -220,7 +283,7 @@ export const RecipeRepository = {
 
   async update(id: string, input: Partial<RecipeInput>): Promise<Recipe | null> {
     if (!isBrowser()) return null;
-    await migrateFromLocalStorageIfNeeded();
+    await ensureRecipeMigrations();
     const db = await getDb();
     const existing = await db.get("recipes", id);
     if (!existing) return null;
@@ -231,19 +294,22 @@ export const RecipeRepository = {
 
   async delete(id: string): Promise<void> {
     if (!isBrowser()) return;
-    await migrateFromLocalStorageIfNeeded();
+    await ensureRecipeMigrations();
     const db = await getDb();
     await db.delete("recipes", id);
   },
 
   async upsertMany(inputs: RecipeInput[]): Promise<Recipe[]> {
     if (!isBrowser()) throw new Error("Not in browser");
-    await migrateFromLocalStorageIfNeeded();
+    await ensureRecipeMigrations();
     const db = await getDb();
     const tx = db.transaction("recipes", "readwrite");
     const results: Recipe[] = [];
     for (const input of inputs) {
-      const id = input.id ?? generateId();
+      const nameTrim = String(input.name ?? "").trim();
+      const id =
+        input.id ??
+        (nameTrim ? stableRecipeIdFromName(nameTrim) : generateId());
       const existing = await tx.store.get(id);
       const updated = normalizeRecipe({ ...input, id }, existing ?? undefined);
       await tx.store.put(updated);
@@ -259,7 +325,7 @@ export const RecipeRepository = {
 
   async replaceMany(recipes: Recipe[]): Promise<void> {
     if (!isBrowser()) throw new Error("Not in browser");
-    await migrateFromLocalStorageIfNeeded();
+    await ensureRecipeMigrations();
     const db = await getDb();
     const tx = db.transaction("recipes", "readwrite");
     for (const r of recipes) {

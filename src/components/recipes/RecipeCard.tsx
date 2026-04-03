@@ -4,6 +4,7 @@ import Link from "next/link";
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import type { Recipe } from "@/lib/recipes/types";
+import { recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
 import { Badge } from "@/components/ui/Badge";
 import { StarRating } from "@/components/ui/StarRating";
 import { Button } from "@/components/ui/Button";
@@ -99,7 +100,7 @@ export function RecipeCard({
         <div className="-mt-1 mb-4 overflow-hidden rounded-2xl border border-[color:var(--line)] bg-black/[0.03] dark:bg-white/[0.05]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={recipe.images[0]}
+            src={recipeImageUrl(recipe.images[0])}
             alt={recipe.name}
             className="h-40 w-full object-cover"
           />

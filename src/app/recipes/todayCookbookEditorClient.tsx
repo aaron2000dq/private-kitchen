@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { useRecipes } from "@/lib/recipes/useRecipes";
 import { useTodayCookbook } from "@/lib/today/useTodayCookbook";
 import { exportTodayCookbookToPng } from "@/lib/today/exportTodayCookbookToImage";
+import { recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
 
 export function TodayCookbookEditorClient() {
   const { recipes, hydrated: recipesHydrated } = useRecipes();
@@ -102,7 +103,7 @@ export function TodayCookbookEditorClient() {
                   {r.images?.[0] ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={r.images[0]}
+                      src={recipeImageUrl(r.images[0])}
                       alt={r.name}
                       className="h-32 w-full rounded-2xl border border-[color:var(--line)] bg-black/[0.03] object-cover"
                     />

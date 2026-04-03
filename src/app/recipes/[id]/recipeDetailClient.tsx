@@ -4,6 +4,7 @@ import Link from "next/link";
 import * as React from "react";
 import { RecipeRepository } from "@/lib/recipes/repository";
 import { Recipe } from "@/lib/recipes/types";
+import { recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
 import { Badge } from "@/components/ui/Badge";
 import { StarRating } from "@/components/ui/StarRating";
 import { Button } from "@/components/ui/Button";
@@ -103,7 +104,11 @@ export function RecipeDetailClient({ id }: { id: string }) {
                 className="overflow-hidden rounded-2xl border border-[color:var(--line)] bg-black/[0.03] dark:bg-white/[0.05]"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={src} alt={`图片 ${idx + 1}`} className="h-36 w-full object-cover" />
+                <img
+                  src={recipeImageUrl(src)}
+                  alt={`图片 ${idx + 1}`}
+                  className="h-36 w-full object-cover"
+                />
               </div>
             ))}
           </div>

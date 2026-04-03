@@ -1,6 +1,7 @@
 "use client";
 
 import type { Recipe } from "@/lib/recipes/types";
+import { recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
 
 function roundRectPath(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
   const radius = Math.min(r, w / 2, h / 2);
@@ -68,7 +69,11 @@ export async function exportTodayCookbookToPng(selected: Recipe[], fileName = "t
 
   // pre-load images
   const images = await Promise.all(
-    selected.slice(0, 3).map(async (r) => (r.images?.[0] ? await loadImage(r.images[0]) : null)),
+    selected
+      .slice(0, 3)
+      .map(async (r) =>
+        r.images?.[0] ? await loadImage(recipeImageUrl(r.images[0])) : null,
+      ),
   );
 
   for (let i = 0; i < 3; i++) {
