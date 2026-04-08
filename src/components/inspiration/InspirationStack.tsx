@@ -34,6 +34,8 @@ function CardFace({
           <img
             src={recipeImageUrl(r.images[0])}
             alt=""
+            loading="lazy"
+            decoding="async"
             className="h-full w-full object-cover"
             draggable={false}
           />

@@ -45,12 +45,15 @@ function wrapTextLines(ctx: CanvasRenderingContext2D, text: string, maxWidth: nu
 }
 
 export async function exportTodayCookbookToPng(selected: Recipe[], fileName = "today-cookbook.png") {
+  const items = selected.slice(0, 10);
   const W = 1200;
-  const H = 820;
+  const H = items.length <= 3 ? 820 : 980;
   const margin = 54;
-  const gap = 36;
-  const cardW = (W - margin * 2 - gap * 2) / 3;
-  const cardH = 560;
+  const gap = 28;
+  const cols = items.length <= 3 ? 3 : 5;
+  const rows = items.length <= 3 ? 1 : 2;
+  const cardW = (W - margin * 2 - gap * (cols - 1)) / cols;
+  const cardH = items.length <= 3 ? 560 : 390;
 
   const canvas = document.createElement("canvas");
   canvas.width = W;
@@ -69,17 +72,16 @@ export async function exportTodayCookbookToPng(selected: Recipe[], fileName = "t
 
   // pre-load images
   const images = await Promise.all(
-    selected
-      .slice(0, 3)
-      .map(async (r) =>
-        r.images?.[0] ? await loadImage(recipeImageUrl(r.images[0])) : null,
-      ),
+    items.map(async (r) => (r.images?.[0] ? await loadImage(recipeImageUrl(r.images[0])) : null)),
   );
 
-  for (let i = 0; i < 3; i++) {
-    const r = selected[i];
-    const x = margin + i * (cardW + gap);
-    const y = 130;
+  const startY = 130;
+  for (let i = 0; i < cols * rows; i++) {
+    const r = items[i];
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    const x = margin + col * (cardW + gap);
+    const y = startY + row * (cardH + gap);
 
     // card background
     ctx.fillStyle = "#FFFFFF";
@@ -87,10 +89,11 @@ export async function exportTodayCookbookToPng(selected: Recipe[], fileName = "t
     ctx.fill();
 
     // image area
-    const imgX = x + 26;
-    const imgY = y + 26;
-    const imgW = cardW - 52;
-    const imgH = 250;
+    const pad = items.length <= 3 ? 26 : 18;
+    const imgX = x + pad;
+    const imgY = y + pad;
+    const imgW = cardW - pad * 2;
+    const imgH = items.length <= 3 ? 250 : 160;
     ctx.save();
     roundRectPath(ctx, imgX, imgY, imgW, imgH, 22);
     ctx.clip();
@@ -108,7 +111,7 @@ export async function exportTodayCookbookToPng(selected: Recipe[], fileName = "t
       ctx.drawImage(img, dx, dy, drawW, drawH);
     } else if (r) {
       ctx.fillStyle = "rgba(0,0,0,0.35)";
-      ctx.font = "600 28px ui-sans-serif, system-ui";
+    ctx.font = items.length <= 3 ? "600 28px ui-sans-serif, system-ui" : "600 20px ui-sans-serif, system-ui";
       ctx.textAlign = "center";
       ctx.fillText("无图", imgX + imgW / 2, imgY + imgH / 2);
       ctx.textAlign = "left";
@@ -117,22 +120,22 @@ export async function exportTodayCookbookToPng(selected: Recipe[], fileName = "t
 
     // content
     ctx.fillStyle = "#111";
-    ctx.font = "700 32px ui-sans-serif, system-ui";
+    ctx.font = items.length <= 3 ? "700 32px ui-sans-serif, system-ui" : "700 22px ui-sans-serif, system-ui";
 
     const title = r?.name ?? "（空位）";
     const lines = wrapTextLines(ctx, title, imgW);
-    const titleLines = lines.slice(0, 2);
-    const titleY = y + 310;
+    const titleLines = lines.slice(0, items.length <= 3 ? 2 : 1);
+    const titleY = y + (items.length <= 3 ? 310 : 206);
     for (let li = 0; li < titleLines.length; li++) {
-      ctx.fillText(titleLines[li]!, imgX, titleY + li * 40);
+      ctx.fillText(titleLines[li]!, imgX, titleY + li * (items.length <= 3 ? 40 : 28));
     }
 
     ctx.fillStyle = "#666";
-    ctx.font = "500 24px ui-sans-serif, system-ui";
+    ctx.font = items.length <= 3 ? "500 24px ui-sans-serif, system-ui" : "500 18px ui-sans-serif, system-ui";
     const meta = r
       ? `${r.category} · ${r.rating ? `${r.rating}/5` : "未评分"}`
       : "可添加菜谱";
-    ctx.fillText(meta, imgX, y + cardH - 62);
+    ctx.fillText(meta, imgX, y + cardH - (items.length <= 3 ? 62 : 44));
 
     ctx.strokeStyle = "rgba(0,0,0,0.08)";
     ctx.lineWidth = 2;

@@ -119,107 +119,14 @@ export function useWeeklyRecommendation(recipes: Recipe[]) {
         return;
       }
 
-      const cached = await loadWeekCache();
-      const targetCount = Math.min(3, recipes.length);
-
-      if (
-        cached &&
-        cached.weekStart === weekStart &&
-        (cached.v ?? 0) >= WEEK_CACHE_VERSION &&
-        cached.source !== "fallback" &&
-        weekCacheIsComplete(cached, weekDates, targetCount) &&
-        cached.days[today]
-      ) {
-        if (!cancelled) {
-          setData(cached.days[today]);
-          setLoading(false);
-        }
-        return;
-      }
-
-      // GitHub Pages / static export: no server API routes; use local rules only.
-      if (process.env.NEXT_PUBLIC_STATIC_EXPORT === "1") {
-        if (!cancelled) {
-          const fb = localFallbackDay(today, recipes);
-          setData({
-            ...fb,
-            reason:
-              "当前为静态站点（GitHub Pages），无服务端大模型接口；时令推荐使用本地规则。",
-          });
-          setLoading(false);
-        }
-        return;
-      }
-
-      setLoading(true);
-
-      try {
-        const resp = await fetch("/api/recommend/week", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            dates: weekDates,
-            recipes: recipePayload,
-          }),
+      // Always use local rules for "今日推荐" (static hosting & faster UX).
+      if (!cancelled) {
+        const fb = localFallbackDay(today, recipes);
+        setData({
+          ...fb,
+          reason: "按本地规则为你搭配三道：尽量错开主食/蛋白/蔬菜，口味也别撞得太厉害。",
         });
-        const raw = await resp.text();
-        const json = (safeJsonParse(raw) as any) ?? null;
-        if (!resp.ok) {
-          const serverMsg =
-            (json && typeof json?.error === "string" && json.error) ||
-            (json && typeof json?.details === "string" && json.details) ||
-            raw;
-          throw new Error(
-            serverMsg?.trim()
-              ? `本周推荐请求失败：${String(serverMsg).trim().slice(0, 240)}`
-              : "本周推荐请求失败",
-          );
-        }
-        const daysObj = json?.days as Record<string, DayRecommendation> | undefined;
-        if (!daysObj || typeof daysObj !== "object") {
-          throw new Error("推荐接口返回格式异常。");
-        }
-
-        const merged: Record<string, DayRecommendation> = { ...daysObj };
-        const target = Math.min(3, recipes.length);
-        let llmTodayHasAny = false;
-        for (const d of weekDates) {
-          const raw = merged[d];
-          if (!raw?.recommendedRecipeIds?.length) {
-            merged[d] = localFallbackDay(d, recipes);
-            continue;
-          }
-          if (d === today) llmTodayHasAny = true;
-          const ids = padDayIds(d, raw.recommendedRecipeIds, recipes, target);
-          merged[d] = {
-            recommendedRecipeIds: ids,
-            reason: raw.reason?.trim()
-              ? raw.reason
-              : "结合当日时令，为你搭配了三道菜。",
-          };
-        }
-
-        const nextCache: WeekRecommendationCache = {
-          weekStart,
-          days: merged,
-          updatedAt: new Date().toISOString(),
-          source: "llm",
-          v: WEEK_CACHE_VERSION,
-        };
-        if (!cancelled) {
-          // 若“今天”没有从 LLM 返回有效推荐，避免缓存 fallback 结果导致下次永远不再重试。
-          if (llmTodayHasAny) {
-            await saveWeekCache(nextCache);
-          }
-          setData(merged[today] ?? localFallbackDay(today, recipes));
-        }
-      } catch (e) {
-        if (!cancelled) {
-          setError(e instanceof Error ? e.message : "本周推荐加载失败");
-          setData(localFallbackDay(today, recipes));
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
+        setLoading(false);
       }
     }
 
@@ -227,7 +134,7 @@ export function useWeeklyRecommendation(recipes: Recipe[]) {
     return () => {
       cancelled = true;
     };
-  }, [recipes, recipePayload, today, weekDates, weekStart]);
+  }, [recipes, today, weekDates, weekStart]);
 
   return { today, weekStart, data, loading, error };
 }

@@ -88,7 +88,7 @@ export function TodayCookbookEditorClient() {
         <div className="rounded-3xl border border-[color:var(--line)] bg-[color:var(--paper)] p-8">
           <Badge tone="muted">空</Badge>
           <p className="mt-3 text-[13px] leading-7 text-[color:var(--muted)]">
-            还没有设置今日菜谱。去「今日」或「分类」挑三道吧。
+            还没有设置今日菜谱。去「今日」或「分类」挑最多 10 道吧。
           </p>
         </div>
       ) : (
@@ -105,6 +105,8 @@ export function TodayCookbookEditorClient() {
                     <img
                       src={recipeImageUrl(r.images[0])}
                       alt={r.name}
+                      loading="lazy"
+                      decoding="async"
                       className="h-32 w-full rounded-2xl border border-[color:var(--line)] bg-black/[0.03] object-cover"
                     />
                   ) : (

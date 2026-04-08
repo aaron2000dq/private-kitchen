@@ -47,9 +47,7 @@ export function TodayRecommendationClient() {
           <p className="max-w-xl text-[13px] leading-7 text-[color:var(--muted)]">
             {todayIds.length
               ? "你已经把菜选成“今日菜谱”了；可在「菜谱」tab里清空/删除/导出为图片。"
-              : loading && !data?.reason
-                ? "正在预加载本周（7 天）的时令推荐，完成后每天打开即可直接查看。"
-                : data?.reason?.trim()
+              : data?.reason?.trim()
                   ? data.reason
                   : "根据日期与已有菜谱，为你搭配一份更顺手的组合。"}
           </p>
@@ -82,6 +80,8 @@ export function TodayRecommendationClient() {
                   <img
                     src={recipeImageUrl(r.images[0])}
                     alt={r.name}
+                    loading="lazy"
+                    decoding="async"
                     className="h-28 w-full object-cover"
                   />
                 </div>

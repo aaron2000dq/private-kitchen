@@ -107,6 +107,8 @@ export function RecipeDetailClient({ id }: { id: string }) {
                 <img
                   src={recipeImageUrl(src)}
                   alt={`图片 ${idx + 1}`}
+                  loading={idx === 0 ? "eager" : "lazy"}
+                  decoding="async"
                   className="h-36 w-full object-cover"
                 />
               </div>

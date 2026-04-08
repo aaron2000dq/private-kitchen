@@ -4,7 +4,7 @@ import * as React from "react";
 import type { TodayCookbook } from "./todayCookbookRepository";
 import { TodayCookbookRepository } from "./todayCookbookRepository";
 
-const DEFAULT_MAX = 3;
+const DEFAULT_MAX = 10;
 
 export function useTodayCookbook(max: number = DEFAULT_MAX) {
   const [hydrated, setHydrated] = React.useState(false);

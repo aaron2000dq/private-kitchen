@@ -103,6 +103,8 @@ export function RecipeCard({
           <img
             src={recipeImageUrl(recipe.images[0])}
             alt={recipe.name}
+            loading="lazy"
+            decoding="async"
             className="h-40 w-full object-cover"
           />
         </div>
@@ -189,7 +191,18 @@ export function RecipeCard({
 
       <div className="mt-4 flex items-center justify-between text-[12px] text-[color:var(--muted-2)]">
         <span>{formatDate(recipe.updatedAt)}</span>
-        <span className="opacity-70 group-hover:opacity-100">打开 →</span>
+        <button
+          type="button"
+          className="opacity-70 transition-opacity group-hover:opacity-100"
+          onClick={(e) => {
+            // Ensure "打开" always navigates, even if wrapper click is blocked by drag/select.
+            e.preventDefault();
+            e.stopPropagation();
+            router.push(href);
+          }}
+        >
+          打开 →
+        </button>
       </div>
 
       {showTodayAction ? (
