@@ -2,8 +2,14 @@ import data from "../../../generated/recipes.json";
 
 type GeneratedRecipe = {
   name: string;
+  category?: string;
+  rating?: number;
+  difficulty?: string;
   description?: string;
   tags?: string[];
+  ingredients?: unknown[];
+  steps?: unknown[];
+  images?: unknown[];
 };
 
 export function getGeneratedRecipes(): GeneratedRecipe[] {

@@ -14,6 +14,7 @@ const CATEGORY_VERSION_KEY = "private-kitchen:category-rule-version";
 const DESCRIPTION_VERSION_KEY = "private-kitchen:description-rule-version";
 const GENERATED_DESC_SYNC_KEY = "private-kitchen:generated-desc-sync-sig";
 const STABLE_ID_MIGRATION_KEY = "private-kitchen:stable-id-migration-v1";
+const SEEDED_FROM_GENERATED_KEY = "private-kitchen:seeded-from-generated-v1";
 
 interface PrivateKitchenDB extends DBSchema {
   recipes: {
@@ -222,9 +223,75 @@ async function maybeSyncDescriptionsFromGeneratedJson(): Promise<void> {
   window.localStorage.setItem(GENERATED_DESC_SYNC_KEY, sig);
 }
 
+async function maybeSeedRecipesFromGeneratedJson(): Promise<void> {
+  if (!isBrowser()) return;
+  if (window.localStorage.getItem(SEEDED_FROM_GENERATED_KEY) === "1") return;
+
+  const db = await getDb();
+  const existingCount = await db.count("recipes");
+  if (existingCount > 0) {
+    window.localStorage.setItem(SEEDED_FROM_GENERATED_KEY, "1");
+    return;
+  }
+
+  const generated = getGeneratedRecipes();
+  if (!generated.length) {
+    window.localStorage.setItem(SEEDED_FROM_GENERATED_KEY, "1");
+    return;
+  }
+
+  const now = new Date().toISOString();
+  const tx = db.transaction("recipes", "readwrite");
+  for (const g of generated as any[]) {
+    const name = String(g?.name ?? "").trim();
+    if (!name) continue;
+    const id = stableRecipeIdFromName(name);
+    const recipe: Recipe = {
+      id,
+      name,
+      category: String(g?.category ?? "家常菜"),
+      rating: Number.isFinite(Number(g?.rating)) ? Number(g.rating) : 0,
+      difficulty:
+        g?.difficulty === "easy" || g?.difficulty === "hard" || g?.difficulty === "medium"
+          ? g.difficulty
+          : "medium",
+      tags: Array.isArray(g?.tags) ? g.tags.map(String).map((s: string) => s.trim()).filter(Boolean).slice(0, 10) : [],
+      description: String(g?.description ?? "").trim(),
+      ingredients: Array.isArray(g?.ingredients)
+        ? g.ingredients
+            .filter((x: any) => x && typeof x === "object")
+            .map((x: any) => ({
+              name: String(x.name ?? "").trim(),
+              amount: String(x.amount ?? "").trim(),
+              note: x.note != null ? String(x.note).trim() : undefined,
+            }))
+            .filter((x: any) => x.name || x.amount)
+        : [],
+      steps: Array.isArray(g?.steps)
+        ? g.steps
+            .filter((x: any) => x && typeof x === "object")
+            .map((x: any, i: number) => ({
+              order: Number.isFinite(Number(x.order)) ? Number(x.order) : i + 1,
+              content: String(x.content ?? "").trim(),
+              tip: x.tip != null ? String(x.tip).trim() : undefined,
+            }))
+            .filter((x: any) => x.content)
+        : [],
+      images: Array.isArray(g?.images) ? g.images.map(String).map((s: string) => s.trim()).filter(Boolean).slice(0, 10) : [],
+      createdAt: now,
+      updatedAt: now,
+    };
+    await tx.store.put(recipe);
+  }
+  await tx.done;
+
+  window.localStorage.setItem(SEEDED_FROM_GENERATED_KEY, "1");
+}
+
 async function ensureRecipeMigrations(): Promise<void> {
   if (!isBrowser()) return;
   await migrateFromLocalStorageIfNeeded();
+  await maybeSeedRecipesFromGeneratedJson();
   await maybeMigrateStableRecipeIds();
   await maybeMigrateRecipeCategoriesIfNeeded();
   await maybeMigrateRecipeDescriptionsIfNeeded();
