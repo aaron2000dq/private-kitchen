@@ -70,7 +70,7 @@ export function TodayRecommendationClient() {
           display.map((r) => {
             const selected = isTodaySelected(r.id);
             const canAdd = !selected && todayIds.length < todayMax;
-            const ingPreview = formatRecipeIngredientsPreview(r.ingredients, 3);
+            const ingPreview = formatRecipeIngredientsPreview(r, 2, 2);
             return (
             <Link
               key={r.id}

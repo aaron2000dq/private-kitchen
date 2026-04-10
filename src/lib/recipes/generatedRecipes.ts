@@ -7,7 +7,10 @@ type GeneratedRecipe = {
   difficulty?: string;
   description?: string;
   tags?: string[];
+  /** @deprecated 仅旧数据；新数据用 mainIngredients + auxiliaryIngredients */
   ingredients?: unknown[];
+  mainIngredients?: unknown[];
+  auxiliaryIngredients?: unknown[];
   steps?: unknown[];
   images?: unknown[];
 };
@@ -26,21 +29,23 @@ function hash32(str: string): number {
   return h >>> 0;
 }
 
-/**
- * A small signature for deciding whether we should re-sync generated content
- * into IndexedDB. Changes when recipe names/descriptions/tags change.
- */
-function ingredientsSignaturePart(r: GeneratedRecipe): string {
-  const ing = r.ingredients;
-  if (!Array.isArray(ing) || !ing.length) return "";
-  return ing
-    .slice(0, 24)
+function ingredientRowsSig(rows: unknown[] | undefined): string {
+  if (!Array.isArray(rows) || !rows.length) return "";
+  return rows
+    .slice(0, 20)
     .map((x: any) => `${String(x?.name ?? "").trim()}:${String(x?.amount ?? "").trim()}`)
     .join(";");
 }
 
+function ingredientsSignaturePart(r: GeneratedRecipe): string {
+  const main = ingredientRowsSig(r.mainIngredients as unknown[]);
+  const aux = ingredientRowsSig(r.auxiliaryIngredients as unknown[]);
+  if (main || aux) return `M:${main}|A:${aux}`;
+  return ingredientRowsSig(r.ingredients as unknown[]);
+}
+
 export function getGeneratedRecipesSignature(): string {
-  const LOGIC_VERSION = 5;
+  const LOGIC_VERSION = 6;
   const recipes = getGeneratedRecipes();
   if (!recipes.length) return `v${LOGIC_VERSION}:empty`;
   const sample = recipes
@@ -52,4 +57,3 @@ export function getGeneratedRecipesSignature(): string {
     .join("\n");
   return `v${LOGIC_VERSION}:${recipes.length}:${hash32(sample).toString(16)}`;
 }
-

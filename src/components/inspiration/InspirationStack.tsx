@@ -28,7 +28,7 @@ function CardFace({
   onTodayAction?: () => void;
 }) {
   const tags = r.tags ?? [];
-  const ingPreview = formatRecipeIngredientsPreview(r.ingredients, 3);
+  const ingPreview = formatRecipeIngredientsPreview(r, 2, 2);
   return (
     <>
       <div className="h-36 w-full shrink-0 bg-black/[0.04] dark:bg-white/[0.06]">

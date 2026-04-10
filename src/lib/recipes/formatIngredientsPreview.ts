@@ -1,14 +1,28 @@
-import type { RecipeIngredient } from "./types";
+import type { Recipe, RecipeIngredient } from "./types";
 
-/** 列表/首页用：展示前几项食材名，过长加「等」 */
-export function formatRecipeIngredientsPreview(
-  ingredients: RecipeIngredient[] | undefined,
-  maxItems = 4,
-): string | null {
-  if (!ingredients?.length) return null;
-  const named = ingredients.map((i) => i.name?.trim()).filter(Boolean) as string[];
-  if (!named.length) return null;
-  const head = named.slice(0, maxItems);
-  const more = named.length > maxItems;
-  return more ? `${head.join("、")} 等` : head.join("、");
+function rowNames(rows: RecipeIngredient[] | undefined, max: number): string[] {
+  if (!rows?.length) return [];
+  return rows
+    .map((i) => i.name?.trim())
+    .filter(Boolean)
+    .slice(0, max) as string[];
+}
+
+/** 列表/首页：主料为主，必要时带辅料摘要 */
+export function formatRecipeIngredientsPreview(recipe: Recipe, mainMax = 3, auxMax = 2): string | null {
+  const main = rowNames(recipe.mainIngredients, mainMax);
+  const aux = rowNames(recipe.auxiliaryIngredients, auxMax);
+  const mainMore = (recipe.mainIngredients ?? []).filter((i) => i.name?.trim()).length > mainMax;
+  const auxMore = (recipe.auxiliaryIngredients ?? []).filter((i) => i.name?.trim()).length > auxMax;
+
+  if (!main.length && !aux.length) return null;
+
+  const parts: string[] = [];
+  if (main.length) {
+    parts.push(`主料：${main.join("、")}${mainMore ? " 等" : ""}`);
+  }
+  if (aux.length) {
+    parts.push(`辅料：${aux.join("、")}${auxMore ? " 等" : ""}`);
+  }
+  return parts.join(" · ");
 }

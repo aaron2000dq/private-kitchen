@@ -15,6 +15,9 @@ const DESCRIPTION_VERSION_KEY = "private-kitchen:description-rule-version";
 const GENERATED_DESC_SYNC_KEY = "private-kitchen:generated-desc-sync-sig";
 const STABLE_ID_MIGRATION_KEY = "private-kitchen:stable-id-migration-v1";
 const SEEDED_FROM_GENERATED_KEY = "private-kitchen:seeded-from-generated-v1";
+const INGREDIENT_MAIN_AUX_MIGRATION_KEY = "private-kitchen:ingredient-main-aux-v1";
+
+type LegacyRecipe = Recipe & { ingredients?: Recipe["mainIngredients"] };
 
 interface PrivateKitchenDB extends DBSchema {
   recipes: {
@@ -35,7 +38,7 @@ function generateId(): string {
   return `recipe_${Math.random().toString(36).slice(2, 10)}_${Date.now().toString(36)}`;
 }
 
-function normalizeIngredientsFromGenerated(raw: unknown): Recipe["ingredients"] {
+function normalizeIngredientRows(raw: unknown): Recipe["mainIngredients"] {
   if (!Array.isArray(raw)) return [];
   return raw
     .filter((x: any) => x && typeof x === "object")
@@ -45,6 +48,20 @@ function normalizeIngredientsFromGenerated(raw: unknown): Recipe["ingredients"] 
       note: x.note != null && String(x.note).trim() ? String(x.note).trim() : undefined,
     }))
     .filter((x) => x.name || x.amount);
+}
+
+/** 读 generated：优先生成端拆好的两组；仅有旧字段 ingredients 时整表视作主料（不猜辅料） */
+function mainAuxFromGenerated(g: Record<string, unknown>): {
+  mainIngredients: Recipe["mainIngredients"];
+  auxiliaryIngredients: Recipe["auxiliaryIngredients"];
+} {
+  const main = normalizeIngredientRows(g.mainIngredients);
+  const aux = normalizeIngredientRows(g.auxiliaryIngredients);
+  if (main.length > 0 || aux.length > 0) {
+    return { mainIngredients: main, auxiliaryIngredients: aux };
+  }
+  const legacy = normalizeIngredientRows(g.ingredients);
+  return { mainIngredients: legacy, auxiliaryIngredients: [] };
 }
 
 async function getDb() {
@@ -189,6 +206,47 @@ async function maybeMigrateStableRecipeIds(): Promise<void> {
   window.localStorage.setItem(STABLE_ID_MIGRATION_KEY, "1");
 }
 
+async function maybeMigrateMainAuxFromLegacy(): Promise<void> {
+  if (!isBrowser()) return;
+  if (window.localStorage.getItem(INGREDIENT_MAIN_AUX_MIGRATION_KEY) === "1") return;
+
+  const db = await getDb();
+  const all = await db.getAll("recipes");
+  if (all.length === 0) {
+    window.localStorage.setItem(INGREDIENT_MAIN_AUX_MIGRATION_KEY, "1");
+    return;
+  }
+
+  const tx = db.transaction("recipes", "readwrite");
+  for (const r of all) {
+    const row = r as unknown as LegacyRecipe & { ingredients?: Recipe["mainIngredients"] };
+    const hasNew =
+      (row.mainIngredients?.length ?? 0) > 0 || (row.auxiliaryIngredients?.length ?? 0) > 0;
+    const legacyFlat = row.ingredients;
+    if (legacyFlat?.length && !hasNew) {
+      const next: Recipe = {
+        id: row.id,
+        name: row.name,
+        category: row.category,
+        rating: row.rating,
+        difficulty: row.difficulty,
+        tags: row.tags,
+        description: row.description,
+        mainIngredients: normalizeIngredientRows(legacyFlat),
+        auxiliaryIngredients: [],
+        steps: row.steps,
+        images: row.images,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+      };
+      await tx.store.put(next);
+    }
+  }
+  await tx.done;
+
+  window.localStorage.setItem(INGREDIENT_MAIN_AUX_MIGRATION_KEY, "1");
+}
+
 async function maybeSyncDescriptionsFromGeneratedJson(): Promise<void> {
   if (!isBrowser()) return;
   const sig = getGeneratedRecipesSignature();
@@ -202,16 +260,23 @@ async function maybeSyncDescriptionsFromGeneratedJson(): Promise<void> {
 
   const byName = new Map<
     string,
-    { description?: string; tags?: string[]; ingredients?: Recipe["ingredients"] }
+    {
+      description?: string;
+      tags?: string[];
+      mainIngredients: Recipe["mainIngredients"];
+      auxiliaryIngredients: Recipe["auxiliaryIngredients"];
+    }
   >();
   for (const r of generated) {
     const name = String(r?.name ?? "").trim();
     if (!name) continue;
-    const ingredients = normalizeIngredientsFromGenerated(r?.ingredients);
+    const g = r as Record<string, unknown>;
+    const { mainIngredients, auxiliaryIngredients } = mainAuxFromGenerated(g);
     byName.set(name, {
       description: r.description,
       tags: r.tags,
-      ingredients: ingredients.length ? ingredients : undefined,
+      mainIngredients,
+      auxiliaryIngredients,
     });
   }
 
@@ -225,9 +290,6 @@ async function maybeSyncDescriptionsFromGeneratedJson(): Promise<void> {
 
       const nextDesc = String(incoming.description ?? "").trim();
       const nextTags = Array.isArray(incoming.tags) ? incoming.tags.map(String) : [];
-      const nextIngs = incoming.ingredients;
-      const useIngs =
-        Array.isArray(nextIngs) && nextIngs.length > 0 ? nextIngs : null;
 
       const updated: Recipe = {
         ...r,
@@ -237,7 +299,8 @@ async function maybeSyncDescriptionsFromGeneratedJson(): Promise<void> {
           .map((s) => s.trim())
           .filter(Boolean)
           .slice(0, 10),
-        ingredients: useIngs ?? r.ingredients,
+        mainIngredients: incoming.mainIngredients,
+        auxiliaryIngredients: incoming.auxiliaryIngredients,
       };
       await tx.store.put(updated);
     }
@@ -270,6 +333,8 @@ async function maybeSeedRecipesFromGeneratedJson(): Promise<void> {
     const name = String(g?.name ?? "").trim();
     if (!name) continue;
     const id = stableRecipeIdFromName(name);
+    const gg = g as Record<string, unknown>;
+    const { mainIngredients, auxiliaryIngredients } = mainAuxFromGenerated(gg);
     const recipe: Recipe = {
       id,
       name,
@@ -281,7 +346,8 @@ async function maybeSeedRecipesFromGeneratedJson(): Promise<void> {
           : "medium",
       tags: Array.isArray(g?.tags) ? g.tags.map(String).map((s: string) => s.trim()).filter(Boolean).slice(0, 10) : [],
       description: String(g?.description ?? "").trim(),
-      ingredients: normalizeIngredientsFromGenerated(g?.ingredients),
+      mainIngredients,
+      auxiliaryIngredients,
       steps: Array.isArray(g?.steps)
         ? g.steps
             .filter((x: any) => x && typeof x === "object")
@@ -307,13 +373,43 @@ async function ensureRecipeMigrations(): Promise<void> {
   if (!isBrowser()) return;
   await migrateFromLocalStorageIfNeeded();
   await maybeSeedRecipesFromGeneratedJson();
+  await maybeMigrateMainAuxFromLegacy();
   await maybeMigrateStableRecipeIds();
   await maybeMigrateRecipeCategoriesIfNeeded();
   await maybeMigrateRecipeDescriptionsIfNeeded();
   await maybeSyncDescriptionsFromGeneratedJson();
 }
 
-function normalizeRecipe(input: RecipeInput, base?: Recipe): Recipe {
+function pickIngredientGroups(
+  input: Partial<RecipeInput> & { ingredients?: Recipe["mainIngredients"] },
+  base?: LegacyRecipe,
+): { main: Recipe["mainIngredients"]; auxiliary: Recipe["auxiliaryIngredients"] } {
+  if (input.mainIngredients !== undefined || input.auxiliaryIngredients !== undefined) {
+    return {
+      main: input.mainIngredients ?? base?.mainIngredients ?? [],
+      auxiliary: input.auxiliaryIngredients ?? base?.auxiliaryIngredients ?? [],
+    };
+  }
+  if (input.ingredients !== undefined) {
+    return { main: normalizeIngredientRows(input.ingredients), auxiliary: [] };
+  }
+  const b = base as LegacyRecipe | undefined;
+  if (b?.ingredients?.length && !(b.mainIngredients?.length || b.auxiliaryIngredients?.length)) {
+    return {
+      main: normalizeIngredientRows(b.ingredients),
+      auxiliary: [],
+    };
+  }
+  return {
+    main: base?.mainIngredients ?? [],
+    auxiliary: base?.auxiliaryIngredients ?? [],
+  };
+}
+
+function normalizeRecipe(
+  input: Partial<RecipeInput> & { ingredients?: Recipe["mainIngredients"] },
+  base?: LegacyRecipe,
+): Recipe {
   const now = new Date().toISOString();
   const nameTrim = String(input.name ?? base?.name ?? "").trim();
   const id =
@@ -321,6 +417,7 @@ function normalizeRecipe(input: RecipeInput, base?: Recipe): Recipe {
     input.id ??
     (nameTrim ? stableRecipeIdFromName(nameTrim) : generateId());
   const createdAt = base?.createdAt ?? now;
+  const { main, auxiliary } = pickIngredientGroups(input, base);
 
   return {
     id,
@@ -330,7 +427,8 @@ function normalizeRecipe(input: RecipeInput, base?: Recipe): Recipe {
     difficulty: input.difficulty ?? base?.difficulty ?? "medium",
     tags: input.tags ?? base?.tags ?? [],
     description: input.description ?? base?.description ?? "",
-    ingredients: input.ingredients ?? base?.ingredients ?? [],
+    mainIngredients: main,
+    auxiliaryIngredients: auxiliary,
     steps: input.steps ?? base?.steps ?? [],
     images: input.images ?? base?.images ?? [],
     createdAt,

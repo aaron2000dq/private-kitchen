@@ -66,7 +66,7 @@ export function RecipeCard({
   }, [catMenuOpen]);
 
   const href = recipeDetailHref(recipe.id);
-  const ingredientsPreview = formatRecipeIngredientsPreview(recipe.ingredients);
+  const ingredientsPreview = formatRecipeIngredientsPreview(recipe);
   const Wrapper: any = categoryEditable ? "div" : Link;
   const wrapperProps = categoryEditable
     ? {

@@ -125,25 +125,62 @@ export function RecipeDetailClient({ id }: { id: string }) {
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-3xl border border-[color:var(--line)] bg-[color:var(--paper)] p-6">
           <Badge tone="muted">用料</Badge>
-          {recipe.ingredients?.length ? (
-            <ul className="mt-4 space-y-2">
-              {recipe.ingredients.map((i, idx) => (
-                <li
-                  key={idx}
-                  className="flex items-baseline justify-between gap-4 rounded-2xl border border-[color:var(--line)] bg-black/[0.01] px-4 py-3 text-[13px] dark:bg-white/[0.03]"
-                >
-                  <div className="min-w-0">
-                    <div className="truncate">{i.name || "—"}</div>
-                    {i.note ? (
-                      <div className="mt-1 text-[12px] text-[color:var(--muted-2)]">
-                        {i.note}
-                      </div>
-                    ) : null}
-                  </div>
-                  <div className="shrink-0 text-[color:var(--muted)]">{i.amount}</div>
-                </li>
-              ))}
-            </ul>
+          {recipe.mainIngredients?.length || recipe.auxiliaryIngredients?.length ? (
+            <div className="mt-4 space-y-6">
+              <div>
+                <div className="text-[12px] font-medium text-[color:var(--muted)]">主要食材</div>
+                {recipe.mainIngredients?.length ? (
+                  <ul className="mt-2 space-y-2">
+                    {recipe.mainIngredients.map((i, idx) => (
+                      <li
+                        key={`m-${idx}`}
+                        className="flex items-baseline justify-between gap-4 rounded-2xl border border-[color:var(--line)] bg-black/[0.01] px-4 py-3 text-[13px] dark:bg-white/[0.03]"
+                      >
+                        <div className="min-w-0">
+                          <div className="truncate">{i.name || "—"}</div>
+                          {i.note ? (
+                            <div className="mt-1 text-[12px] text-[color:var(--muted-2)]">
+                              {i.note}
+                            </div>
+                          ) : null}
+                        </div>
+                        <div className="shrink-0 text-[color:var(--muted)]">{i.amount}</div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-2 text-[13px] text-[color:var(--muted-2)]">未列出主料。</p>
+                )}
+              </div>
+              <div>
+                <div className="text-[12px] font-medium text-[color:var(--muted)]">辅料</div>
+                <p className="mt-1 text-[11px] text-[color:var(--muted-2)]">
+                  油盐酱醋、糖、淀粉、香料、葱姜蒜等调味与作料。
+                </p>
+                {recipe.auxiliaryIngredients?.length ? (
+                  <ul className="mt-2 space-y-2">
+                    {recipe.auxiliaryIngredients.map((i, idx) => (
+                      <li
+                        key={`a-${idx}`}
+                        className="flex items-baseline justify-between gap-4 rounded-2xl border border-[color:var(--line)] bg-black/[0.01] px-4 py-3 text-[13px] dark:bg-white/[0.03]"
+                      >
+                        <div className="min-w-0">
+                          <div className="truncate">{i.name || "—"}</div>
+                          {i.note ? (
+                            <div className="mt-1 text-[12px] text-[color:var(--muted-2)]">
+                              {i.note}
+                            </div>
+                          ) : null}
+                        </div>
+                        <div className="shrink-0 text-[color:var(--muted)]">{i.amount}</div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-2 text-[13px] text-[color:var(--muted-2)]">未列出辅料。</p>
+                )}
+              </div>
+            </div>
           ) : (
             <p className="mt-4 text-[13px] text-[color:var(--muted-2)]">未填写用料。</p>
           )}

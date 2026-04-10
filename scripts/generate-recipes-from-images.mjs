@@ -82,8 +82,8 @@ function buildDescription(name, category) {
   return `${name}。${base}`;
 }
 
-function defaultIngredients(name, category) {
-  const common = [
+function defaultIngredientGroups(name, category) {
+  const commonAux = [
     { name: "食用油", amount: "适量" },
     { name: "盐", amount: "适量" },
     { name: "生抽", amount: "1-2汤匙" },
@@ -91,53 +91,62 @@ function defaultIngredients(name, category) {
     { name: "葱", amount: "1根", note: "切段" },
   ];
   if (category === "汤羹") {
-    return [
-      { name: "清水/高汤", amount: "800ml" },
-      { name: "姜", amount: "2-3片" },
-      ...common,
-    ];
+    return {
+      mainIngredients: [{ name: "主食材", amount: "适量", note: "按菜名准备" }],
+      auxiliaryIngredients: [
+        { name: "清水/高汤", amount: "800ml" },
+        { name: "姜", amount: "2-3片" },
+        ...commonAux,
+      ],
+    };
   }
   if (category === "粥饭面") {
-    return [
-      { name: "米/面/粉", amount: "2人份" },
-      { name: "清水/高汤", amount: "适量" },
-      ...common,
-    ];
+    return {
+      mainIngredients: [{ name: "米/面/粉", amount: "2人份" }],
+      auxiliaryIngredients: [{ name: "清水/高汤", amount: "适量" }, ...commonAux],
+    };
   }
   if (category === "炖煮") {
-    return [
-      { name: "主食材", amount: "500-800g", note: "按菜名准备" },
-      { name: "姜", amount: "3-4片" },
-      { name: "料酒", amount: "1-2汤匙" },
-      { name: "老抽", amount: "1/2汤匙", note: "可选" },
-      { name: "冰糖/白糖", amount: "少许", note: "可选" },
-      ...common,
-    ];
+    return {
+      mainIngredients: [{ name: "主食材", amount: "500-800g", note: "按菜名准备" }],
+      auxiliaryIngredients: [
+        { name: "姜", amount: "3-4片" },
+        { name: "料酒", amount: "1-2汤匙" },
+        { name: "老抽", amount: "1/2汤匙", note: "可选" },
+        { name: "冰糖/白糖", amount: "少许", note: "可选" },
+        ...commonAux,
+      ],
+    };
   }
   if (category === "火锅") {
-    return [
-      { name: "火锅底料", amount: "适量" },
-      { name: "清水", amount: "1.5L" },
-      { name: "蘸料", amount: "适量" },
-    ];
+    return {
+      mainIngredients: [{ name: "涮品", amount: "适量", note: "按喜好准备" }],
+      auxiliaryIngredients: [
+        { name: "火锅底料", amount: "适量" },
+        { name: "清水", amount: "1.5L" },
+        { name: "蘸料", amount: "适量" },
+      ],
+    };
   }
   if (category === "甜品饮品") {
-    return [
-      { name: "清水", amount: "1L" },
-      { name: "冰糖/白糖", amount: "适量" },
-    ];
+    return {
+      mainIngredients: [{ name: "主食材", amount: "适量", note: "按菜名" }],
+      auxiliaryIngredients: [
+        { name: "清水", amount: "1L" },
+        { name: "冰糖/白糖", amount: "适量" },
+      ],
+    };
   }
   if (category === "海鲜") {
-    return [
-      { name: "主海鲜食材", amount: "300-500g", note: "按菜名准备" },
-      { name: "料酒", amount: "1汤匙" },
-      ...common,
-    ];
+    return {
+      mainIngredients: [{ name: "主海鲜食材", amount: "300-500g", note: "按菜名准备" }],
+      auxiliaryIngredients: [{ name: "料酒", amount: "1汤匙" }, ...commonAux],
+    };
   }
-  return [
-    { name: "主食材", amount: "300-500g", note: "按菜名准备" },
-    ...common,
-  ];
+  return {
+    mainIngredients: [{ name: "主食材", amount: "300-500g", note: "按菜名准备" }],
+    auxiliaryIngredients: commonAux,
+  };
 }
 
 function defaultSteps(category) {
@@ -207,6 +216,7 @@ function defaultSteps(category) {
 function buildRecipeFromName(name, imageFiles) {
   const category = pickCategory(name);
   const difficulty = pickDifficulty(name);
+  const { mainIngredients, auxiliaryIngredients } = defaultIngredientGroups(name, category);
   return {
     name,
     category,
@@ -214,7 +224,8 @@ function buildRecipeFromName(name, imageFiles) {
     difficulty,
     tags: pickTags(name, category),
     description: buildDescription(name, category),
-    ingredients: defaultIngredients(name, category),
+    mainIngredients,
+    auxiliaryIngredients,
     steps: defaultSteps(category),
     images: imageFiles,
   };

@@ -3,7 +3,12 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useRecipes } from "@/lib/recipes/useRecipes";
-import { Recipe, RecipeDifficulty, RecipeIngredient, RecipeStep } from "@/lib/recipes/types";
+import {
+  Recipe,
+  RecipeDifficulty,
+  RecipeIngredient,
+  RecipeStep,
+} from "@/lib/recipes/types";
 import { recipeDetailHref } from "@/lib/recipes/recipeRoutes";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -66,13 +71,32 @@ export function RecipeFormClient({
   const [tags, setTags] = React.useState<string>((initial?.tags ?? []).join(" "));
   const [description, setDescription] = React.useState(initial?.description ?? "");
 
-  const [ingredients, setIngredients] = React.useState<
+  const legacyIngr = (initial as Recipe & { ingredients?: RecipeIngredient[] })?.ingredients;
+
+  const [mainIngredients, setMainIngredients] = React.useState<
     Array<{ name: string; amount: string; note?: string }>
-  >(
-    initial?.ingredients?.length
-      ? initial.ingredients.map((i) => ({ name: i.name, amount: i.amount, note: i.note }))
-      : [{ name: "", amount: "", note: "" }],
-  );
+  >(() => {
+    if (initial?.mainIngredients?.length) {
+      return initial.mainIngredients.map((i) => ({ name: i.name, amount: i.amount, note: i.note }));
+    }
+    if (legacyIngr?.length) {
+      return legacyIngr.map((i) => ({ name: i.name, amount: i.amount, note: i.note }));
+    }
+    return [{ name: "", amount: "", note: "" }];
+  });
+
+  const [auxiliaryIngredients, setAuxiliaryIngredients] = React.useState<
+    Array<{ name: string; amount: string; note?: string }>
+  >(() => {
+    if (initial?.auxiliaryIngredients?.length) {
+      return initial.auxiliaryIngredients.map((i) => ({
+        name: i.name,
+        amount: i.amount,
+        note: i.note,
+      }));
+    }
+    return [{ name: "", amount: "", note: "" }];
+  });
 
   const [steps, setSteps] = React.useState<Array<{ content: string; tip?: string }>>(
     initial?.steps?.length
@@ -133,7 +157,8 @@ export function RecipeFormClient({
           .map((t) => t.trim())
           .filter(Boolean),
         description: description.trim(),
-        ingredients: normalizeIngredients(ingredients),
+        mainIngredients: normalizeIngredients(mainIngredients),
+        auxiliaryIngredients: normalizeIngredients(auxiliaryIngredients),
         steps: normalizedSteps,
         images,
       } as const;
@@ -252,24 +277,29 @@ export function RecipeFormClient({
 
           <div className="rounded-3xl border border-[color:var(--line)] bg-[color:var(--paper)] p-6">
             <div className="flex items-center justify-between gap-4">
-              <Badge tone="muted">用料</Badge>
+              <div>
+                <Badge tone="muted">主要食材</Badge>
+                <p className="mt-1 text-[12px] text-[color:var(--muted-2)]">肉禽蛋蔬、豆谷菌菇、主食原料等。</p>
+              </div>
               <Button
                 variant="outline"
                 size="sm"
                 type="button"
-                onClick={() => setIngredients((prev) => [...prev, { name: "", amount: "", note: "" }])}
+                onClick={() =>
+                  setMainIngredients((prev) => [...prev, { name: "", amount: "", note: "" }])
+                }
               >
                 添加
               </Button>
             </div>
 
             <div className="mt-5 space-y-3">
-              {ingredients.map((row, idx) => (
-                <div key={idx} className="grid gap-2 md:grid-cols-[1fr_0.7fr_1fr_auto]">
+              {mainIngredients.map((row, idx) => (
+                <div key={`m-${idx}`} className="grid gap-2 md:grid-cols-[1fr_0.7fr_1fr_auto]">
                   <Input
                     value={row.name}
                     onChange={(e) =>
-                      setIngredients((prev) =>
+                      setMainIngredients((prev) =>
                         prev.map((p, i) => (i === idx ? { ...p, name: e.target.value } : p)),
                       )
                     }
@@ -278,7 +308,7 @@ export function RecipeFormClient({
                   <Input
                     value={row.amount}
                     onChange={(e) =>
-                      setIngredients((prev) =>
+                      setMainIngredients((prev) =>
                         prev.map((p, i) => (i === idx ? { ...p, amount: e.target.value } : p)),
                       )
                     }
@@ -287,7 +317,7 @@ export function RecipeFormClient({
                   <Input
                     value={row.note ?? ""}
                     onChange={(e) =>
-                      setIngredients((prev) =>
+                      setMainIngredients((prev) =>
                         prev.map((p, i) => (i === idx ? { ...p, note: e.target.value } : p)),
                       )
                     }
@@ -297,9 +327,82 @@ export function RecipeFormClient({
                     type="button"
                     className="h-11 rounded-xl border border-[color:var(--line)] px-3 text-[12px] text-[color:var(--muted)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06]"
                     onClick={() =>
-                      setIngredients((prev) => prev.filter((_, i) => i !== idx).length ? prev.filter((_, i) => i !== idx) : [{ name: "", amount: "", note: "" }])
+                      setMainIngredients((prev) =>
+                        prev.filter((_, i) => i !== idx).length
+                          ? prev.filter((_, i) => i !== idx)
+                          : [{ name: "", amount: "", note: "" }],
+                      )
                     }
-                    aria-label="删除用料"
+                    aria-label="删除主料"
+                  >
+                    删除
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-[color:var(--line)] bg-[color:var(--paper)] p-6">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <Badge tone="muted">辅料</Badge>
+                <p className="mt-1 text-[12px] text-[color:var(--muted-2)]">
+                  油盐酱醋、糖、淀粉、料酒、生抽老抽、香料、葱姜蒜等。
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                onClick={() =>
+                  setAuxiliaryIngredients((prev) => [...prev, { name: "", amount: "", note: "" }])
+                }
+              >
+                添加
+              </Button>
+            </div>
+
+            <div className="mt-5 space-y-3">
+              {auxiliaryIngredients.map((row, idx) => (
+                <div key={`a-${idx}`} className="grid gap-2 md:grid-cols-[1fr_0.7fr_1fr_auto]">
+                  <Input
+                    value={row.name}
+                    onChange={(e) =>
+                      setAuxiliaryIngredients((prev) =>
+                        prev.map((p, i) => (i === idx ? { ...p, name: e.target.value } : p)),
+                      )
+                    }
+                    placeholder="食材"
+                  />
+                  <Input
+                    value={row.amount}
+                    onChange={(e) =>
+                      setAuxiliaryIngredients((prev) =>
+                        prev.map((p, i) => (i === idx ? { ...p, amount: e.target.value } : p)),
+                      )
+                    }
+                    placeholder="用量"
+                  />
+                  <Input
+                    value={row.note ?? ""}
+                    onChange={(e) =>
+                      setAuxiliaryIngredients((prev) =>
+                        prev.map((p, i) => (i === idx ? { ...p, note: e.target.value } : p)),
+                      )
+                    }
+                    placeholder="备注（可选）"
+                  />
+                  <button
+                    type="button"
+                    className="h-11 rounded-xl border border-[color:var(--line)] px-3 text-[12px] text-[color:var(--muted)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06]"
+                    onClick={() =>
+                      setAuxiliaryIngredients((prev) =>
+                        prev.filter((_, i) => i !== idx).length
+                          ? prev.filter((_, i) => i !== idx)
+                          : [{ name: "", amount: "", note: "" }],
+                      )
+                    }
+                    aria-label="删除辅料"
                   >
                     删除
                   </button>

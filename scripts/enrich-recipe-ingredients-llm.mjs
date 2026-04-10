@@ -13,7 +13,8 @@ import { Agent, setGlobalDispatcher } from "undici";
 
 const ROOT = process.cwd();
 const INPUT = path.join(ROOT, "generated", "recipes.json");
-const CHECKPOINT = path.join(ROOT, "generated", "recipes.ingredients.checkpoint.json");
+// v2：主料/辅料分两组，与旧 checkpoint 不兼容
+const CHECKPOINT = path.join(ROOT, "generated", "recipes.ingredients.v2.checkpoint.json");
 
 dotenv.config({ path: path.join(ROOT, ".env.local") });
 
@@ -87,11 +88,22 @@ function extractJsonObject(text) {
   return null;
 }
 
+function namedCount(rows) {
+  if (!Array.isArray(rows)) return 0;
+  return rows.filter((x) => String(x?.name ?? "").trim()).length;
+}
+
+/** 已由模型拆成「主料 + 辅料」两组且数量合理 */
+function hasValidModelSplit(r) {
+  if (!Array.isArray(r.mainIngredients) || !Array.isArray(r.auxiliaryIngredients)) return false;
+  if (namedCount(r.mainIngredients) < 2) return false;
+  if (namedCount(r.auxiliaryIngredients) < 1) return false;
+  return true;
+}
+
 function isMissingIngredients(r) {
-  const ings = r?.ingredients;
-  if (!Array.isArray(ings) || ings.length === 0) return true;
-  const named = ings.filter((x) => String(x?.name ?? "").trim()).length;
-  return named < 2;
+  if (hasValidModelSplit(r)) return false;
+  return true;
 }
 
 function normalizeIngredients(rows) {
@@ -125,17 +137,19 @@ async function llmIngredientsBatch(items) {
   }));
 
   const system = [
-    "你是中式家常菜用料助手。根据菜名、类别与简介推断常见家庭做法的用料清单。",
+    "你是中式家常菜用料助手。根据菜名、类别与简介推断常见家庭做法的用料，并拆成两组。",
     "只输出合法 JSON，不能包含 Markdown、不能包含多余解释文字。",
-    "ingredients 为数组；每项含 name（食材名）、amount（家庭厨房常用分量，如「约300g」「1小勺」「2瓣」「少许」）、note（可选，如「切片」「提前泡发」）。",
-    "每道菜至少 5 种、通常不超过 14 种主料与调料；分量按 2～4 人份估算。",
-    '输出顶层字段 items，与输入顺序一一对应；每项含 name（与输入菜名一致）、ingredients 数组。',
+    "mainIngredients：主要食材（占菜量主体的肉禽蛋水产、蔬菜豆谷、豆腐菌菇、米面主食原料等）。",
+    "auxiliaryIngredients：辅料——油盐糖醋酱、生抽、老抽、蚝油、料酒、淀粉、香料、花椒八角等干料，以及葱姜蒜等作料头；生抽、老抽、盐、糖、淀粉一律放在辅料。",
+    "两组都用数组；每项含 name、amount（如「约300g」「1小勺」「少许」）、note（可选）。同一食材不得重复出现在两组。",
+    "主料至少 2 项有名称；辅料至少 1 项有名称。总量按 2～4 人份估算。",
+    "输出顶层 items，与输入顺序一一对应；每项含 name（菜名与输入一致）、mainIngredients、auxiliaryIngredients。",
   ].join("");
 
   const user = [
-    "请为下面每一道菜写出用料清单。",
+    "请为下面每一道菜写出 mainIngredients 与 auxiliaryIngredients。",
     "必须只返回如下结构的 JSON：",
-    '{ "items": [ { "name": "菜名", "ingredients": [ { "name": "食材", "amount": "分量", "note": "可选" } ] } ] }',
+    '{ "items": [ { "name": "菜名", "mainIngredients": [ { "name": "", "amount": "", "note": "" } ], "auxiliaryIngredients": [ { "name": "", "amount": "", "note": "" } ] } ] }',
     "",
     "输入：",
     JSON.stringify({ items: compact }, null, 0),
@@ -273,12 +287,19 @@ for (let offset = 0; offset < targets.length; offset += CHUNK) {
         cp.done[key] = { ok: false, error: "missing item in batch output" };
         continue;
       }
-      const normalized = normalizeIngredients(row?.ingredients);
-      if (normalized.length < 2) {
-        cp.done[key] = { ok: false, error: "too few ingredients" };
+      const main = normalizeIngredients(row?.mainIngredients);
+      const aux = normalizeIngredients(row?.auxiliaryIngredients);
+      if (namedCount(main) < 2) {
+        cp.done[key] = { ok: false, error: "too few mainIngredients" };
         continue;
       }
-      r.ingredients = normalized;
+      if (namedCount(aux) < 1) {
+        cp.done[key] = { ok: false, error: "too few auxiliaryIngredients" };
+        continue;
+      }
+      delete r.ingredients;
+      r.mainIngredients = main;
+      r.auxiliaryIngredients = aux;
       cp.done[key] = { ok: true };
       processed++;
     }

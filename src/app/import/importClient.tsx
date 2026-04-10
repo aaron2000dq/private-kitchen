@@ -57,16 +57,35 @@ function normalizeDraft(raw: Record<string, unknown>): ImportDraft {
   const tags = asStringArray(raw.tags);
   const description = String(raw.description ?? "").trim();
 
-  const ingredients =
+  const mapRows = (arr: unknown[]) =>
+    arr
+      .map((i) => ({
+        name: String((i as { name?: unknown }).name ?? "").trim(),
+        amount: String((i as { amount?: unknown }).amount ?? "").trim(),
+        note: (i as { note?: unknown }).note ? String((i as { note?: unknown }).note).trim() : undefined,
+      }))
+      .filter((i) => i.name || i.amount);
+
+  const legacyFlat =
     Array.isArray(raw.ingredients) && raw.ingredients.every(isObject)
-      ? raw.ingredients
-          .map((i) => ({
-            name: String(i.name ?? "").trim(),
-            amount: String(i.amount ?? "").trim(),
-            note: i.note ? String(i.note).trim() : undefined,
-          }))
-          .filter((i) => i.name || i.amount)
+      ? mapRows(raw.ingredients as unknown[])
       : [];
+
+  const mainFromKeys =
+    Array.isArray(raw.mainIngredients) && raw.mainIngredients.every(isObject)
+      ? mapRows(raw.mainIngredients as unknown[])
+      : [];
+  const auxFromKeys =
+    Array.isArray(raw.auxiliaryIngredients) && raw.auxiliaryIngredients.every(isObject)
+      ? mapRows(raw.auxiliaryIngredients as unknown[])
+      : [];
+
+  const hasSplit =
+    (Array.isArray(raw.mainIngredients) && raw.mainIngredients.every(isObject)) ||
+    (Array.isArray(raw.auxiliaryIngredients) && raw.auxiliaryIngredients.every(isObject));
+
+  const mainIngredients = hasSplit ? mainFromKeys : legacyFlat;
+  const auxiliaryIngredients = hasSplit ? auxFromKeys : [];
 
   const steps =
     Array.isArray(raw.steps) && raw.steps.every(isObject)
@@ -90,7 +109,8 @@ function normalizeDraft(raw: Record<string, unknown>): ImportDraft {
     difficulty,
     tags,
     description,
-    ingredients,
+    mainIngredients,
+    auxiliaryIngredients,
     steps,
     images,
   };
@@ -100,7 +120,7 @@ function normalizeDraft(raw: Record<string, unknown>): ImportDraft {
 
 export function ImportClient() {
   const [jsonText, setJsonText] = React.useState<string>(
-    `{\n  "recipes": [\n    {\n      "name": "番茄炒蛋",\n      "category": "家常菜",\n      "rating": 5,\n      "tags": ["快手"],\n      "description": "酸甜开胃，下饭。",\n      "ingredients": [{ "name": "鸡蛋", "amount": "2个" }, { "name": "番茄", "amount": "2个" }],\n      "steps": [{ "content": "鸡蛋打散炒熟盛出。" }, { "content": "番茄炒出汁，回锅鸡蛋翻匀。" }],\n      "images": ["image-1.jpg"]\n    }\n  ]\n}\n`,
+    `{\n  "recipes": [\n    {\n      "name": "番茄炒蛋",\n      "category": "家常菜",\n      "rating": 5,\n      "tags": ["快手"],\n      "description": "酸甜开胃，下饭。",\n      "mainIngredients": [{ "name": "鸡蛋", "amount": "2个" }, { "name": "番茄", "amount": "2个" }],\n      "auxiliaryIngredients": [{ "name": "盐", "amount": "少许" }, { "name": "糖", "amount": "少许" }],\n      "steps": [{ "content": "鸡蛋打散炒熟盛出。" }, { "content": "番茄炒出汁，回锅鸡蛋翻匀。" }],\n      "images": ["image-1.jpg"]\n    }\n  ]\n}\n`,
   );
 
   const [files, setFiles] = React.useState<File[]>([]);
@@ -330,7 +350,9 @@ export function ImportClient() {
                   </div>
                 ) : (
                   <div className="mt-4 text-[12px] text-[color:var(--muted-2)]">
-                    用料 {d.recipe.ingredients?.length ?? 0} · 步骤 {d.recipe.steps?.length ?? 0} · 图片{" "}
+                    用料{" "}
+                    {(d.recipe.mainIngredients?.length ?? 0) + (d.recipe.auxiliaryIngredients?.length ?? 0)} ·
+                    步骤 {d.recipe.steps?.length ?? 0} · 图片{" "}
                     {d.recipe.images?.length ?? 0}
                   </div>
                 )}

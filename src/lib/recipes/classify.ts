@@ -77,7 +77,7 @@ export function classifyRecipeCategory(input: {
 }
 
 export function reclassifyRecipe(r: Recipe): Recipe {
-  const ingredientsText = (r.ingredients ?? [])
+  const ingredientsText = [...(r.mainIngredients ?? []), ...(r.auxiliaryIngredients ?? [])]
     .map((i) => `${i.name}${i.amount ? `(${i.amount})` : ""}`)
     .join(" ");
   const category = classifyRecipeCategory({

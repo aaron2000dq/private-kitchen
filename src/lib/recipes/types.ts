@@ -22,7 +22,10 @@ export interface Recipe {
   difficulty: RecipeDifficulty;
   tags: RecipeTag[];
   description: string;
-  ingredients: RecipeIngredient[];
+  /** 主料：肉禽蛋蔬豆谷等 */
+  mainIngredients: RecipeIngredient[];
+  /** 辅料：调料、油盐糖酱、淀粉、葱姜蒜等 */
+  auxiliaryIngredients: RecipeIngredient[];
   steps: RecipeStep[];
   images: string[];
   createdAt: string;
