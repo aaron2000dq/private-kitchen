@@ -35,6 +35,18 @@ function generateId(): string {
   return `recipe_${Math.random().toString(36).slice(2, 10)}_${Date.now().toString(36)}`;
 }
 
+function normalizeIngredientsFromGenerated(raw: unknown): Recipe["ingredients"] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((x: any) => x && typeof x === "object")
+    .map((x: any) => ({
+      name: String(x.name ?? "").trim(),
+      amount: String(x.amount ?? "").trim(),
+      note: x.note != null && String(x.note).trim() ? String(x.note).trim() : undefined,
+    }))
+    .filter((x) => x.name || x.amount);
+}
+
 async function getDb() {
   return await openDB<PrivateKitchenDB>("private-kitchen", 1, {
     upgrade(db) {
@@ -188,11 +200,19 @@ async function maybeSyncDescriptionsFromGeneratedJson(): Promise<void> {
     return;
   }
 
-  const byName = new Map<string, { description?: string; tags?: string[] }>();
+  const byName = new Map<
+    string,
+    { description?: string; tags?: string[]; ingredients?: Recipe["ingredients"] }
+  >();
   for (const r of generated) {
     const name = String(r?.name ?? "").trim();
     if (!name) continue;
-    byName.set(name, { description: r.description, tags: r.tags });
+    const ingredients = normalizeIngredientsFromGenerated(r?.ingredients);
+    byName.set(name, {
+      description: r.description,
+      tags: r.tags,
+      ingredients: ingredients.length ? ingredients : undefined,
+    });
   }
 
   const db = await getDb();
@@ -205,15 +225,19 @@ async function maybeSyncDescriptionsFromGeneratedJson(): Promise<void> {
 
       const nextDesc = String(incoming.description ?? "").trim();
       const nextTags = Array.isArray(incoming.tags) ? incoming.tags.map(String) : [];
+      const nextIngs = incoming.ingredients;
+      const useIngs =
+        Array.isArray(nextIngs) && nextIngs.length > 0 ? nextIngs : null;
 
       const updated: Recipe = {
         ...r,
-        // Intentionally do NOT touch category/ratings/etc; only overwrite generated content.
+        // Intentionally do NOT touch category/ratings/etc; only overwrite generated bundle fields.
         description: nextDesc || r.description,
         tags: nextTags
           .map((s) => s.trim())
           .filter(Boolean)
           .slice(0, 10),
+        ingredients: useIngs ?? r.ingredients,
       };
       await tx.store.put(updated);
     }
@@ -257,16 +281,7 @@ async function maybeSeedRecipesFromGeneratedJson(): Promise<void> {
           : "medium",
       tags: Array.isArray(g?.tags) ? g.tags.map(String).map((s: string) => s.trim()).filter(Boolean).slice(0, 10) : [],
       description: String(g?.description ?? "").trim(),
-      ingredients: Array.isArray(g?.ingredients)
-        ? g.ingredients
-            .filter((x: any) => x && typeof x === "object")
-            .map((x: any) => ({
-              name: String(x.name ?? "").trim(),
-              amount: String(x.amount ?? "").trim(),
-              note: x.note != null ? String(x.note).trim() : undefined,
-            }))
-            .filter((x: any) => x.name || x.amount)
-        : [],
+      ingredients: normalizeIngredientsFromGenerated(g?.ingredients),
       steps: Array.isArray(g?.steps)
         ? g.steps
             .filter((x: any) => x && typeof x === "object")

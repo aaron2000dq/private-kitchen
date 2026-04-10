@@ -14,6 +14,15 @@ const nav = [
   { href: "/import", label: "导入" },
 ] as const;
 
+function isNavActive(itemHref: string, pathname: string): boolean {
+  if (itemHref === "/") return pathname === "/";
+  // 「菜谱」仅指「编辑今日的菜谱」页，避免 /recipes/all、/recipes/new 等也显示为选中
+  if (itemHref === "/recipes") return pathname === "/recipes" || pathname === "/recipes/";
+  if (itemHref === "/categories") return pathname === "/categories" || pathname.startsWith("/categories/");
+  if (itemHref === "/import") return pathname === "/import" || pathname.startsWith("/import/");
+  return pathname === itemHref || pathname.startsWith(`${itemHref}/`);
+}
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
@@ -37,10 +46,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
             <nav className="hidden items-center gap-1 md:flex">
               {nav.map((item) => {
-                const active =
-                  item.href === "/"
-                    ? pathname === "/"
-                    : pathname.startsWith(item.href);
+                const active = isNavActive(item.href, pathname);
                 return (
                   <Link
                     key={item.href}
@@ -73,10 +79,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[color:var(--line)] bg-[color:var(--paper)]/90 backdrop-blur md:hidden">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-around px-4">
           {nav.map((item) => {
-            const active =
-              item.href === "/"
-                ? pathname === "/"
-                : pathname.startsWith(item.href);
+            const active = isNavActive(item.href, pathname);
             return (
               <Link
                 key={item.href}

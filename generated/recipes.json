@@ -14,7 +14,66 @@
         "素菜为主"
       ],
       "description": "豆腐软嫩，白菜煮出清甜汤底，粉丝吸饱汁水后略带弹性，整体清淡但有层次。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "白菜",
+          "amount": "约300g",
+          "note": "切段或手撕"
+        },
+        {
+          "name": "嫩豆腐",
+          "amount": "约200g",
+          "note": "切块"
+        },
+        {
+          "name": "粉丝",
+          "amount": "约50g",
+          "note": "提前用温水泡软"
+        },
+        {
+          "name": "鸡蛋",
+          "amount": "1个",
+          "note": "可选，打散后加入"
+        },
+        {
+          "name": "姜",
+          "amount": "3片"
+        },
+        {
+          "name": "蒜",
+          "amount": "2瓣"
+        },
+        {
+          "name": "葱",
+          "amount": "2根",
+          "note": "切段"
+        },
+        {
+          "name": "食用油",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "生抽",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "老抽",
+          "amount": "1茶匙",
+          "note": "可选，上色"
+        },
+        {
+          "name": "盐",
+          "amount": "1/2茶匙"
+        },
+        {
+          "name": "白胡椒粉",
+          "amount": "少许"
+        },
+        {
+          "name": "香油",
+          "amount": "1/2茶匙"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -40,7 +99,68 @@
         "秋季食材"
       ],
       "description": "板栗粉糯、鸡肉软烂，酱汁裹在食材表面，甜咸交织。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "鸡腿肉",
+          "amount": "约500g",
+          "note": "切块"
+        },
+        {
+          "name": "板栗",
+          "amount": "约150g",
+          "note": "去壳"
+        },
+        {
+          "name": "胡萝卜",
+          "amount": "1根",
+          "note": "切块"
+        },
+        {
+          "name": "姜",
+          "amount": "3片"
+        },
+        {
+          "name": "蒜",
+          "amount": "3瓣"
+        },
+        {
+          "name": "葱",
+          "amount": "2根",
+          "note": "切段"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "生抽",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "老抽",
+          "amount": "1茶匙"
+        },
+        {
+          "name": "冰糖",
+          "amount": "1小块"
+        },
+        {
+          "name": "盐",
+          "amount": "1/2茶匙"
+        },
+        {
+          "name": "食用油",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "八角",
+          "amount": "1颗"
+        },
+        {
+          "name": "香叶",
+          "amount": "1片"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -66,7 +186,67 @@
         "猪肉"
       ],
       "description": "包菜脆甜，肉片煸出油脂香，旺火快炒保留水分和脆感。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "包菜",
+          "amount": "约300g",
+          "note": "切丝或手撕"
+        },
+        {
+          "name": "猪肉",
+          "amount": "约150g",
+          "note": "切片或切丝"
+        },
+        {
+          "name": "胡萝卜",
+          "amount": "半根",
+          "note": "可选，切丝"
+        },
+        {
+          "name": "姜",
+          "amount": "2片"
+        },
+        {
+          "name": "蒜",
+          "amount": "2瓣",
+          "note": "切末"
+        },
+        {
+          "name": "葱",
+          "amount": "1根",
+          "note": "切段"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "生抽",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "老抽",
+          "amount": "1茶匙",
+          "note": "可选，上色"
+        },
+        {
+          "name": "盐",
+          "amount": "1/2茶匙"
+        },
+        {
+          "name": "白胡椒粉",
+          "amount": "少许"
+        },
+        {
+          "name": "干辣椒",
+          "amount": "1个",
+          "note": "可选，剪段"
+        },
+        {
+          "name": "食用油",
+          "amount": "1汤匙"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -92,7 +272,71 @@
         "重口味"
       ],
       "description": "小肠韧而有嚼劲，辣椒花椒提辣提麻，锅气足，适合配饭。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "小肠",
+          "amount": "约300g",
+          "note": "清洗干净后切段，沸水焯水"
+        },
+        {
+          "name": "青椒",
+          "amount": "1个",
+          "note": "切块"
+        },
+        {
+          "name": "红椒",
+          "amount": "1个",
+          "note": "切块"
+        },
+        {
+          "name": "姜",
+          "amount": "3片"
+        },
+        {
+          "name": "蒜",
+          "amount": "3瓣",
+          "note": "切片"
+        },
+        {
+          "name": "葱",
+          "amount": "2根",
+          "note": "切段"
+        },
+        {
+          "name": "干辣椒",
+          "amount": "5-6个",
+          "note": "剪段，根据口味"
+        },
+        {
+          "name": "花椒",
+          "amount": "1茶匙"
+        },
+        {
+          "name": "豆瓣酱",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "生抽",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "老抽",
+          "amount": "1茶匙",
+          "note": "可选，上色"
+        },
+        {
+          "name": "盐",
+          "amount": "1/2茶匙"
+        },
+        {
+          "name": "食用油",
+          "amount": "1汤匙"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -118,7 +362,47 @@
         "雪梨"
       ],
       "description": "雪梨软糯带清甜，冰糖融化后汤色微黄，入口润泽。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "雪梨",
+          "amount": "2个",
+          "note": "去皮去核切块"
+        },
+        {
+          "name": "冰糖",
+          "amount": "约30g",
+          "note": "根据口味"
+        },
+        {
+          "name": "枸杞",
+          "amount": "5g",
+          "note": "提前用温水泡软"
+        },
+        {
+          "name": "红枣",
+          "amount": "3颗",
+          "note": "去核"
+        },
+        {
+          "name": "水",
+          "amount": "约500ml"
+        },
+        {
+          "name": "陈皮",
+          "amount": "1小块",
+          "note": "可选，泡软"
+        },
+        {
+          "name": "蜂蜜",
+          "amount": "1茶匙",
+          "note": "可选，出锅后调味"
+        },
+        {
+          "name": "桂花",
+          "amount": "少许",
+          "note": "可选"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -144,7 +428,72 @@
         "手工"
       ],
       "description": "手工面条细而滑，浇头咸香，淋在面上和面拌匀后味道均匀。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "高筋面粉",
+          "amount": "300g",
+          "note": "用于手擀细面"
+        },
+        {
+          "name": "鸡蛋",
+          "amount": "1个",
+          "note": "加入面团中"
+        },
+        {
+          "name": "盐",
+          "amount": "1小撮"
+        },
+        {
+          "name": "水",
+          "amount": "约120ml",
+          "note": "调节面团软硬"
+        },
+        {
+          "name": "鸡胸肉",
+          "amount": "100g",
+          "note": "切丝后焯水"
+        },
+        {
+          "name": "胡萝卜",
+          "amount": "50g",
+          "note": "切丝"
+        },
+        {
+          "name": "青豆",
+          "amount": "30g"
+        },
+        {
+          "name": "香菇",
+          "amount": "3朵",
+          "note": "切片"
+        },
+        {
+          "name": "大葱",
+          "amount": "1根",
+          "note": "切段"
+        },
+        {
+          "name": "生姜",
+          "amount": "3片"
+        },
+        {
+          "name": "酱油",
+          "amount": "2汤匙"
+        },
+        {
+          "name": "芝麻油",
+          "amount": "1茶匙"
+        },
+        {
+          "name": "高汤",
+          "amount": "500ml",
+          "note": "鸡骨或猪骨汤"
+        },
+        {
+          "name": "白胡椒粉",
+          "amount": "少许"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -170,7 +519,46 @@
         "甜汤"
       ],
       "description": "汤色澄澈微红，红枣香甜不抢，枸杞带来一丝回甘，整体清淡带暖意。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "红枣",
+          "amount": "10颗",
+          "note": "去核"
+        },
+        {
+          "name": "枸杞",
+          "amount": "20g"
+        },
+        {
+          "name": "龙眼干",
+          "amount": "10g",
+          "note": "可选"
+        },
+        {
+          "name": "黑豆",
+          "amount": "30g",
+          "note": "提前泡发"
+        },
+        {
+          "name": "花生",
+          "amount": "30g",
+          "note": "提前泡发"
+        },
+        {
+          "name": "水",
+          "amount": "800ml"
+        },
+        {
+          "name": "冰糖",
+          "amount": "30g",
+          "note": "可根据口味增减"
+        },
+        {
+          "name": "生姜",
+          "amount": "3片",
+          "note": "去腥"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -196,7 +584,54 @@
         "时令"
       ],
       "description": "腊肉切得薄，油脂煸出后裹住脆嫩的菜苔，烟熏香气和青菜清苦形成对比。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "菜苔",
+          "amount": "300g",
+          "note": "洗净切段"
+        },
+        {
+          "name": "腊肉",
+          "amount": "150g",
+          "note": "切薄片"
+        },
+        {
+          "name": "大蒜",
+          "amount": "3瓣",
+          "note": "切片"
+        },
+        {
+          "name": "生姜",
+          "amount": "3片",
+          "note": "切丝"
+        },
+        {
+          "name": "食用油",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "生抽",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "老抽",
+          "amount": "1茶匙",
+          "note": "上色可选"
+        },
+        {
+          "name": "白糖",
+          "amount": "1茶匙"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "辣椒",
+          "amount": "少许",
+          "note": "可选"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -222,7 +657,63 @@
         "主食"
       ],
       "description": "面条宽扁有嚼劲，酱汁挂得均匀，每口都有味道层次。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "宽扁面",
+          "amount": "300g",
+          "note": "手擀或市售宽面"
+        },
+        {
+          "name": "大葱",
+          "amount": "1根",
+          "note": "切花"
+        },
+        {
+          "name": "大蒜",
+          "amount": "3瓣",
+          "note": "切末"
+        },
+        {
+          "name": "生姜",
+          "amount": "1小块",
+          "note": "切末"
+        },
+        {
+          "name": "酱油",
+          "amount": "2汤匙"
+        },
+        {
+          "name": "香醋",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "芝麻油",
+          "amount": "1茶匙"
+        },
+        {
+          "name": "辣椒油",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "黄瓜",
+          "amount": "1根",
+          "note": "切丝"
+        },
+        {
+          "name": "胡萝卜",
+          "amount": "1根",
+          "note": "切丝"
+        },
+        {
+          "name": "炒花生碎",
+          "amount": "30g"
+        },
+        {
+          "name": "香菜",
+          "amount": "适量",
+          "note": "切碎"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -248,7 +739,54 @@
         "主食"
       ],
       "description": "清汤做底，面条吸饱汤汁，配料简单但存在感明确。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "手擀细面",
+          "amount": "300g"
+        },
+        {
+          "name": "鸡骨/猪骨汤",
+          "amount": "800ml",
+          "note": "清汤底"
+        },
+        {
+          "name": "生姜",
+          "amount": "3片"
+        },
+        {
+          "name": "大葱",
+          "amount": "1根",
+          "note": "切段"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "白胡椒粉",
+          "amount": "少许"
+        },
+        {
+          "name": "小白菜",
+          "amount": "100g",
+          "note": "或菠菜"
+        },
+        {
+          "name": "软煮蛋",
+          "amount": "1个",
+          "note": "对半切"
+        },
+        {
+          "name": "火腿片",
+          "amount": "2片",
+          "note": "可选"
+        },
+        {
+          "name": "香油",
+          "amount": "1茶匙",
+          "note": "出锅前滴"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -274,7 +812,50 @@
         "福建"
       ],
       "description": "米粉细而不断，炒后根根分明，配料点缀其间，口感弹牙不黏。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "福鼎干米粉",
+          "amount": "约200g",
+          "note": "提前用温水泡发30分钟"
+        },
+        {
+          "name": "猪肉丝",
+          "amount": "约100g",
+          "note": "切丝"
+        },
+        {
+          "name": "绿豆芽",
+          "amount": "约50g",
+          "note": "去根洗净"
+        },
+        {
+          "name": "韭菜",
+          "amount": "少许",
+          "note": "切段"
+        },
+        {
+          "name": "大蒜",
+          "amount": "2瓣",
+          "note": "切末"
+        },
+        {
+          "name": "生抽",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "老抽",
+          "amount": "少许",
+          "note": "调色"
+        },
+        {
+          "name": "盐",
+          "amount": "少许"
+        },
+        {
+          "name": "食用油",
+          "amount": "适量"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -300,7 +881,26 @@
         "时蔬"
       ],
       "description": "叶片翠绿，旺火快炒锁住水分，入口清脆带微苦，蒜香提底。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "油麦菜",
+          "amount": "约400g",
+          "note": "洗净切段"
+        },
+        {
+          "name": "大蒜",
+          "amount": "3瓣",
+          "note": "切末或切片"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "食用油",
+          "amount": "适量"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -326,7 +926,41 @@
         "滋补"
       ],
       "description": "汤色清亮，虫草带着菌菇的菌香，鸡肉软而不散。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "鸡肉",
+          "amount": "约500g",
+          "note": "切块，焯水"
+        },
+        {
+          "name": "虫草花",
+          "amount": "约10g",
+          "note": "提前泡发"
+        },
+        {
+          "name": "香菇",
+          "amount": "3-4朵",
+          "note": "提前泡发，切片"
+        },
+        {
+          "name": "杏鲍菇",
+          "amount": "约80g",
+          "note": "切片"
+        },
+        {
+          "name": "姜片",
+          "amount": "3-4片"
+        },
+        {
+          "name": "盐",
+          "amount": "适量",
+          "note": "出锅前放"
+        },
+        {
+          "name": "清水",
+          "amount": "约1.5L"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -352,7 +986,36 @@
         "下饭"
       ],
       "description": "春笋脆嫩，腊肉的油香和咸鲜渗进笋肉里。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "春笋",
+          "amount": "约300g",
+          "note": "切片，焯水去涩味"
+        },
+        {
+          "name": "腊肉",
+          "amount": "约150g",
+          "note": "切片"
+        },
+        {
+          "name": "大蒜",
+          "amount": "2瓣",
+          "note": "切末"
+        },
+        {
+          "name": "生抽",
+          "amount": "少许"
+        },
+        {
+          "name": "白糖",
+          "amount": "少许",
+          "note": "提鲜"
+        },
+        {
+          "name": "食用油",
+          "amount": "适量"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -382,7 +1045,39 @@
         "油脂润感"
       ],
       "description": "笋肉吸了肉汁，鲜甜里带着一点油脂的润感。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "春笋",
+          "amount": "约300g",
+          "note": "切片，焯水"
+        },
+        {
+          "name": "猪肉",
+          "amount": "约150g",
+          "note": "切片或切丝"
+        },
+        {
+          "name": "大蒜",
+          "amount": "2瓣",
+          "note": "切末"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "生抽",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "盐",
+          "amount": "少许"
+        },
+        {
+          "name": "食用油",
+          "amount": "适量"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -408,7 +1103,45 @@
         "清淡"
       ],
       "description": "虾肉的甜和笋的清香同时在汤里，入口清淡不腻。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "春笋",
+          "amount": "约200g",
+          "note": "切片"
+        },
+        {
+          "name": "鲜虾",
+          "amount": "约150g",
+          "note": "去壳留尾"
+        },
+        {
+          "name": "姜",
+          "amount": "3片",
+          "note": "切丝"
+        },
+        {
+          "name": "葱",
+          "amount": "2根",
+          "note": "切段"
+        },
+        {
+          "name": "鸡蛋",
+          "amount": "1个",
+          "note": "打散"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "白胡椒粉",
+          "amount": "少许"
+        },
+        {
+          "name": "清水",
+          "amount": "约800ml"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -434,7 +1167,53 @@
         "家常"
       ],
       "description": "葱油裹着鸡肉，香气足，鸡肉滑嫩不柴。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "鸡腿肉",
+          "amount": "约400g",
+          "note": "切块"
+        },
+        {
+          "name": "大葱",
+          "amount": "2根",
+          "note": "切段"
+        },
+        {
+          "name": "姜",
+          "amount": "3片",
+          "note": "切丝"
+        },
+        {
+          "name": "蒜",
+          "amount": "3瓣",
+          "note": "切片"
+        },
+        {
+          "name": "食用油",
+          "amount": "2大勺",
+          "note": "葱油用"
+        },
+        {
+          "name": "生抽",
+          "amount": "1大勺"
+        },
+        {
+          "name": "老抽",
+          "amount": "1小勺"
+        },
+        {
+          "name": "料酒",
+          "amount": "1大勺"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "白胡椒粉",
+          "amount": "少许"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -460,7 +1239,47 @@
         "开胃"
       ],
       "description": "醋酸味渗进鸡肉，蒸出来的肉质紧实但不硬，带点酸爽。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "鸡腿肉",
+          "amount": "约400g",
+          "note": "切块"
+        },
+        {
+          "name": "米醋",
+          "amount": "3大勺"
+        },
+        {
+          "name": "酱油",
+          "amount": "1大勺"
+        },
+        {
+          "name": "糖",
+          "amount": "1小勺"
+        },
+        {
+          "name": "姜",
+          "amount": "3片",
+          "note": "切丝"
+        },
+        {
+          "name": "葱",
+          "amount": "2根",
+          "note": "切段"
+        },
+        {
+          "name": "料酒",
+          "amount": "1大勺"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "白胡椒粉",
+          "amount": "少许"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -486,7 +1305,35 @@
         "快手"
       ],
       "description": "粒粒分明的米饭裹着金黄蛋液，咀嚼时能尝到轻微的焦香。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "隔夜米饭",
+          "amount": "约300g",
+          "note": "用手捏散"
+        },
+        {
+          "name": "鸡蛋",
+          "amount": "2个",
+          "note": "打散"
+        },
+        {
+          "name": "葱",
+          "amount": "2根",
+          "note": "切碎"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "白胡椒粉",
+          "amount": "少许"
+        },
+        {
+          "name": "食用油",
+          "amount": "1大勺"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -512,7 +1359,45 @@
         "香草"
       ],
       "description": "蒜香香肠切片外皮微脆，土豆块内部绵软，迷迭香的清苦在口腔里转瞬即逝。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "蒜味香肠",
+          "amount": "约200g",
+          "note": "切片"
+        },
+        {
+          "name": "土豆",
+          "amount": "约300g",
+          "note": "切块"
+        },
+        {
+          "name": "迷迭香",
+          "amount": "1小勺",
+          "note": "干燥"
+        },
+        {
+          "name": "大蒜",
+          "amount": "3瓣",
+          "note": "切末"
+        },
+        {
+          "name": "橄榄油",
+          "amount": "2大勺"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "黑胡椒",
+          "amount": "少许"
+        },
+        {
+          "name": "柠檬皮屑",
+          "amount": "少许",
+          "note": "可选"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -538,7 +1423,53 @@
         "焖饭"
       ],
       "description": "腊肉油脂渗入米饭，春笋带来轻微的脆嫩和清苦，豌豆提供一丝回甘。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "大米",
+          "amount": "约300g",
+          "note": "洗净"
+        },
+        {
+          "name": "水",
+          "amount": "约300ml"
+        },
+        {
+          "name": "腊肉",
+          "amount": "100g",
+          "note": "切丁"
+        },
+        {
+          "name": "春笋",
+          "amount": "1根",
+          "note": "切片"
+        },
+        {
+          "name": "豌豆",
+          "amount": "50g",
+          "note": "去壳"
+        },
+        {
+          "name": "姜",
+          "amount": "3片"
+        },
+        {
+          "name": "葱",
+          "amount": "1根",
+          "note": "切段"
+        },
+        {
+          "name": "料酒",
+          "amount": "1小勺"
+        },
+        {
+          "name": "酱油",
+          "amount": "1小勺"
+        },
+        {
+          "name": "盐",
+          "amount": "少许"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -564,7 +1495,60 @@
         "红烧"
       ],
       "description": "五花肉软烂入味，豆腐吸饱汤汁后饱满绵密，豆香和肉香在舌面上融合。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "五花肉",
+          "amount": "300g",
+          "note": "切块"
+        },
+        {
+          "name": "北豆腐",
+          "amount": "200g",
+          "note": "切块"
+        },
+        {
+          "name": "生抽",
+          "amount": "2汤匙"
+        },
+        {
+          "name": "老抽",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "糖",
+          "amount": "1小勺"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "姜",
+          "amount": "3片"
+        },
+        {
+          "name": "蒜",
+          "amount": "3瓣",
+          "note": "拍碎"
+        },
+        {
+          "name": "葱",
+          "amount": "1根",
+          "note": "切段"
+        },
+        {
+          "name": "盐",
+          "amount": "少许"
+        },
+        {
+          "name": "食用油",
+          "amount": "2汤匙"
+        },
+        {
+          "name": "清水",
+          "amount": "200ml"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -590,7 +1574,52 @@
         "快炒"
       ],
       "description": "豆角碧绿挺括略带嚼劲，肉丝滑嫩，酱油的咸鲜缠绕在咀嚼的间隙里。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "四季豆",
+          "amount": "200g",
+          "note": "切段"
+        },
+        {
+          "name": "瘦肉",
+          "amount": "150g",
+          "note": "切丝"
+        },
+        {
+          "name": "姜",
+          "amount": "2片"
+        },
+        {
+          "name": "蒜",
+          "amount": "2瓣",
+          "note": "切片"
+        },
+        {
+          "name": "葱",
+          "amount": "1根",
+          "note": "切段"
+        },
+        {
+          "name": "生抽",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "老抽",
+          "amount": "1小勺"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "盐",
+          "amount": "少许"
+        },
+        {
+          "name": "食用油",
+          "amount": "2汤匙"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -616,7 +1645,52 @@
         "蒸菜"
       ],
       "description": "鱼头肉质细腻得近乎入口即化，剁椒的辣味在舌尖有清晰的层次，先辣后鲜。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "鱼头",
+          "amount": "约600g",
+          "note": "洗净"
+        },
+        {
+          "name": "剁椒",
+          "amount": "30g",
+          "note": "可根据口味增减"
+        },
+        {
+          "name": "姜",
+          "amount": "4片"
+        },
+        {
+          "name": "蒜",
+          "amount": "4瓣",
+          "note": "拍碎"
+        },
+        {
+          "name": "葱",
+          "amount": "2根",
+          "note": "切段"
+        },
+        {
+          "name": "料酒",
+          "amount": "2汤匙"
+        },
+        {
+          "name": "酱油",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "糖",
+          "amount": "1小勺"
+        },
+        {
+          "name": "盐",
+          "amount": "少许"
+        },
+        {
+          "name": "食用油",
+          "amount": "2汤匙"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -642,7 +1716,52 @@
         "湘味"
       ],
       "description": "芋头绵密，剁椒的辣和蒜香裹在外层，辣度层层递进。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "芋头",
+          "amount": "400g",
+          "note": "去皮切块"
+        },
+        {
+          "name": "剁椒",
+          "amount": "30g"
+        },
+        {
+          "name": "蒜",
+          "amount": "3瓣",
+          "note": "切末"
+        },
+        {
+          "name": "姜",
+          "amount": "2片",
+          "note": "切丝"
+        },
+        {
+          "name": "葱",
+          "amount": "1根",
+          "note": "切段"
+        },
+        {
+          "name": "生抽",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "糖",
+          "amount": "1小勺"
+        },
+        {
+          "name": "盐",
+          "amount": "少许"
+        },
+        {
+          "name": "食用油",
+          "amount": "2汤匙"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -668,7 +1787,59 @@
         "鸡排"
       ],
       "description": "外皮煎至金黄褐色，鸡肉保持嫩滑多汁，法式香料的气息隐约可辨。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "鸡胸肉",
+          "amount": "2块（约300g）",
+          "note": "横向片成薄片或保留整块"
+        },
+        {
+          "name": "橄榄油",
+          "amount": "2大勺"
+        },
+        {
+          "name": "黄油",
+          "amount": "1小块（约15g）"
+        },
+        {
+          "name": "大蒜",
+          "amount": "3瓣",
+          "note": "切片"
+        },
+        {
+          "name": "迷迭香",
+          "amount": "1小勺",
+          "note": "新鲜或干制"
+        },
+        {
+          "name": "百里香",
+          "amount": "1小勺",
+          "note": "新鲜或干制"
+        },
+        {
+          "name": "黑胡椒",
+          "amount": "少许"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "柠檬",
+          "amount": "半个",
+          "note": "挤汁或切片装饰"
+        },
+        {
+          "name": "面粉",
+          "amount": "2大勺",
+          "note": "裹粉用"
+        },
+        {
+          "name": "白葡萄酒",
+          "amount": "2大勺",
+          "note": "可选，去腥增香"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -694,7 +1865,59 @@
         "烩饭"
       ],
       "description": "番茄熬成浓稠酱汁裹住每粒米饭，肥牛薄片吸饱酸甜汤底，入口即化。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "肥牛片",
+          "amount": "200g"
+        },
+        {
+          "name": "番茄",
+          "amount": "3个（约400g）",
+          "note": "切块"
+        },
+        {
+          "name": "米饭",
+          "amount": "2碗"
+        },
+        {
+          "name": "番茄酱",
+          "amount": "2大勺"
+        },
+        {
+          "name": "洋葱",
+          "amount": "半个",
+          "note": "切丁"
+        },
+        {
+          "name": "大蒜",
+          "amount": "2瓣",
+          "note": "切末"
+        },
+        {
+          "name": "生抽",
+          "amount": "1大勺"
+        },
+        {
+          "name": "白糖",
+          "amount": "1小勺"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "黑胡椒",
+          "amount": "少许"
+        },
+        {
+          "name": "清水或高汤",
+          "amount": "200ml"
+        },
+        {
+          "name": "食用油",
+          "amount": "1大勺"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -720,7 +1943,68 @@
         "焖煮"
       ],
       "description": "牛腩慢炖至酥烂，番茄的酸度被高温逼出，与肉香融合成黏稠酱汁挂在肉块上。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "牛腩",
+          "amount": "500g",
+          "note": "切块，冷水下锅焯水去血沫"
+        },
+        {
+          "name": "番茄",
+          "amount": "4个（约500g）",
+          "note": "切块，可提前去皮"
+        },
+        {
+          "name": "洋葱",
+          "amount": "1个",
+          "note": "切块"
+        },
+        {
+          "name": "胡萝卜",
+          "amount": "1根",
+          "note": "滚刀块"
+        },
+        {
+          "name": "姜",
+          "amount": "3片"
+        },
+        {
+          "name": "大蒜",
+          "amount": "3瓣"
+        },
+        {
+          "name": "八角",
+          "amount": "1个"
+        },
+        {
+          "name": "桂皮",
+          "amount": "1小块"
+        },
+        {
+          "name": "生抽",
+          "amount": "2大勺"
+        },
+        {
+          "name": "老抽",
+          "amount": "1大勺"
+        },
+        {
+          "name": "料酒",
+          "amount": "1大勺"
+        },
+        {
+          "name": "白糖",
+          "amount": "1小勺"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "清水",
+          "amount": "适量没过食材"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -746,7 +2030,66 @@
         "番茄"
       ],
       "description": "砂锅的高温锁住牛肉纤维里的鲜味，番茄熬出沙后与肉汁混合，酱色浓稠。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "牛肉",
+          "amount": "400g",
+          "note": "切块，建议用牛腩或牛腱"
+        },
+        {
+          "name": "番茄",
+          "amount": "4个（约500g）",
+          "note": "切块"
+        },
+        {
+          "name": "土豆",
+          "amount": "1个",
+          "note": "滚刀块"
+        },
+        {
+          "name": "胡萝卜",
+          "amount": "1根",
+          "note": "滚刀块"
+        },
+        {
+          "name": "洋葱",
+          "amount": "半个",
+          "note": "切丝"
+        },
+        {
+          "name": "姜",
+          "amount": "3片"
+        },
+        {
+          "name": "葱",
+          "amount": "2根",
+          "note": "切段"
+        },
+        {
+          "name": "生抽",
+          "amount": "2大勺"
+        },
+        {
+          "name": "蚝油",
+          "amount": "1大勺"
+        },
+        {
+          "name": "番茄酱",
+          "amount": "1大勺"
+        },
+        {
+          "name": "白糖",
+          "amount": "1小勺"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "清水",
+          "amount": "适量"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -772,7 +2115,59 @@
         "番茄"
       ],
       "description": "红烧做法让牛肉裹上酱油的焦香，番茄在收汁时融入酱里，酸甜开胃，咸鲜收尾。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "牛肉",
+          "amount": "400g",
+          "note": "切块，冷水下锅焯水"
+        },
+        {
+          "name": "番茄",
+          "amount": "3个（约400g）",
+          "note": "切块"
+        },
+        {
+          "name": "姜",
+          "amount": "3片"
+        },
+        {
+          "name": "蒜",
+          "amount": "3瓣"
+        },
+        {
+          "name": "葱",
+          "amount": "2根",
+          "note": "切段"
+        },
+        {
+          "name": "生抽",
+          "amount": "2大勺"
+        },
+        {
+          "name": "老抽",
+          "amount": "1大勺"
+        },
+        {
+          "name": "蚝油",
+          "amount": "1大勺"
+        },
+        {
+          "name": "白糖",
+          "amount": "1大勺"
+        },
+        {
+          "name": "料酒",
+          "amount": "1大勺"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "食用油",
+          "amount": "适量"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -798,7 +2193,58 @@
         "酸辣口"
       ],
       "description": "肉片裹了地瓜粉，口感滑嫩中带点弹牙，汤底用的是醋与辣椒调味的酸辣鲜汤。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "猪瘦肉",
+          "amount": "300g",
+          "note": "建议选用里脊或后腿肉，口感更嫩"
+        },
+        {
+          "name": "地瓜粉",
+          "amount": "80g",
+          "note": "红薯淀粉，用于裹肉片"
+        },
+        {
+          "name": "姜",
+          "amount": "3片",
+          "note": "切片或切末"
+        },
+        {
+          "name": "葱",
+          "amount": "2根",
+          "note": "葱白切段，葱绿切花"
+        },
+        {
+          "name": "盐",
+          "amount": "1小勺",
+          "note": "调整汤底咸味"
+        },
+        {
+          "name": "生抽",
+          "amount": "1大勺",
+          "note": "提鲜增色"
+        },
+        {
+          "name": "陈醋",
+          "amount": "2大勺",
+          "note": "福鼎特色酸味来源"
+        },
+        {
+          "name": "辣椒油",
+          "amount": "1小勺",
+          "note": "或用小米辣切碎代替"
+        },
+        {
+          "name": "料酒",
+          "amount": "1小勺",
+          "note": "去腥"
+        },
+        {
+          "name": "白胡椒粉",
+          "amount": "少许",
+          "note": "提香"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -824,7 +2270,48 @@
         "家常汤"
       ],
       "description": "排骨炖到脱骨，海带吸饱了肉汁但还保留着嚼劲，汤色清澈不浑浊。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "排骨",
+          "amount": "500g",
+          "note": "建议选用肋排或腔骨"
+        },
+        {
+          "name": "干海带",
+          "amount": "30g",
+          "note": "提前泡发切片，或用鲜海带结100g"
+        },
+        {
+          "name": "姜",
+          "amount": "5片",
+          "note": "拍扁或切片"
+        },
+        {
+          "name": "葱",
+          "amount": "2根",
+          "note": "打结或切段"
+        },
+        {
+          "name": "盐",
+          "amount": "1.5小勺",
+          "note": "出锅前调味"
+        },
+        {
+          "name": "料酒",
+          "amount": "2大勺",
+          "note": "去腥增香"
+        },
+        {
+          "name": "白醋",
+          "amount": "几滴",
+          "note": "帮助排骨钙质释放"
+        },
+        {
+          "name": "白胡椒粉",
+          "amount": "少许",
+          "note": "提鲜去腥"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -850,7 +2337,58 @@
         "越南风味"
       ],
       "description": "河粉吸了海鲜的汤汁但没被泡烂，虾仁Q弹、贝类鲜甜，整体鲜而不腥。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "河粉",
+          "amount": "400g",
+          "note": "干河粉需提前泡软，或用鲜河粉"
+        },
+        {
+          "name": "鲜虾",
+          "amount": "150g",
+          "note": "去壳去虾线，虾仁也可用"
+        },
+        {
+          "name": "蛤蜊",
+          "amount": "200g",
+          "note": "提前吐沙干净"
+        },
+        {
+          "name": "姜",
+          "amount": "3片",
+          "note": "切丝或切片"
+        },
+        {
+          "name": "葱",
+          "amount": "2根",
+          "note": "切段，葱绿切花备用"
+        },
+        {
+          "name": "鱼露",
+          "amount": "1大勺",
+          "note": "提鲜增鲜"
+        },
+        {
+          "name": "糖",
+          "amount": "半小勺",
+          "note": "提鲜中和酸味"
+        },
+        {
+          "name": "柠檬",
+          "amount": "半个",
+          "note": "挤汁或切片装饰"
+        },
+        {
+          "name": "豆芽",
+          "amount": "80g",
+          "note": "去头尾，焯水备用"
+        },
+        {
+          "name": "盐",
+          "amount": "1小勺",
+          "note": "调整汤底咸淡"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -876,7 +2414,63 @@
         "重口味"
       ],
       "description": "酸笋发酵味够冲，配菜堆得满当当，腐竹炸得酥脆泡在汤里还能保持形状。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "干米粉",
+          "amount": "200g",
+          "note": "提前泡软或直接煮至八成熟"
+        },
+        {
+          "name": "酸笋",
+          "amount": "80g",
+          "note": "切丝，发酵酸味要够"
+        },
+        {
+          "name": "腐竹",
+          "amount": "30g",
+          "note": "提前炸好或炸至酥脆"
+        },
+        {
+          "name": "花生米",
+          "amount": "40g",
+          "note": "炸至金黄酥脆"
+        },
+        {
+          "name": "黑木耳",
+          "amount": "30g",
+          "note": "提前泡发切丝"
+        },
+        {
+          "name": "空心菜",
+          "amount": "100g",
+          "note": "或其他绿叶菜，焯水备用"
+        },
+        {
+          "name": "辣椒油",
+          "amount": "2大勺",
+          "note": "根据口味调整辣度"
+        },
+        {
+          "name": "螺蛳汤底",
+          "amount": "500ml",
+          "note": "可用浓缩螺蛳粉汤料或自制高汤"
+        },
+        {
+          "name": "酸豆角",
+          "amount": "40g",
+          "note": "切碎增酸香味"
+        },
+        {
+          "name": "卤水",
+          "amount": "1大勺",
+          "note": "可选，增加卤香"
+        },
+        {
+          "name": "盐",
+          "amount": "1小勺",
+          "note": "调整整体咸味"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -902,7 +2496,68 @@
         "炒菜"
       ],
       "description": "黑木耳切得细碎混入肉末，辣椒爆香后锅气足，拌饭时能挂住酱汁。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "黑木耳",
+          "amount": "50g",
+          "note": "提前泡发，去根切碎末"
+        },
+        {
+          "name": "猪肉末",
+          "amount": "250g",
+          "note": "三分肥七分瘦，口感更香"
+        },
+        {
+          "name": "青椒",
+          "amount": "1个",
+          "note": "切小丁，增加清香"
+        },
+        {
+          "name": "红椒",
+          "amount": "1个",
+          "note": "切小丁，增加色彩"
+        },
+        {
+          "name": "姜",
+          "amount": "1小块",
+          "note": "切末"
+        },
+        {
+          "name": "蒜",
+          "amount": "3瓣",
+          "note": "切末"
+        },
+        {
+          "name": "豆瓣酱",
+          "amount": "1大勺",
+          "note": "增加酱香和微辣"
+        },
+        {
+          "name": "生抽",
+          "amount": "1大勺",
+          "note": "提鲜调味"
+        },
+        {
+          "name": "老抽",
+          "amount": "半小勺",
+          "note": "上色增香"
+        },
+        {
+          "name": "料酒",
+          "amount": "1小勺",
+          "note": "去腥"
+        },
+        {
+          "name": "糖",
+          "amount": "半小勺",
+          "note": "提鲜中和酱味"
+        },
+        {
+          "name": "香油",
+          "amount": "少许",
+          "note": "出锅前淋入增香"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -928,7 +2583,57 @@
         "家常硬菜"
       ],
       "description": "牛腩炖了两小时以上，筋络部分软烂但不散，酱汁收得浓稠裹在肉上。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "牛腩",
+          "amount": "约500g",
+          "note": "切块"
+        },
+        {
+          "name": "生抽",
+          "amount": "2汤匙"
+        },
+        {
+          "name": "老抽",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "糖",
+          "amount": "1小勺"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "生姜",
+          "amount": "3片"
+        },
+        {
+          "name": "大葱",
+          "amount": "1段"
+        },
+        {
+          "name": "八角",
+          "amount": "2颗"
+        },
+        {
+          "name": "香叶",
+          "amount": "2片"
+        },
+        {
+          "name": "清水",
+          "amount": "约800ml"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "油",
+          "amount": "1汤匙"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -954,7 +2659,57 @@
         "黄豆"
       ],
       "description": "猪蹄炖得胶质软糯，豆香渗透进肉里，酱汁微甜带点姜味。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "猪蹄",
+          "amount": "2只（约600g）"
+        },
+        {
+          "name": "黄豆",
+          "amount": "100g",
+          "note": "提前泡发"
+        },
+        {
+          "name": "生抽",
+          "amount": "2汤匙"
+        },
+        {
+          "name": "老抽",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "冰糖",
+          "amount": "1小勺"
+        },
+        {
+          "name": "生姜",
+          "amount": "3片"
+        },
+        {
+          "name": "蒜",
+          "amount": "2瓣"
+        },
+        {
+          "name": "八角",
+          "amount": "1颗"
+        },
+        {
+          "name": "香叶",
+          "amount": "1片"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "清水",
+          "amount": "约1500ml"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -980,7 +2735,41 @@
         "黄豆"
       ],
       "description": "排骨炖得酥软，黄豆绵密却不散，汤色清亮带点微微的甘甜。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "排骨",
+          "amount": "300g"
+        },
+        {
+          "name": "黄豆",
+          "amount": "80g",
+          "note": "提前泡发"
+        },
+        {
+          "name": "生姜",
+          "amount": "2片"
+        },
+        {
+          "name": "大葱",
+          "amount": "1段"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "清水",
+          "amount": "1500ml"
+        },
+        {
+          "name": "白胡椒粉",
+          "amount": "少许"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1007,7 +2796,43 @@
         "蒜蓉"
       ],
       "description": "大虾肉质紧实弹牙，黄油与蒜蓉的香气裹住虾肉，入口略带奶香又不抢味。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "大虾",
+          "amount": "约400g",
+          "note": "去壳留尾"
+        },
+        {
+          "name": "黄油",
+          "amount": "30g"
+        },
+        {
+          "name": "蒜",
+          "amount": "3瓣",
+          "note": "剁成蒜蓉"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "黑胡椒",
+          "amount": "少许"
+        },
+        {
+          "name": "柠檬汁",
+          "amount": "少许"
+        },
+        {
+          "name": "欧芹",
+          "amount": "少许",
+          "note": "可选"
+        },
+        {
+          "name": "橄榄油",
+          "amount": "1小勺"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1033,7 +2858,61 @@
         "家常"
       ],
       "description": "回锅肉的油香渗入米饭，蛋花裹住每一粒，干爽不腻，层次分明。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "米饭",
+          "amount": "2碗",
+          "note": "隔夜饭更佳"
+        },
+        {
+          "name": "五花肉",
+          "amount": "150g",
+          "note": "切片"
+        },
+        {
+          "name": "鸡蛋",
+          "amount": "2个"
+        },
+        {
+          "name": "生抽",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "老抽",
+          "amount": "1/2汤匙"
+        },
+        {
+          "name": "豆瓣酱",
+          "amount": "1小勺"
+        },
+        {
+          "name": "大蒜",
+          "amount": "2瓣",
+          "note": "切末"
+        },
+        {
+          "name": "姜",
+          "amount": "1小块",
+          "note": "切末"
+        },
+        {
+          "name": "青蒜",
+          "amount": "1根",
+          "note": "切段"
+        },
+        {
+          "name": "油",
+          "amount": "2汤匙"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "白糖",
+          "amount": "少许"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1059,7 +2938,44 @@
         "辣"
       ],
       "description": "火锅底料的麻辣在热米饭上融化，酱香和微辣交织，舌尖有轻微的麻感。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "米饭",
+          "amount": "约300g (2-3碗)"
+        },
+        {
+          "name": "火锅底料（麻辣）",
+          "amount": "约30g (2大勺)"
+        },
+        {
+          "name": "食用油",
+          "amount": "1小勺"
+        },
+        {
+          "name": "鸡蛋",
+          "amount": "1个",
+          "note": "打散"
+        },
+        {
+          "name": "小葱",
+          "amount": "2根",
+          "note": "切碎"
+        },
+        {
+          "name": "大蒜",
+          "amount": "1瓣",
+          "note": "切末"
+        },
+        {
+          "name": "生抽",
+          "amount": "1小勺",
+          "note": "可选"
+        },
+        {
+          "name": "盐",
+          "amount": "少许"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1085,7 +3001,42 @@
         "豆腐"
       ],
       "description": "鲫鱼炖出的汤体清甜，豆腐嫩滑吸满鱼鲜，轻轻一捞就能尝到细腻的鱼肉碎。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "鲫鱼",
+          "amount": "1条 (约300g)"
+        },
+        {
+          "name": "嫩豆腐",
+          "amount": "200g",
+          "note": "切块"
+        },
+        {
+          "name": "姜",
+          "amount": "2片"
+        },
+        {
+          "name": "葱",
+          "amount": "1根",
+          "note": "切段"
+        },
+        {
+          "name": "料酒",
+          "amount": "1小勺"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "胡椒粉",
+          "amount": "少许"
+        },
+        {
+          "name": "清水",
+          "amount": "约800ml"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1111,7 +3062,38 @@
         "蛋白质"
       ],
       "description": "外层形成薄薄的焦壳，中心呈粉红色，切开后肉汁缓慢渗出，口感嫩而不柴。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "牛排",
+          "amount": "2块 (各约200g)"
+        },
+        {
+          "name": "食用油",
+          "amount": "1小勺"
+        },
+        {
+          "name": "黄油",
+          "amount": "10g"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "黑胡椒",
+          "amount": "少许"
+        },
+        {
+          "name": "大蒜",
+          "amount": "1瓣",
+          "note": "压碎"
+        },
+        {
+          "name": "迷迭香",
+          "amount": "少量",
+          "note": "可选"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1137,7 +3119,37 @@
         "下酒"
       ],
       "description": "表皮裹满细颗粒椒盐，咬开能尝到蒜香底味和轻微麻感，肉质入味透彻。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "鸡翅",
+          "amount": "8只 (约500g)"
+        },
+        {
+          "name": "椒盐",
+          "amount": "1小勺"
+        },
+        {
+          "name": "蒜",
+          "amount": "3瓣",
+          "note": "切末"
+        },
+        {
+          "name": "生抽",
+          "amount": "1小勺"
+        },
+        {
+          "name": "料酒",
+          "amount": "1小勺"
+        },
+        {
+          "name": "淀粉",
+          "amount": "1大勺"
+        },
+        {
+          "name": "油",
+          "amount": "适量"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1163,7 +3175,43 @@
         "炖汤"
       ],
       "description": "杂菌与嫩豆腐同炖，汤色偏白，豆腐吸饱菌鲜后软而不散，汤底醇厚。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "混合菌菇",
+          "amount": "150g",
+          "note": "提前泡发"
+        },
+        {
+          "name": "嫩豆腐",
+          "amount": "200g",
+          "note": "切块"
+        },
+        {
+          "name": "姜",
+          "amount": "2片"
+        },
+        {
+          "name": "葱",
+          "amount": "1根",
+          "note": "切段"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "胡椒粉",
+          "amount": "少许"
+        },
+        {
+          "name": "清水",
+          "amount": "约800ml"
+        },
+        {
+          "name": "食用油",
+          "amount": "1小勺"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1189,7 +3237,53 @@
         "清汤"
       ],
       "description": "清汤版本，菌菇释放出的鲜甜融在汤里，豆腐滑嫩但保持完整不碎。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "嫩豆腐",
+          "amount": "1盒（约400g）",
+          "note": "切块，温水浸泡去豆腥"
+        },
+        {
+          "name": "混合菌菇",
+          "amount": "约200g",
+          "note": "金针菇、香菇、蟹味菇、白玉菇等，去根洗净"
+        },
+        {
+          "name": "鸡蛋",
+          "amount": "1个",
+          "note": "打散成蛋液"
+        },
+        {
+          "name": "盐",
+          "amount": "1/2小勺"
+        },
+        {
+          "name": "鸡精",
+          "amount": "少许"
+        },
+        {
+          "name": "白胡椒粉",
+          "amount": "少许"
+        },
+        {
+          "name": "香油",
+          "amount": "1小勺"
+        },
+        {
+          "name": "清水",
+          "amount": "约800ml"
+        },
+        {
+          "name": "葱花",
+          "amount": "1根",
+          "note": "装饰"
+        },
+        {
+          "name": "姜片",
+          "amount": "2片",
+          "note": "提鲜"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1219,7 +3313,49 @@
         "肉馅紧实"
       ],
       "description": "肠衣在高温下变得酥脆，里面的肉馅紧实有弹性，掰开能看见细碎的肉粒。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "火腿肠",
+          "amount": "6根（约300g）",
+          "note": "猪肉或鸡肉肠均可"
+        },
+        {
+          "name": "食用油",
+          "amount": "1小勺",
+          "note": "刷在肠表面防粘"
+        },
+        {
+          "name": "辣椒粉",
+          "amount": "1/2小勺"
+        },
+        {
+          "name": "孜然粉",
+          "amount": "少许"
+        },
+        {
+          "name": "黑胡椒粉",
+          "amount": "少许"
+        },
+        {
+          "name": "盐",
+          "amount": "少许"
+        },
+        {
+          "name": "糖",
+          "amount": "1小撮",
+          "note": "调味"
+        },
+        {
+          "name": "蒜粉",
+          "amount": "少许",
+          "note": "增香"
+        },
+        {
+          "name": "蜂蜜",
+          "amount": "1小勺",
+          "note": "最后刷上一层增加光泽"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1245,7 +3381,55 @@
         "聚会"
       ],
       "description": "表皮在高温下泛出油光，边缘略带焦色，撕开时内部肉汁渗出，鸡肉嫩滑。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "鸡翅中",
+          "amount": "8只（约600g）",
+          "note": "洗净去杂毛"
+        },
+        {
+          "name": "盐",
+          "amount": "1小勺"
+        },
+        {
+          "name": "生抽",
+          "amount": "1大勺"
+        },
+        {
+          "name": "料酒",
+          "amount": "1大勺"
+        },
+        {
+          "name": "老抽",
+          "amount": "1小勺",
+          "note": "上色"
+        },
+        {
+          "name": "蜂蜜",
+          "amount": "1大勺"
+        },
+        {
+          "name": "辣椒粉",
+          "amount": "1小勺"
+        },
+        {
+          "name": "蒜末",
+          "amount": "2瓣"
+        },
+        {
+          "name": "黑胡椒粉",
+          "amount": "少许"
+        },
+        {
+          "name": "五香粉",
+          "amount": "少许"
+        },
+        {
+          "name": "食用油",
+          "amount": "1小勺",
+          "note": "防粘"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1271,7 +3455,51 @@
         "家常"
       ],
       "description": "可乐糖浆裹在鸡翅表面，收成薄薄的甜咸酱汁，外层微脆，肉质软嫩不干。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "鸡翅中",
+          "amount": "8只（约600g）",
+          "note": "洗净"
+        },
+        {
+          "name": "可乐",
+          "amount": "1罐（约330ml）"
+        },
+        {
+          "name": "生抽",
+          "amount": "2大勺"
+        },
+        {
+          "name": "老抽",
+          "amount": "1小勺"
+        },
+        {
+          "name": "料酒",
+          "amount": "1大勺"
+        },
+        {
+          "name": "姜片",
+          "amount": "3片"
+        },
+        {
+          "name": "大蒜",
+          "amount": "3瓣",
+          "note": "拍裂"
+        },
+        {
+          "name": "冰糖",
+          "amount": "10g",
+          "note": "增亮"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "白胡椒粉",
+          "amount": "少许"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1297,7 +3525,49 @@
         "清淡"
       ],
       "description": "口蘑切厚片同炒，菌香逼进汤底，青菜吸饱鲜味，吃起来清爽但有回甘。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "口蘑",
+          "amount": "150g",
+          "note": "切片，厚片"
+        },
+        {
+          "name": "青菜",
+          "amount": "300g",
+          "note": "小白菜或油菜，洗净切段"
+        },
+        {
+          "name": "大蒜",
+          "amount": "2瓣",
+          "note": "拍碎"
+        },
+        {
+          "name": "食用油",
+          "amount": "1大勺"
+        },
+        {
+          "name": "盐",
+          "amount": "1/2小勺"
+        },
+        {
+          "name": "鸡精",
+          "amount": "少许"
+        },
+        {
+          "name": "料酒",
+          "amount": "1小勺"
+        },
+        {
+          "name": "蚝油",
+          "amount": "1小勺",
+          "note": "提鲜"
+        },
+        {
+          "name": "白糖",
+          "amount": "少许",
+          "note": "提鲜"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1323,7 +3593,49 @@
         "广东"
       ],
       "description": "腊肠油脂渗透到底部米饭，锅巴焦脆，咸香和米饭的甜混在一起，油润但不糊嘴。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "大米",
+          "amount": "约300g",
+          "note": "提前浸泡30分钟"
+        },
+        {
+          "name": "腊肠",
+          "amount": "2根（约100g）",
+          "note": "斜切成片"
+        },
+        {
+          "name": "鸡蛋",
+          "amount": "2个",
+          "note": "可选，打散或整颗"
+        },
+        {
+          "name": "老抽",
+          "amount": "1勺"
+        },
+        {
+          "name": "生抽",
+          "amount": "2勺"
+        },
+        {
+          "name": "蚝油",
+          "amount": "1小勺"
+        },
+        {
+          "name": "白糖",
+          "amount": "少许"
+        },
+        {
+          "name": "食用油",
+          "amount": "适量",
+          "note": "沿锅边淋入"
+        },
+        {
+          "name": "小葱",
+          "amount": "少许",
+          "note": "切葱花"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1349,7 +3661,49 @@
         "下饭"
       ],
       "description": "辣椒煸到虎皮皱起，肉片滑炒入味，青椒脆甜中和了油腻，是典型的下饭组合。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "青椒",
+          "amount": "4-5个（约250g）",
+          "note": "去籽切块"
+        },
+        {
+          "name": "五花肉",
+          "amount": "约200g",
+          "note": "切薄片"
+        },
+        {
+          "name": "大蒜",
+          "amount": "3瓣",
+          "note": "切片"
+        },
+        {
+          "name": "豆豉",
+          "amount": "1小勺",
+          "note": "可选"
+        },
+        {
+          "name": "生抽",
+          "amount": "1.5勺"
+        },
+        {
+          "name": "老抽",
+          "amount": "半勺",
+          "note": "上色用"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "白糖",
+          "amount": "少许"
+        },
+        {
+          "name": "食用油",
+          "amount": "适量"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1375,7 +3729,53 @@
         "重口"
       ],
       "description": "擂碎的青椒铺在茄子上煲熟，茄子软烂吸满辣味，辣度渗进肉质里但不呛口。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "茄子",
+          "amount": "3根（约300g）",
+          "note": "切段或条状"
+        },
+        {
+          "name": "青椒",
+          "amount": "4-5个（约200g）",
+          "note": "选用皮薄肉厚的品种"
+        },
+        {
+          "name": "猪肉末",
+          "amount": "约100g",
+          "note": "可选，增加鲜味"
+        },
+        {
+          "name": "大蒜",
+          "amount": "4瓣",
+          "note": "切末"
+        },
+        {
+          "name": "姜",
+          "amount": "1小块",
+          "note": "切末"
+        },
+        {
+          "name": "豆瓣酱",
+          "amount": "1.5勺"
+        },
+        {
+          "name": "生抽",
+          "amount": "1勺"
+        },
+        {
+          "name": "白糖",
+          "amount": "少许"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "食用油",
+          "amount": "适量"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1401,7 +3801,57 @@
         "重口"
       ],
       "description": "排骨炖到能脱骨，擂辣椒的香气裹在肉上，辣味从骨缝渗进去，吃完手指都带点辣。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "排骨",
+          "amount": "约500g",
+          "note": "斩成小段"
+        },
+        {
+          "name": "青椒",
+          "amount": "5-6个（约250g）",
+          "note": "选用二荆条或螺丝椒"
+        },
+        {
+          "name": "大蒜",
+          "amount": "5瓣",
+          "note": "切末"
+        },
+        {
+          "name": "姜",
+          "amount": "1小块",
+          "note": "切片"
+        },
+        {
+          "name": "生抽",
+          "amount": "2勺"
+        },
+        {
+          "name": "老抽",
+          "amount": "1勺"
+        },
+        {
+          "name": "豆瓣酱",
+          "amount": "1勺",
+          "note": "可选"
+        },
+        {
+          "name": "白糖",
+          "amount": "少许"
+        },
+        {
+          "name": "料酒",
+          "amount": "1勺"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "食用油",
+          "amount": "适量"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1427,7 +3877,63 @@
         "下饭菜"
       ],
       "description": "鸡腿卤得透亮，皮弹肉紧，卤香渗进骨头里，咸鲜中带点回甘。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "鸡腿",
+          "amount": "4个（约500g）",
+          "note": "划几刀便于入味"
+        },
+        {
+          "name": "八角",
+          "amount": "2个"
+        },
+        {
+          "name": "桂皮",
+          "amount": "1小块"
+        },
+        {
+          "name": "香叶",
+          "amount": "2片"
+        },
+        {
+          "name": "花椒",
+          "amount": "10粒左右"
+        },
+        {
+          "name": "干辣椒",
+          "amount": "2-3个",
+          "note": "可选，微辣"
+        },
+        {
+          "name": "生抽",
+          "amount": "3勺"
+        },
+        {
+          "name": "老抽",
+          "amount": "2勺",
+          "note": "上色用"
+        },
+        {
+          "name": "冰糖",
+          "amount": "约20g"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "料酒",
+          "amount": "1勺"
+        },
+        {
+          "name": "姜",
+          "amount": "3-4片"
+        },
+        {
+          "name": "葱",
+          "amount": "2段"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1453,7 +3959,61 @@
         "聚会菜"
       ],
       "description": "豆干、鸡爪、鸭翅混搭，卤汁收得咸香适中，各有各的嚼头。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "豆干",
+          "amount": "约200g",
+          "note": "切块"
+        },
+        {
+          "name": "鸡爪",
+          "amount": "约300g",
+          "note": "剪指甲"
+        },
+        {
+          "name": "鸭翅",
+          "amount": "约200g",
+          "note": "切段"
+        },
+        {
+          "name": "鸡蛋",
+          "amount": "2个",
+          "note": "可选"
+        },
+        {
+          "name": "卤料包",
+          "amount": "1包",
+          "note": "含八角、桂皮、香叶、花椒、草果、豆蔻"
+        },
+        {
+          "name": "生抽",
+          "amount": "30ml"
+        },
+        {
+          "name": "老抽",
+          "amount": "15ml"
+        },
+        {
+          "name": "糖",
+          "amount": "10g"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "料酒",
+          "amount": "20ml"
+        },
+        {
+          "name": "姜片",
+          "amount": "3片"
+        },
+        {
+          "name": "蒜瓣",
+          "amount": "3瓣"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1479,7 +4039,44 @@
         "家常菜"
       ],
       "description": "排骨炖到脱骨，萝卜吸饱汤汁，入口清甜不腻，有炖品该有的鲜。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "排骨",
+          "amount": "约500g",
+          "note": "焯水去血沫"
+        },
+        {
+          "name": "白萝卜",
+          "amount": "约300g",
+          "note": "切块"
+        },
+        {
+          "name": "胡萝卜",
+          "amount": "约100g",
+          "note": "可选，切块"
+        },
+        {
+          "name": "姜",
+          "amount": "3片"
+        },
+        {
+          "name": "料酒",
+          "amount": "20ml"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "清水",
+          "amount": "约1500ml"
+        },
+        {
+          "name": "枸杞",
+          "amount": "5g",
+          "note": "可选"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1505,7 +4102,63 @@
         "重口"
       ],
       "description": "酸笋汤底酸辣够劲，配菜里有脆腐竹和木耳，涮完丸子挂满汤汁。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "螺蛳粉干粉",
+          "amount": "200g",
+          "note": "提前浸泡"
+        },
+        {
+          "name": "螺蛳汤底料",
+          "amount": "150g",
+          "note": "含螺蛳肉、酸笋、辣椒油"
+        },
+        {
+          "name": "木耳",
+          "amount": "50g",
+          "note": "提前泡发"
+        },
+        {
+          "name": "脆腐竹",
+          "amount": "30g"
+        },
+        {
+          "name": "豆芽",
+          "amount": "100g"
+        },
+        {
+          "name": "鸡蛋",
+          "amount": "2个"
+        },
+        {
+          "name": "猪肉片",
+          "amount": "150g"
+        },
+        {
+          "name": "鱼丸",
+          "amount": "100g"
+        },
+        {
+          "name": "辣椒粉",
+          "amount": "5g"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "生抽",
+          "amount": "20ml"
+        },
+        {
+          "name": "蒜末",
+          "amount": "10g"
+        },
+        {
+          "name": "姜末",
+          "amount": "5g"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1531,7 +4184,69 @@
         "重口"
       ],
       "description": "牛油锅底麻辣鲜香，毛肚涮到微卷裹着红油，入口脆嫩带辣。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "牛油火锅底料",
+          "amount": "200g",
+          "note": "切块"
+        },
+        {
+          "name": "辣椒粉",
+          "amount": "10g"
+        },
+        {
+          "name": "花椒",
+          "amount": "5g"
+        },
+        {
+          "name": "豆瓣酱",
+          "amount": "30g"
+        },
+        {
+          "name": "大葱",
+          "amount": "2根",
+          "note": "切段"
+        },
+        {
+          "name": "姜",
+          "amount": "3片"
+        },
+        {
+          "name": "蒜",
+          "amount": "4瓣"
+        },
+        {
+          "name": "羊肉片",
+          "amount": "200g"
+        },
+        {
+          "name": "牛肉丸",
+          "amount": "150g"
+        },
+        {
+          "name": "鱼丸",
+          "amount": "100g"
+        },
+        {
+          "name": "豆皮",
+          "amount": "100g",
+          "note": "切段"
+        },
+        {
+          "name": "金针菇",
+          "amount": "100g",
+          "note": "去根"
+        },
+        {
+          "name": "藕片",
+          "amount": "100g",
+          "note": "切薄"
+        },
+        {
+          "name": "生菜",
+          "amount": "100g"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1557,7 +4272,68 @@
         "夏夜菜"
       ],
       "description": "小龙虾壳薄好剥，虾肉紧实弹牙，麻辣汤汁裹满虾身，辣意从指尖蔓延。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "小龙虾",
+          "amount": "500g",
+          "note": "清洗，去头去肠"
+        },
+        {
+          "name": "干辣椒",
+          "amount": "30g",
+          "note": "剪段"
+        },
+        {
+          "name": "花椒",
+          "amount": "10g"
+        },
+        {
+          "name": "姜片",
+          "amount": "5g"
+        },
+        {
+          "name": "蒜瓣",
+          "amount": "5瓣"
+        },
+        {
+          "name": "豆瓣酱",
+          "amount": "30g"
+        },
+        {
+          "name": "生抽",
+          "amount": "20ml"
+        },
+        {
+          "name": "老抽",
+          "amount": "10ml"
+        },
+        {
+          "name": "料酒",
+          "amount": "30ml"
+        },
+        {
+          "name": "糖",
+          "amount": "10g"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "食用油",
+          "amount": "30ml"
+        },
+        {
+          "name": "啤酒",
+          "amount": "200ml",
+          "note": "可选"
+        },
+        {
+          "name": "香料",
+          "amount": "少量",
+          "note": "八角、桂皮、香叶"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1583,7 +4359,67 @@
         "下饭菜"
       ],
       "description": "豆腐裹满红油，豆瓣的酱香和花椒的麻在舌尖散开，肉末吸饱汤汁。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "嫩豆腐",
+          "amount": "300g",
+          "note": "切块"
+        },
+        {
+          "name": "猪肉末",
+          "amount": "100g"
+        },
+        {
+          "name": "郫县豆瓣酱",
+          "amount": "1.5汤匙"
+        },
+        {
+          "name": "豆豉",
+          "amount": "1茶匙"
+        },
+        {
+          "name": "花椒粉",
+          "amount": "1/2茶匙"
+        },
+        {
+          "name": "辣椒粉",
+          "amount": "1/2茶匙"
+        },
+        {
+          "name": "姜",
+          "amount": "1小块",
+          "note": "切末"
+        },
+        {
+          "name": "蒜",
+          "amount": "2瓣",
+          "note": "切末"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "生抽",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "糖",
+          "amount": "1/2茶匙"
+        },
+        {
+          "name": "鸡精",
+          "amount": "少许"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "食用油",
+          "amount": "2汤匙"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1609,7 +4445,64 @@
         "家常"
       ],
       "description": "肉丸紧实弹牙，酱汁收得刚好，咸香中带点微甜，空口吃也不腻。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "猪肉末",
+          "amount": "300g"
+        },
+        {
+          "name": "鸡肉末",
+          "amount": "100g"
+        },
+        {
+          "name": "鸡蛋",
+          "amount": "1个"
+        },
+        {
+          "name": "面包屑",
+          "amount": "30g"
+        },
+        {
+          "name": "牛奶",
+          "amount": "30ml"
+        },
+        {
+          "name": "盐",
+          "amount": "1/2茶匙"
+        },
+        {
+          "name": "生抽",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "胡椒粉",
+          "amount": "少许"
+        },
+        {
+          "name": "姜末",
+          "amount": "1小勺"
+        },
+        {
+          "name": "洋葱末",
+          "amount": "30g"
+        },
+        {
+          "name": "番茄酱",
+          "amount": "2汤匙"
+        },
+        {
+          "name": "糖",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "醋",
+          "amount": "1茶匙"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1635,7 +4528,57 @@
         "家常"
       ],
       "description": "五花肉炖到软烂，梅菜吸饱油脂，咸甜口的汤汁拌饭刚好。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "五花肉",
+          "amount": "400g"
+        },
+        {
+          "name": "梅菜",
+          "amount": "100g",
+          "note": "提前泡发并洗净"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "生抽",
+          "amount": "2汤匙"
+        },
+        {
+          "name": "老抽",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "糖",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "姜",
+          "amount": "3片"
+        },
+        {
+          "name": "蒜",
+          "amount": "2瓣"
+        },
+        {
+          "name": "八角",
+          "amount": "1个"
+        },
+        {
+          "name": "桂皮",
+          "amount": "1小块"
+        },
+        {
+          "name": "清水",
+          "amount": "适量"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1661,7 +4604,53 @@
         "煲仔"
       ],
       "description": "排骨酥软脱骨，南瓜绵密吸满肉汁，甜味自然不腻。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "排骨",
+          "amount": "400g"
+        },
+        {
+          "name": "南瓜",
+          "amount": "300g",
+          "note": "切块"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "生抽",
+          "amount": "2汤匙"
+        },
+        {
+          "name": "老抽",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "糖",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "姜",
+          "amount": "3片"
+        },
+        {
+          "name": "蒜",
+          "amount": "2瓣"
+        },
+        {
+          "name": "清水",
+          "amount": "适量"
+        },
+        {
+          "name": "胡椒粉",
+          "amount": "少许"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1687,7 +4676,48 @@
         "蛋黃"
       ],
       "description": "鸡翅裹着蛋黄酱，外层微焦，挤上柠檬汁后酸甜解腻。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "鸡翅中",
+          "amount": "8只"
+        },
+        {
+          "name": "蛋黄酱",
+          "amount": "3汤匙"
+        },
+        {
+          "name": "柠檬汁",
+          "amount": "2汤匙"
+        },
+        {
+          "name": "柠檬皮屑",
+          "amount": "少许"
+        },
+        {
+          "name": "盐",
+          "amount": "1/2茶匙"
+        },
+        {
+          "name": "糖",
+          "amount": "1茶匙"
+        },
+        {
+          "name": "生抽",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "胡椒粉",
+          "amount": "少许"
+        },
+        {
+          "name": "食用油",
+          "amount": "1汤匙"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1713,7 +4743,55 @@
         "下饭"
       ],
       "description": "肉片、鸡蛋、青椒同炒，油润喷香，米饭杀手。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "猪瘦肉",
+          "amount": "约200g",
+          "note": "切成薄片"
+        },
+        {
+          "name": "鸡蛋",
+          "amount": "3个",
+          "note": "打散备用"
+        },
+        {
+          "name": "青椒",
+          "amount": "2个",
+          "note": "斜切成块"
+        },
+        {
+          "name": "大蒜",
+          "amount": "3瓣",
+          "note": "切片"
+        },
+        {
+          "name": "生姜",
+          "amount": "1小块",
+          "note": "切末"
+        },
+        {
+          "name": "食用油",
+          "amount": "适量",
+          "note": "约30ml"
+        },
+        {
+          "name": "生抽",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "盐",
+          "amount": "少许"
+        },
+        {
+          "name": "鸡精",
+          "amount": "少许",
+          "note": "可选"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1739,7 +4817,52 @@
         "汤品"
       ],
       "description": "番茄熬出浓稠汤底，豆腐嫩滑，入口酸甜带着微咸。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "番茄",
+          "amount": "3个",
+          "note": "去皮切块"
+        },
+        {
+          "name": "嫩豆腐",
+          "amount": "约300g",
+          "note": "切小块"
+        },
+        {
+          "name": "鸡蛋",
+          "amount": "1个",
+          "note": "打散"
+        },
+        {
+          "name": "葱",
+          "amount": "2根",
+          "note": "切葱花"
+        },
+        {
+          "name": "姜",
+          "amount": "1小块",
+          "note": "切末"
+        },
+        {
+          "name": "食用油",
+          "amount": "适量",
+          "note": "约20ml"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "白糖",
+          "amount": "1小勺",
+          "note": "提鲜用"
+        },
+        {
+          "name": "水淀粉",
+          "amount": "少许",
+          "note": "勾芡用"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1765,7 +4888,41 @@
         "凉菜"
       ],
       "description": "皮蛋切丁落在嫩豆腐上，淋一勺酱油，蛋白微弹、蛋黄绵密。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "皮蛋",
+          "amount": "3个",
+          "note": "去壳切丁"
+        },
+        {
+          "name": "嫩豆腐",
+          "amount": "约400g",
+          "note": "切块摆盘"
+        },
+        {
+          "name": "生抽",
+          "amount": "2汤匙"
+        },
+        {
+          "name": "香油",
+          "amount": "1小勺"
+        },
+        {
+          "name": "蒜",
+          "amount": "2瓣",
+          "note": "切末"
+        },
+        {
+          "name": "葱",
+          "amount": "1根",
+          "note": "切葱花"
+        },
+        {
+          "name": "红椒",
+          "amount": "少许",
+          "note": "切末装饰用"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1791,7 +4948,45 @@
         "河鲜"
       ],
       "description": "蒲菜爽脆，虾仁弹牙，青翠与粉白同盘，清鲜为主调。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "蒲菜",
+          "amount": "约250g",
+          "note": "斜切成段"
+        },
+        {
+          "name": "虾仁",
+          "amount": "约200g",
+          "note": "去虾线，洗净"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "姜",
+          "amount": "2片",
+          "note": "切丝"
+        },
+        {
+          "name": "葱",
+          "amount": "1根",
+          "note": "切段"
+        },
+        {
+          "name": "食用油",
+          "amount": "适量",
+          "note": "约25ml"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "白胡椒粉",
+          "amount": "少许"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -1817,7 +5012,50 @@
         "家常"
       ],
       "description": "青椒切丝与肉丝同炒，蛋香裹住肉香，微辣但不抢戏。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "青椒",
+          "amount": "3个",
+          "note": "切丝"
+        },
+        {
+          "name": "猪里脊肉",
+          "amount": "约200g",
+          "note": "切丝"
+        },
+        {
+          "name": "鸡蛋",
+          "amount": "2个",
+          "note": "打散"
+        },
+        {
+          "name": "大蒜",
+          "amount": "2瓣",
+          "note": "切片"
+        },
+        {
+          "name": "食用油",
+          "amount": "适量",
+          "note": "约30ml"
+        },
+        {
+          "name": "生抽",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "盐",
+          "amount": "少许"
+        },
+        {
+          "name": "淀粉",
+          "amount": "少许",
+          "note": "肉丝上浆用"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2218,7 +5456,43 @@
         "时蔬"
       ],
       "description": "丝瓜肉软糯细腻，筷子一戳即破，入口微甜，汤汁清淡。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "丝瓜",
+          "amount": "2根",
+          "note": "去皮切滚刀块"
+        },
+        {
+          "name": "蒜",
+          "amount": "2瓣",
+          "note": "切末"
+        },
+        {
+          "name": "姜",
+          "amount": "1小块",
+          "note": "切丝"
+        },
+        {
+          "name": "食用油",
+          "amount": "2汤匙",
+          "note": "如花生油"
+        },
+        {
+          "name": "盐",
+          "amount": "适量",
+          "note": "约1/2茶匙"
+        },
+        {
+          "name": "鸡精",
+          "amount": "少许",
+          "note": "可选"
+        },
+        {
+          "name": "清水",
+          "amount": "少许",
+          "note": "防止粘锅"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2244,7 +5518,46 @@
         "海鲜"
       ],
       "description": "鱼肉细嫩刺少，清蒸保留鱼肉的鲜甜，淋上热油后葱香渗入鱼身。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "鲈鱼",
+          "amount": "1条（约500克）",
+          "note": "去鳞去内脏洗净"
+        },
+        {
+          "name": "姜",
+          "amount": "5片",
+          "note": "切片铺底"
+        },
+        {
+          "name": "葱",
+          "amount": "2根",
+          "note": "切段铺在鱼身上"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "盐",
+          "amount": "适量",
+          "note": "约1茶匙"
+        },
+        {
+          "name": "生抽",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "香油",
+          "amount": "1茶匙",
+          "note": "出锅前淋上"
+        },
+        {
+          "name": "红椒",
+          "amount": "少许",
+          "note": "切丝装饰（可选）"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2274,7 +5587,47 @@
         "蟹黄"
       ],
       "description": "蟹壳打开后肉质饱满，蟹黄橘红醇厚，蟹膏黏润，蒸制后鲜味浓缩。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "活螃蟹",
+          "amount": "4只（约800克）",
+          "note": "清洗干净"
+        },
+        {
+          "name": "姜",
+          "amount": "3片",
+          "note": "切片"
+        },
+        {
+          "name": "葱",
+          "amount": "2根",
+          "note": "切段"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "盐",
+          "amount": "少许",
+          "note": "约1/2茶匙"
+        },
+        {
+          "name": "酱油",
+          "amount": "1汤匙",
+          "note": "蘸汁"
+        },
+        {
+          "name": "醋",
+          "amount": "1汤匙",
+          "note": "蘸汁"
+        },
+        {
+          "name": "蒜泥",
+          "amount": "1瓣",
+          "note": "蘸汁"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2300,7 +5653,64 @@
         "炖菜"
       ],
       "description": "五花肉的油脂渗入嫩豆腐，酱汁在食材表面挂了一层咸甜的底味",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "五花肉",
+          "amount": "300克",
+          "note": "切块，焯水去血沫"
+        },
+        {
+          "name": "嫩豆腐",
+          "amount": "1盒（约400克）",
+          "note": "切块"
+        },
+        {
+          "name": "泉水",
+          "amount": "约500毫升",
+          "note": "可用矿泉水或纯净水"
+        },
+        {
+          "name": "生抽",
+          "amount": "2汤匙"
+        },
+        {
+          "name": "老抽",
+          "amount": "1汤匙",
+          "note": "上色用"
+        },
+        {
+          "name": "白糖",
+          "amount": "1茶匙"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "姜片",
+          "amount": "3片"
+        },
+        {
+          "name": "蒜瓣",
+          "amount": "2瓣",
+          "note": "拍碎"
+        },
+        {
+          "name": "八角",
+          "amount": "1颗",
+          "note": "可选"
+        },
+        {
+          "name": "盐",
+          "amount": "适量",
+          "note": "约1/2茶匙"
+        },
+        {
+          "name": "香菜",
+          "amount": "少许",
+          "note": "装饰（可选）"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2326,7 +5736,55 @@
         "煮面"
       ],
       "description": "方便面吸饱肉汤后挂着一层薄油，面芯还保留着一点弹性",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "方便面",
+          "amount": "2包",
+          "note": "根据食量可增减"
+        },
+        {
+          "name": "猪肉片",
+          "amount": "150克",
+          "note": "切片，用料酒、盐、淀粉腌制10分钟"
+        },
+        {
+          "name": "鸡蛋",
+          "amount": "2个",
+          "note": "打散"
+        },
+        {
+          "name": "青菜",
+          "amount": "适量",
+          "note": "如小青菜或菠菜，洗净"
+        },
+        {
+          "name": "葱花",
+          "amount": "1根",
+          "note": "切碎"
+        },
+        {
+          "name": "姜末",
+          "amount": "1茶匙"
+        },
+        {
+          "name": "酱油",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "盐",
+          "amount": "适量",
+          "note": "约1/2茶匙"
+        },
+        {
+          "name": "食用油",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "清水",
+          "amount": "约800毫升",
+          "note": "用于煮面"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2352,7 +5810,48 @@
         "砂锅"
       ],
       "description": "蛤蜊和虾仁沉在稠粥里，鲜味被砂锅的余温慢慢逼进米粒间隙",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "大米",
+          "amount": "1杯",
+          "note": "洗净后浸泡30分钟"
+        },
+        {
+          "name": "蛤蜊",
+          "amount": "200g",
+          "note": "吐沙后备用"
+        },
+        {
+          "name": "虾仁",
+          "amount": "150g",
+          "note": "去壳去肠线"
+        },
+        {
+          "name": "姜",
+          "amount": "3片",
+          "note": "切丝"
+        },
+        {
+          "name": "盐",
+          "amount": "适量",
+          "note": "约1小勺"
+        },
+        {
+          "name": "白胡椒粉",
+          "amount": "少许",
+          "note": "提鲜"
+        },
+        {
+          "name": "香葱",
+          "amount": "2根",
+          "note": "切碎"
+        },
+        {
+          "name": "清水",
+          "amount": "1200ml",
+          "note": "或高汤"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2378,7 +5877,53 @@
         "焖菜"
       ],
       "description": "猪蹄炖到骨肉将脱，黄豆绵得用舌尖一压就散成泥",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "猪蹄",
+          "amount": "2只",
+          "note": "斩块，焯水去血沫"
+        },
+        {
+          "name": "黄豆",
+          "amount": "150g",
+          "note": "提前泡发4小时"
+        },
+        {
+          "name": "姜",
+          "amount": "5片",
+          "note": "拍散"
+        },
+        {
+          "name": "料酒",
+          "amount": "2汤匙",
+          "note": "去腥"
+        },
+        {
+          "name": "生抽",
+          "amount": "1汤匙",
+          "note": "调味"
+        },
+        {
+          "name": "老抽",
+          "amount": "1茶匙",
+          "note": "上色"
+        },
+        {
+          "name": "冰糖",
+          "amount": "10g",
+          "note": "提鲜"
+        },
+        {
+          "name": "盐",
+          "amount": "适量",
+          "note": "约1小勺"
+        },
+        {
+          "name": "清水",
+          "amount": "适量",
+          "note": "没过猪蹄"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2404,7 +5949,43 @@
         "清汤"
       ],
       "description": "整鸡在砂锅里逼出清鸡汤，鸡肉纤维吸了盐味后略带弹性",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "整鸡",
+          "amount": "1只",
+          "note": "约1200g，斩块"
+        },
+        {
+          "name": "姜",
+          "amount": "4片",
+          "note": "拍散"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙",
+          "note": "去腥"
+        },
+        {
+          "name": "盐",
+          "amount": "适量",
+          "note": "约1小勺"
+        },
+        {
+          "name": "白胡椒粉",
+          "amount": "少许",
+          "note": "提味"
+        },
+        {
+          "name": "香葱",
+          "amount": "3根",
+          "note": "切段"
+        },
+        {
+          "name": "清水",
+          "amount": "1500ml",
+          "note": "或高汤"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2430,7 +6011,48 @@
         "焖饭"
       ],
       "description": "土豆淀粉融进米汤里，锅底结了一层薄脆的焦层",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "大米",
+          "amount": "2杯",
+          "note": "洗净"
+        },
+        {
+          "name": "土豆",
+          "amount": "300g",
+          "note": "去皮切块"
+        },
+        {
+          "name": "腊肉",
+          "amount": "80g",
+          "note": "切丁，可选"
+        },
+        {
+          "name": "姜",
+          "amount": "2片",
+          "note": "切丝"
+        },
+        {
+          "name": "酱油",
+          "amount": "1汤匙",
+          "note": "调味"
+        },
+        {
+          "name": "盐",
+          "amount": "适量",
+          "note": "约1小勺"
+        },
+        {
+          "name": "清水",
+          "amount": "适量",
+          "note": "比米略少的水量"
+        },
+        {
+          "name": "葱花",
+          "amount": "少许",
+          "note": "出锅前撒上"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2456,7 +6078,48 @@
         "清淡"
       ],
       "description": "山药绵软融入汤底，鸡肉纤维吸饱鲜味，汤色清透不腻。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "鸡肉",
+          "amount": "500g",
+          "note": "斩块，焯水"
+        },
+        {
+          "name": "山药",
+          "amount": "200g",
+          "note": "去皮切滚刀块"
+        },
+        {
+          "name": "姜",
+          "amount": "3片",
+          "note": "拍散"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙",
+          "note": "去腥"
+        },
+        {
+          "name": "盐",
+          "amount": "适量",
+          "note": "约1小勺"
+        },
+        {
+          "name": "白胡椒粉",
+          "amount": "少许",
+          "note": "提鲜"
+        },
+        {
+          "name": "香葱",
+          "amount": "2根",
+          "note": "切段"
+        },
+        {
+          "name": "清水",
+          "amount": "1500ml",
+          "note": "或高汤"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2482,7 +6145,45 @@
         "下饭"
       ],
       "description": "姜片煸至焦香裹住肉片，辛辣裹着油脂，适合配饭。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "猪肉",
+          "amount": "约300g",
+          "note": "切片或切丝"
+        },
+        {
+          "name": "生姜",
+          "amount": "约40g",
+          "note": "切薄片"
+        },
+        {
+          "name": "食用油",
+          "amount": "2汤匙"
+        },
+        {
+          "name": "生抽",
+          "amount": "1.5汤匙"
+        },
+        {
+          "name": "盐",
+          "amount": "约1/2小勺"
+        },
+        {
+          "name": "白糖",
+          "amount": "少许",
+          "note": "约1/3小勺，提鲜用"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙",
+          "note": "去腥"
+        },
+        {
+          "name": "大蒜",
+          "amount": "2瓣",
+          "note": "切片，可选"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2512,7 +6213,48 @@
         "肉片极薄"
       ],
       "description": "米粉吸住薄肉片的汤汁，入口滑溜，带一点油润感。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "干米粉",
+          "amount": "约250g",
+          "note": "提前泡软"
+        },
+        {
+          "name": "瘦肉",
+          "amount": "约200g",
+          "note": "切薄片或切丝"
+        },
+        {
+          "name": "高汤或清水",
+          "amount": "约600ml"
+        },
+        {
+          "name": "姜",
+          "amount": "约10g",
+          "note": "切丝"
+        },
+        {
+          "name": "盐",
+          "amount": "约1小勺"
+        },
+        {
+          "name": "生抽",
+          "amount": "1.5汤匙"
+        },
+        {
+          "name": "葱",
+          "amount": "2根",
+          "note": "切葱花"
+        },
+        {
+          "name": "食用油",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "胡椒粉",
+          "amount": "少许"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2542,7 +6284,54 @@
         "有芡汁"
       ],
       "description": "青红椒脆甜中和辣度，鸡丁滑嫩，芡汁挂在表面。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "鸡胸肉",
+          "amount": "约300g",
+          "note": "切丁"
+        },
+        {
+          "name": "青椒",
+          "amount": "1个",
+          "note": "切块"
+        },
+        {
+          "name": "红椒",
+          "amount": "1个",
+          "note": "切块"
+        },
+        {
+          "name": "姜",
+          "amount": "约10g",
+          "note": "切末"
+        },
+        {
+          "name": "蒜",
+          "amount": "2瓣",
+          "note": "切末"
+        },
+        {
+          "name": "食用油",
+          "amount": "2汤匙"
+        },
+        {
+          "name": "生抽",
+          "amount": "1.5汤匙"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "淀粉",
+          "amount": "1小勺",
+          "note": "提前用少许水调开"
+        },
+        {
+          "name": "盐",
+          "amount": "约1/2小勺"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2568,7 +6357,63 @@
         "香辣"
       ],
       "description": "牛肉保留纤维感，青红椒提供爽脆层次，辣度不轻。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "牛肉",
+          "amount": "约300g",
+          "note": "逆纹切薄片"
+        },
+        {
+          "name": "青椒",
+          "amount": "1个",
+          "note": "切块"
+        },
+        {
+          "name": "红椒",
+          "amount": "1个",
+          "note": "切块"
+        },
+        {
+          "name": "姜",
+          "amount": "约10g",
+          "note": "切丝"
+        },
+        {
+          "name": "蒜",
+          "amount": "2瓣",
+          "note": "切片"
+        },
+        {
+          "name": "食用油",
+          "amount": "2汤匙"
+        },
+        {
+          "name": "生抽",
+          "amount": "1.5汤匙"
+        },
+        {
+          "name": "老抽",
+          "amount": "少许",
+          "note": "调色用"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "淀粉",
+          "amount": "1小勺",
+          "note": "提前用少许水调开"
+        },
+        {
+          "name": "盐",
+          "amount": "约1/2小勺"
+        },
+        {
+          "name": "胡椒粉",
+          "amount": "少许"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2594,7 +6439,63 @@
         "香辣"
       ],
       "description": "蛙肉质地滑嫩易入味，双椒的辛香撑开整道菜的层次。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "牛蛙",
+          "amount": "约500g",
+          "note": "斩成小块"
+        },
+        {
+          "name": "青椒",
+          "amount": "1个",
+          "note": "切块"
+        },
+        {
+          "name": "红椒",
+          "amount": "1个",
+          "note": "切块"
+        },
+        {
+          "name": "姜",
+          "amount": "约15g",
+          "note": "切末"
+        },
+        {
+          "name": "蒜",
+          "amount": "3瓣",
+          "note": "切片"
+        },
+        {
+          "name": "食用油",
+          "amount": "3汤匙"
+        },
+        {
+          "name": "生抽",
+          "amount": "2汤匙"
+        },
+        {
+          "name": "料酒",
+          "amount": "1.5汤匙"
+        },
+        {
+          "name": "蚝油",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "淀粉",
+          "amount": "1小勺",
+          "note": "提前用少许水调开"
+        },
+        {
+          "name": "盐",
+          "amount": "约1/2小勺"
+        },
+        {
+          "name": "花椒",
+          "amount": "少许",
+          "note": "可选，提麻香"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2620,7 +6521,44 @@
         "煲"
       ],
       "description": "丝瓜炖到透明裹进软豆腐，汤底收得略稠，入口滑溜带着清淡的甘。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "丝瓜",
+          "amount": "约300g",
+          "note": "去皮切滚刀块"
+        },
+        {
+          "name": "嫩豆腐",
+          "amount": "1块（约200g）",
+          "note": "切小块"
+        },
+        {
+          "name": "蒜末",
+          "amount": "1小勺"
+        },
+        {
+          "name": "姜末",
+          "amount": "半小勺"
+        },
+        {
+          "name": "虾皮",
+          "amount": "少许",
+          "note": "可选，提鲜用"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "水淀粉",
+          "amount": "适量",
+          "note": "勾芡用"
+        },
+        {
+          "name": "食用油",
+          "amount": "1小勺"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2646,7 +6584,40 @@
         "汤"
       ],
       "description": "牛肉片嫩而不柴，丝瓜清甜释出，整碗汤颜色透亮，入口有肉香打底。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "牛肉",
+          "amount": "约200g",
+          "note": "逆纹切薄片"
+        },
+        {
+          "name": "丝瓜",
+          "amount": "约300g",
+          "note": "去皮切块"
+        },
+        {
+          "name": "姜片",
+          "amount": "3-4片"
+        },
+        {
+          "name": "料酒",
+          "amount": "1小勺",
+          "note": "去腥"
+        },
+        {
+          "name": "生抽",
+          "amount": "少许",
+          "note": "可选，提色"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "食用油",
+          "amount": "少许"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2676,7 +6647,31 @@
         "口感绵软"
       ],
       "description": "纯粹丝瓜煮出的清汤，丝瓜肉绵软带汁，味道干净，没什么多余的修饰。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "丝瓜",
+          "amount": "约400g",
+          "note": "去皮切块或片"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "葱花",
+          "amount": "少许",
+          "note": "出锅前撒入"
+        },
+        {
+          "name": "食用油",
+          "amount": "几滴",
+          "note": "可选，增香"
+        },
+        {
+          "name": "清水",
+          "amount": "约500ml"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2702,7 +6697,38 @@
         "炒"
       ],
       "description": "四季豆炒至表皮微皱，吸了肉汁的咸鲜，嚼起来有脆感和油脂香。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "四季豆",
+          "amount": "约300g",
+          "note": "去头尾和两侧丝，斜切段"
+        },
+        {
+          "name": "猪肉",
+          "amount": "约150g",
+          "note": "切薄片或肉丝"
+        },
+        {
+          "name": "蒜末",
+          "amount": "1小勺"
+        },
+        {
+          "name": "姜末",
+          "amount": "半小勺"
+        },
+        {
+          "name": "生抽",
+          "amount": "1大勺"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "食用油",
+          "amount": "2大勺"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2728,7 +6754,44 @@
         "炒"
       ],
       "description": "酸菜酸脆爽口，五花肉煸出油脂又留有嚼劲，两者味道互相拉扯，不会腻。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "酸菜",
+          "amount": "约200g",
+          "note": "提前泡水去部分酸味，切丝"
+        },
+        {
+          "name": "五花肉",
+          "amount": "约250g",
+          "note": "切薄片"
+        },
+        {
+          "name": "姜丝",
+          "amount": "少许"
+        },
+        {
+          "name": "蒜片",
+          "amount": "少许"
+        },
+        {
+          "name": "干辣椒",
+          "amount": "2-3个",
+          "note": "可选，增香"
+        },
+        {
+          "name": "生抽",
+          "amount": "1小勺"
+        },
+        {
+          "name": "盐",
+          "amount": "少许",
+          "note": "根据酸菜咸度调整"
+        },
+        {
+          "name": "食用油",
+          "amount": "1大勺"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2754,7 +6817,70 @@
         "煲"
       ],
       "description": "酸菜打底铺牛肉片焖入味，汤汁浓一些，牛肉吸饱酸香，吃起来有回甘。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "牛肉片",
+          "amount": "约300g",
+          "note": "切片"
+        },
+        {
+          "name": "酸菜",
+          "amount": "约150g",
+          "note": "切段"
+        },
+        {
+          "name": "姜",
+          "amount": "3片",
+          "note": "切片"
+        },
+        {
+          "name": "蒜",
+          "amount": "3瓣",
+          "note": "拍碎"
+        },
+        {
+          "name": "干辣椒",
+          "amount": "3个",
+          "note": "可根据口味调整"
+        },
+        {
+          "name": "豆瓣酱",
+          "amount": "1小勺"
+        },
+        {
+          "name": "生抽",
+          "amount": "1勺"
+        },
+        {
+          "name": "老抽",
+          "amount": "少许"
+        },
+        {
+          "name": "料酒",
+          "amount": "1勺"
+        },
+        {
+          "name": "糖",
+          "amount": "少许"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "清水",
+          "amount": "约300ml"
+        },
+        {
+          "name": "淀粉",
+          "amount": "1小勺",
+          "note": "腌肉"
+        },
+        {
+          "name": "食用油",
+          "amount": "适量"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2780,7 +6906,60 @@
         "下饭菜"
       ],
       "description": "酸豆角带着脆劲，鸡胗弹牙有嚼劲，酸辣底味很足。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "鸡胗",
+          "amount": "约250g",
+          "note": "切片或切花"
+        },
+        {
+          "name": "酸豆角",
+          "amount": "约150g",
+          "note": "切段"
+        },
+        {
+          "name": "姜",
+          "amount": "2片",
+          "note": "切片"
+        },
+        {
+          "name": "蒜",
+          "amount": "2瓣",
+          "note": "拍碎"
+        },
+        {
+          "name": "干辣椒",
+          "amount": "2个"
+        },
+        {
+          "name": "料酒",
+          "amount": "1勺"
+        },
+        {
+          "name": "生抽",
+          "amount": "1勺"
+        },
+        {
+          "name": "老抽",
+          "amount": "少许"
+        },
+        {
+          "name": "醋",
+          "amount": "1小勺"
+        },
+        {
+          "name": "糖",
+          "amount": "少许"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "食用油",
+          "amount": "适量"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2806,7 +6985,55 @@
         "家常小炒"
       ],
       "description": "酸萝卜爽脆，牛肉滑嫩，酸香型家常小炒。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "牛肉片",
+          "amount": "约250g"
+        },
+        {
+          "name": "酸萝卜",
+          "amount": "约150g",
+          "note": "切片"
+        },
+        {
+          "name": "姜",
+          "amount": "2片",
+          "note": "切片"
+        },
+        {
+          "name": "蒜",
+          "amount": "2瓣",
+          "note": "拍碎"
+        },
+        {
+          "name": "干辣椒",
+          "amount": "2个"
+        },
+        {
+          "name": "生抽",
+          "amount": "1勺"
+        },
+        {
+          "name": "老抽",
+          "amount": "少许"
+        },
+        {
+          "name": "料酒",
+          "amount": "1勺"
+        },
+        {
+          "name": "糖",
+          "amount": "少许"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "食用油",
+          "amount": "适量"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2832,7 +7059,36 @@
         "素菜"
       ],
       "description": "菠菜质地软嫩，裹满蒜香，简单但有滋味。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "菠菜",
+          "amount": "约300g",
+          "note": "洗净"
+        },
+        {
+          "name": "蒜",
+          "amount": "3瓣",
+          "note": "切末"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "鸡精",
+          "amount": "少许",
+          "note": "可选"
+        },
+        {
+          "name": "食用油",
+          "amount": "适量"
+        },
+        {
+          "name": "清水",
+          "amount": "少许",
+          "note": "焯水用"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2862,7 +7118,40 @@
         "蒜蓉点缀"
       ],
       "description": "生菜维持脆感，蒜蓉碎点缀其中，清口解腻。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "生菜",
+          "amount": "约250g",
+          "note": "撕成片"
+        },
+        {
+          "name": "蒜",
+          "amount": "3瓣",
+          "note": "切末"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "鸡精",
+          "amount": "少许"
+        },
+        {
+          "name": "食用油",
+          "amount": "适量"
+        },
+        {
+          "name": "醋",
+          "amount": "1小勺",
+          "note": "可选"
+        },
+        {
+          "name": "酱油",
+          "amount": "少许",
+          "note": "可选"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2892,7 +7181,42 @@
         "腊肠熏香"
       ],
       "description": "笋干吸了腊肠的油脂，变得柔韧入味，带熏香。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "笋干",
+          "amount": "约200g",
+          "note": "提前泡发12小时，切段"
+        },
+        {
+          "name": "腊肠",
+          "amount": "约150g",
+          "note": "斜切成薄片"
+        },
+        {
+          "name": "大蒜",
+          "amount": "3瓣",
+          "note": "切末"
+        },
+        {
+          "name": "干辣椒",
+          "amount": "2个",
+          "note": "去籽切段，可选"
+        },
+        {
+          "name": "生抽",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "白糖",
+          "amount": "少许",
+          "note": "约半小勺，提鲜"
+        },
+        {
+          "name": "食用油",
+          "amount": "适量",
+          "note": "约2汤匙"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2918,7 +7242,50 @@
         "汤菜"
       ],
       "description": "土豆煮到软糯，番茄熬出酸甜，汤体绵密浓稠。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "土豆",
+          "amount": "约300g",
+          "note": "去皮切小块"
+        },
+        {
+          "name": "番茄",
+          "amount": "约250g",
+          "note": "去皮切块"
+        },
+        {
+          "name": "洋葱",
+          "amount": "半个",
+          "note": "切丁"
+        },
+        {
+          "name": "大蒜",
+          "amount": "2瓣",
+          "note": "切末"
+        },
+        {
+          "name": "番茄酱",
+          "amount": "1汤匙",
+          "note": "可选，增色增味"
+        },
+        {
+          "name": "清水或高汤",
+          "amount": "约500ml"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "白糖",
+          "amount": "少许",
+          "note": "中和酸味"
+        },
+        {
+          "name": "食用油",
+          "amount": "1汤匙"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2948,7 +7315,50 @@
         "锅巴焦香"
       ],
       "description": "米粒裹住土豆泥般的绵密，锅底那层薄焦是整锅的灵魂。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "大米",
+          "amount": "约300g",
+          "note": "洗净"
+        },
+        {
+          "name": "土豆",
+          "amount": "约200g",
+          "note": "去皮切小块"
+        },
+        {
+          "name": "腊肠",
+          "amount": "约100g",
+          "note": "切小丁"
+        },
+        {
+          "name": "生抽",
+          "amount": "2汤匙"
+        },
+        {
+          "name": "老抽",
+          "amount": "1小勺",
+          "note": "上色用"
+        },
+        {
+          "name": "蚝油",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "食用油",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "清水",
+          "amount": "适量",
+          "note": "与米齐平或略少"
+        },
+        {
+          "name": "葱花",
+          "amount": "少许",
+          "note": "出锅后撒"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -2974,7 +7384,54 @@
         "砂锅"
       ],
       "description": "粉丝吸饱汤汁，娃娃菜还保留着一点脆劲，筷子一夹就断。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "娃娃菜",
+          "amount": "约300g",
+          "note": "切段或掰开"
+        },
+        {
+          "name": "粉丝",
+          "amount": "约80g",
+          "note": "提前泡软，剪断"
+        },
+        {
+          "name": "虾皮",
+          "amount": "1小把",
+          "note": "提鲜"
+        },
+        {
+          "name": "大蒜",
+          "amount": "3瓣",
+          "note": "切末"
+        },
+        {
+          "name": "姜",
+          "amount": "2片",
+          "note": "切丝，可选"
+        },
+        {
+          "name": "生抽",
+          "amount": "2汤匙"
+        },
+        {
+          "name": "蚝油",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "清水或高汤",
+          "amount": "约300ml"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "葱花",
+          "amount": "少许",
+          "note": "出锅后撒"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -3000,7 +7457,50 @@
         "快手"
       ],
       "description": "豌豆粒粒清甜，混在米粒里，颜色鲜亮。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "米饭",
+          "amount": "约400g",
+          "note": "最好是隔夜饭"
+        },
+        {
+          "name": "豌豆",
+          "amount": "约100g",
+          "note": "新鲜或冷冻均可"
+        },
+        {
+          "name": "鸡蛋",
+          "amount": "2个",
+          "note": "打散"
+        },
+        {
+          "name": "火腿",
+          "amount": "约80g",
+          "note": "切小丁"
+        },
+        {
+          "name": "大蒜",
+          "amount": "2瓣",
+          "note": "切末，可选"
+        },
+        {
+          "name": "生抽",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "食用油",
+          "amount": "2汤匙"
+        },
+        {
+          "name": "葱花",
+          "amount": "少许",
+          "note": "出锅前撒"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -3030,7 +7530,40 @@
         "西兰花脆"
       ],
       "description": "虾仁弹牙，西兰花焯得刚好还带脆口，没有多余的汤水。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "西兰花",
+          "amount": "约300g",
+          "note": "掰成小朵，焯水后备用"
+        },
+        {
+          "name": "虾仁",
+          "amount": "约200g",
+          "note": "去虾线，料酒腌制"
+        },
+        {
+          "name": "大蒜",
+          "amount": "2瓣",
+          "note": "切片"
+        },
+        {
+          "name": "食用油",
+          "amount": "2汤匙"
+        },
+        {
+          "name": "盐",
+          "amount": "少许"
+        },
+        {
+          "name": "料酒",
+          "amount": "1小勺"
+        },
+        {
+          "name": "水淀粉",
+          "amount": "适量",
+          "note": "勾薄芡用"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -3056,7 +7589,43 @@
         "家常"
       ],
       "description": "虾滑打得紧实，豆腐泡孔里塞满了鲜味，一口咬下去会爆汁。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "虾仁",
+          "amount": "约250g",
+          "note": "剁成虾泥"
+        },
+        {
+          "name": "豆腐泡",
+          "amount": "约200g",
+          "note": "对半切开，挖出部分内瓤"
+        },
+        {
+          "name": "鸡蛋清",
+          "amount": "1个"
+        },
+        {
+          "name": "料酒",
+          "amount": "1小勺"
+        },
+        {
+          "name": "盐",
+          "amount": "少许"
+        },
+        {
+          "name": "白胡椒粉",
+          "amount": "少许"
+        },
+        {
+          "name": "葱姜水",
+          "amount": "适量",
+          "note": "去腥用"
+        },
+        {
+          "name": "生抽",
+          "amount": "1小勺"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -3082,7 +7651,38 @@
         "滑蛋"
       ],
       "description": "蛋液嫩得像凝固的高汤，虾仁藏在里面，筷子一戳就分开。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "虾仁",
+          "amount": "约200g",
+          "note": "去虾线，料酒腌制"
+        },
+        {
+          "name": "鸡蛋",
+          "amount": "3个"
+        },
+        {
+          "name": "料酒",
+          "amount": "1小勺"
+        },
+        {
+          "name": "盐",
+          "amount": "少许"
+        },
+        {
+          "name": "食用油",
+          "amount": "3汤匙"
+        },
+        {
+          "name": "葱花",
+          "amount": "适量",
+          "note": "出锅前撒入"
+        },
+        {
+          "name": "白胡椒粉",
+          "amount": "少许"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -3108,7 +7708,45 @@
         "嫩滑"
       ],
       "description": "蛋液凝结后呈微微晃动的嫩度，虾仁收缩紧实带出淡淡咸鲜，与蛋香分层咬下。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "虾仁",
+          "amount": "约150g",
+          "note": "料酒去腥"
+        },
+        {
+          "name": "鸡蛋",
+          "amount": "3个"
+        },
+        {
+          "name": "温开水",
+          "amount": "约200ml",
+          "note": "蛋液与水比例约1:1.5"
+        },
+        {
+          "name": "盐",
+          "amount": "少许"
+        },
+        {
+          "name": "料酒",
+          "amount": "1小勺"
+        },
+        {
+          "name": "葱花",
+          "amount": "适量",
+          "note": "出锅后撒入"
+        },
+        {
+          "name": "生抽",
+          "amount": "1小勺",
+          "note": "出锅后淋入"
+        },
+        {
+          "name": "香油",
+          "amount": "几滴",
+          "note": "出锅后淋入"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -3134,7 +7772,56 @@
         "咸鲜"
       ],
       "description": "鱼块外层裹住薄薄酱汁略带焦香，内里蒜瓣肉纤维吸饱汤底，虾只提供鲜甜底味不抢戏。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "鲈鱼",
+          "amount": "约400g",
+          "note": "切块"
+        },
+        {
+          "name": "鲜虾",
+          "amount": "约150g",
+          "note": "去虾线"
+        },
+        {
+          "name": "大蒜",
+          "amount": "约10瓣",
+          "note": "整颗或拍碎"
+        },
+        {
+          "name": "姜片",
+          "amount": "5-6片"
+        },
+        {
+          "name": "葱段",
+          "amount": "适量"
+        },
+        {
+          "name": "生抽",
+          "amount": "2汤匙"
+        },
+        {
+          "name": "蚝油",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "白糖",
+          "amount": "少许"
+        },
+        {
+          "name": "盐",
+          "amount": "少许"
+        },
+        {
+          "name": "食用油",
+          "amount": "适量",
+          "note": "砂锅底部铺底用"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -3160,7 +7847,45 @@
         "下饭"
       ],
       "description": "咸菜脆爽带酸减轻油腻感，肉片边缘微卷吸进菜香，属于下饭而非开胃的咸口搭配。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "咸菜",
+          "amount": "约200g",
+          "note": "切段，提前泡洗去部分盐分"
+        },
+        {
+          "name": "猪瘦肉",
+          "amount": "约250g",
+          "note": "切成薄片"
+        },
+        {
+          "name": "蒜瓣",
+          "amount": "3瓣",
+          "note": "切片"
+        },
+        {
+          "name": "姜",
+          "amount": "少许",
+          "note": "切丝"
+        },
+        {
+          "name": "食用油",
+          "amount": "2汤匙"
+        },
+        {
+          "name": "生抽",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "料酒",
+          "amount": "1小勺"
+        },
+        {
+          "name": "白糖",
+          "amount": "少许",
+          "note": "提鲜"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -3186,7 +7911,43 @@
         "咸香"
       ],
       "description": "外层裹粉炸至干燥蓬松，咬开才有明显沙感，蛋黄裹住鸡翅形成略有颗粒的酱层。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "鸡翅中",
+          "amount": "约400g（8-10只）"
+        },
+        {
+          "name": "咸蛋黄",
+          "amount": "3-4个",
+          "note": "提前蒸熟压碎"
+        },
+        {
+          "name": "面粉",
+          "amount": "约50g"
+        },
+        {
+          "name": "淀粉",
+          "amount": "约30g",
+          "note": "裹粉用"
+        },
+        {
+          "name": "姜末",
+          "amount": "少许"
+        },
+        {
+          "name": "料酒",
+          "amount": "1小勺"
+        },
+        {
+          "name": "盐",
+          "amount": "少许"
+        },
+        {
+          "name": "食用油",
+          "amount": "适量",
+          "note": "炸制用"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -3212,7 +7973,54 @@
         "浓香"
       ],
       "description": "肋排经腌制后先煎后焖，边缘呈焦糖色脆壳，肉心保留汁水不柴，酱汁收浓挂在骨缝。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "猪肋排",
+          "amount": "约500g",
+          "note": "斩成小段"
+        },
+        {
+          "name": "生抽",
+          "amount": "2汤匙"
+        },
+        {
+          "name": "老抽",
+          "amount": "1汤匙",
+          "note": "上色用"
+        },
+        {
+          "name": "料酒",
+          "amount": "2汤匙"
+        },
+        {
+          "name": "白糖",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "八角",
+          "amount": "2个"
+        },
+        {
+          "name": "桂皮",
+          "amount": "1小块"
+        },
+        {
+          "name": "姜片",
+          "amount": "3-4片"
+        },
+        {
+          "name": "葱段",
+          "amount": "2段"
+        },
+        {
+          "name": "清水",
+          "amount": "约150ml"
+        },
+        {
+          "name": "食用油",
+          "amount": "2汤匙"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -3238,7 +8046,57 @@
         "辛辣"
       ],
       "description": "牛肉横切快炒断生，保留弹性不勾芡，靠小米椒和蒜末在高温下逼出香辛气息。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "黄牛肉",
+          "amount": "约300g",
+          "note": "逆纹切薄片"
+        },
+        {
+          "name": "小米椒",
+          "amount": "8-10个",
+          "note": "切圈，可根据口味调整"
+        },
+        {
+          "name": "蒜瓣",
+          "amount": "4-5瓣",
+          "note": "切片"
+        },
+        {
+          "name": "姜",
+          "amount": "少许",
+          "note": "切丝"
+        },
+        {
+          "name": "青蒜",
+          "amount": "2根",
+          "note": "切段"
+        },
+        {
+          "name": "生抽",
+          "amount": "1.5汤匙"
+        },
+        {
+          "name": "蚝油",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "食用油",
+          "amount": "2-3汤匙"
+        },
+        {
+          "name": "盐",
+          "amount": "少许"
+        },
+        {
+          "name": "白糖",
+          "amount": "少许"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -3264,7 +8122,62 @@
         "微辣"
       ],
       "description": "鸡腿肉切成小丁，与青红椒同炒，表面微焦而内里保持嫩滑，调味带一丝酸辣。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "鸡腿肉",
+          "amount": "约350g",
+          "note": "去骨切小丁"
+        },
+        {
+          "name": "青椒",
+          "amount": "1个",
+          "note": "切小块"
+        },
+        {
+          "name": "红椒",
+          "amount": "1个",
+          "note": "切小块"
+        },
+        {
+          "name": "蒜瓣",
+          "amount": "3瓣",
+          "note": "切片"
+        },
+        {
+          "name": "姜",
+          "amount": "少许",
+          "note": "切末"
+        },
+        {
+          "name": "泡椒",
+          "amount": "3-4个",
+          "note": "切碎，增酸辣"
+        },
+        {
+          "name": "生抽",
+          "amount": "1.5汤匙"
+        },
+        {
+          "name": "醋",
+          "amount": "1小勺"
+        },
+        {
+          "name": "料酒",
+          "amount": "1汤匙"
+        },
+        {
+          "name": "食用油",
+          "amount": "2汤匙"
+        },
+        {
+          "name": "盐",
+          "amount": "少许"
+        },
+        {
+          "name": "白糖",
+          "amount": "少许"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -3290,7 +8203,45 @@
         "牛肉"
       ],
       "description": "卤牛肉切片后与蒜苗快速翻炒，牛肉纹理清晰、略有嚼劲但不失软嫩。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "卤牛肉",
+          "amount": "约300g",
+          "note": "切片备用"
+        },
+        {
+          "name": "蒜苗",
+          "amount": "3根",
+          "note": "斜切段"
+        },
+        {
+          "name": "姜",
+          "amount": "3片",
+          "note": "切丝"
+        },
+        {
+          "name": "蒜",
+          "amount": "3瓣",
+          "note": "切片"
+        },
+        {
+          "name": "干辣椒",
+          "amount": "2个",
+          "note": "剪段去籽"
+        },
+        {
+          "name": "食用油",
+          "amount": "1勺"
+        },
+        {
+          "name": "生抽",
+          "amount": "1小勺"
+        },
+        {
+          "name": "料酒",
+          "amount": "少许"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -3316,7 +8267,59 @@
         "下饭"
       ],
       "description": "杏鲍菇切成滚刀块，表面煎至微黄，带有菌菇特有的弹脆口感，与肉丝同炒吸足酱香。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "杏鲍菇",
+          "amount": "2个",
+          "note": "切滚刀块"
+        },
+        {
+          "name": "猪里脊肉",
+          "amount": "约150g",
+          "note": "切丝"
+        },
+        {
+          "name": "青椒",
+          "amount": "1个",
+          "note": "切丝"
+        },
+        {
+          "name": "红椒",
+          "amount": "半个",
+          "note": "切丝"
+        },
+        {
+          "name": "姜",
+          "amount": "2片",
+          "note": "切末"
+        },
+        {
+          "name": "蒜",
+          "amount": "2瓣",
+          "note": "切片"
+        },
+        {
+          "name": "食用油",
+          "amount": "2勺"
+        },
+        {
+          "name": "生抽",
+          "amount": "1小勺"
+        },
+        {
+          "name": "蚝油",
+          "amount": "1小勺"
+        },
+        {
+          "name": "盐",
+          "amount": "少许"
+        },
+        {
+          "name": "淀粉",
+          "amount": "少许",
+          "note": "肉丝抓匀上浆"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -3342,7 +8345,48 @@
         "海鲜"
       ],
       "description": "羊肚菌的菌香在砂锅煲中慢慢渗入嫩豆腐和虾仁，汤汁清淡但菌菇的鲜味层次分明。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "羊肚菌",
+          "amount": "6-8朵",
+          "note": "提前泡发洗净"
+        },
+        {
+          "name": "嫩豆腐",
+          "amount": "1盒",
+          "note": "切块"
+        },
+        {
+          "name": "虾仁",
+          "amount": "约150g",
+          "note": "去虾线"
+        },
+        {
+          "name": "姜",
+          "amount": "3片"
+        },
+        {
+          "name": "葱",
+          "amount": "1根",
+          "note": "切段"
+        },
+        {
+          "name": "高汤或清水",
+          "amount": "约500ml"
+        },
+        {
+          "name": "食用油",
+          "amount": "1勺"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "香油",
+          "amount": "少许"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -3368,7 +8412,34 @@
         "蛋"
       ],
       "description": "羊肚菌铺在蛋液上同蒸，蒸蛋表面平滑、质地细腻，菌香与蛋香各自清晰但融合得很好。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "鸡蛋",
+          "amount": "3个"
+        },
+        {
+          "name": "羊肚菌",
+          "amount": "4-5朵",
+          "note": "提前泡发切片"
+        },
+        {
+          "name": "温开水",
+          "amount": "约200ml",
+          "note": "蛋液比例约1:1.5"
+        },
+        {
+          "name": "盐",
+          "amount": "少许"
+        },
+        {
+          "name": "生抽",
+          "amount": "半小勺"
+        },
+        {
+          "name": "香油",
+          "amount": "几滴"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -3394,7 +8465,48 @@
         "双鲜"
       ],
       "description": "鲜鱿鱼切花刀与虾仁一同入煲，鱿鱼卷起打卷、虾仁紧实饱满，两者都带着海鲜特有的清甜。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "鲜鱿鱼",
+          "amount": "约200g",
+          "note": "去皮切花刀切块"
+        },
+        {
+          "name": "虾仁",
+          "amount": "约150g",
+          "note": "去虾线"
+        },
+        {
+          "name": "姜",
+          "amount": "3片"
+        },
+        {
+          "name": "蒜",
+          "amount": "3瓣",
+          "note": "切片"
+        },
+        {
+          "name": "葱",
+          "amount": "1根",
+          "note": "切段"
+        },
+        {
+          "name": "料酒",
+          "amount": "1小勺"
+        },
+        {
+          "name": "清水或高汤",
+          "amount": "约300ml"
+        },
+        {
+          "name": "食用油",
+          "amount": "1勺"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -3420,7 +8532,44 @@
         "家常"
       ],
       "description": "玉米甜味渗进汤底，排骨炖至脱骨，汤色清亮不浑浊。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "排骨",
+          "amount": "约350g",
+          "note": "先焯水去血沫"
+        },
+        {
+          "name": "甜玉米",
+          "amount": "1根",
+          "note": "切段"
+        },
+        {
+          "name": "胡萝卜",
+          "amount": "1根",
+          "note": "切块"
+        },
+        {
+          "name": "洋葱",
+          "amount": "半个",
+          "note": "切块"
+        },
+        {
+          "name": "姜",
+          "amount": "3片"
+        },
+        {
+          "name": "料酒",
+          "amount": "1勺"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "水",
+          "amount": "约1500ml"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -3446,7 +8595,65 @@
         "下饭"
       ],
       "description": "小芋头绵密软糯，鸡肉吸足酱香，芡汁挂在肉上不散。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "鸡腿肉",
+          "amount": "300g",
+          "note": "切块"
+        },
+        {
+          "name": "小芋头",
+          "amount": "250g",
+          "note": "去皮切块，提前蒸软"
+        },
+        {
+          "name": "豆瓣酱",
+          "amount": "1.5勺"
+        },
+        {
+          "name": "干辣椒",
+          "amount": "3根",
+          "note": "可根据口味增减"
+        },
+        {
+          "name": "花椒",
+          "amount": "1小撮"
+        },
+        {
+          "name": "姜",
+          "amount": "3片",
+          "note": "切丝"
+        },
+        {
+          "name": "蒜",
+          "amount": "3瓣",
+          "note": "切片"
+        },
+        {
+          "name": "料酒",
+          "amount": "1勺"
+        },
+        {
+          "name": "生抽",
+          "amount": "1勺"
+        },
+        {
+          "name": "老抽",
+          "amount": "1/2勺"
+        },
+        {
+          "name": "糖",
+          "amount": "少许"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "油",
+          "amount": "适量"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -3473,7 +8680,61 @@
         "咸鲜"
       ],
       "description": "芋头吸了肉汁变得绵密，排骨保留骨边肉的嚼劲，鲜香不腻。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "排骨",
+          "amount": "300g",
+          "note": "先焯水去血沫"
+        },
+        {
+          "name": "芋头",
+          "amount": "250g",
+          "note": "去皮切块"
+        },
+        {
+          "name": "姜",
+          "amount": "3片",
+          "note": "切丝"
+        },
+        {
+          "name": "蒜",
+          "amount": "2瓣",
+          "note": "切片"
+        },
+        {
+          "name": "料酒",
+          "amount": "1勺"
+        },
+        {
+          "name": "生抽",
+          "amount": "1勺"
+        },
+        {
+          "name": "老抽",
+          "amount": "1/2勺"
+        },
+        {
+          "name": "盐",
+          "amount": "适量"
+        },
+        {
+          "name": "糖",
+          "amount": "少许"
+        },
+        {
+          "name": "淀粉",
+          "amount": "1小勺"
+        },
+        {
+          "name": "芝麻油",
+          "amount": "少许"
+        },
+        {
+          "name": "葱",
+          "amount": "1根",
+          "note": "切段"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -3499,7 +8760,47 @@
         "鸡翅"
       ],
       "description": "外层裹粉炸到金黄酥脆，里层鸡肉汁水锁在肉里不干柴。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "鸡翅中",
+          "amount": "8只",
+          "note": "洗净，用盐、料酒腌制30分钟"
+        },
+        {
+          "name": "面粉",
+          "amount": "80g"
+        },
+        {
+          "name": "淀粉",
+          "amount": "30g"
+        },
+        {
+          "name": "鸡蛋",
+          "amount": "1个"
+        },
+        {
+          "name": "牛奶",
+          "amount": "30ml"
+        },
+        {
+          "name": "盐",
+          "amount": "1小勺"
+        },
+        {
+          "name": "胡椒粉",
+          "amount": "少许"
+        },
+        {
+          "name": "辣椒粉",
+          "amount": "少许",
+          "note": "可选"
+        },
+        {
+          "name": "油",
+          "amount": "适量",
+          "note": "炸制用"
+        }
+      ],
       "steps": [
         {
           "order": 1,
@@ -3524,7 +8825,47 @@
         "炸物"
       ],
       "description": "面衣炸得轻透酥松，虾肉弹牙鲜甜，蘸椒盐或单吃都有滋味。",
-      "ingredients": [],
+      "ingredients": [
+        {
+          "name": "虾仁",
+          "amount": "250g",
+          "note": "去壳去肠线，用料酒、盐腌制10分钟"
+        },
+        {
+          "name": "淀粉",
+          "amount": "50g"
+        },
+        {
+          "name": "面粉",
+          "amount": "30g"
+        },
+        {
+          "name": "鸡蛋",
+          "amount": "1个"
+        },
+        {
+          "name": "盐",
+          "amount": "1小勺"
+        },
+        {
+          "name": "胡椒粉",
+          "amount": "少许"
+        },
+        {
+          "name": "料酒",
+          "amount": "1小勺"
+        },
+        {
+          "name": "油",
+          "amount": "适量",
+          "note": "炸制用"
+        },
+        {
+          "name": "椒盐粉",
+          "amount": "少许",
+          "note": "蘸食用"
+        }
+      ],
       "steps": [
         {
           "order": 1,

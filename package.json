@@ -8,6 +8,7 @@
     "prebuild": "node scripts/copy-images-to-public.mjs",
     "build": "next build",
     "build:static": "STATIC_EXPORT=1 next build",
+    "enrich:ingredients": "node scripts/enrich-recipe-ingredients-llm.mjs",
     "start": "next start",
     "lint": "eslint"
   },

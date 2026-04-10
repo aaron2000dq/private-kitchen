@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/Button";
 import { useTodayCookbook } from "@/lib/today/useTodayCookbook";
 import { recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
 import { recipeDetailHref } from "@/lib/recipes/recipeRoutes";
+import { formatRecipeIngredientsPreview } from "@/lib/recipes/formatIngredientsPreview";
+import { VisuallyLosslessThumb } from "@/components/recipes/VisuallyLosslessThumb";
 
 export function TodayRecommendationClient() {
   const { recipes, hydrated } = useRecipes();
@@ -68,6 +70,7 @@ export function TodayRecommendationClient() {
           display.map((r) => {
             const selected = isTodaySelected(r.id);
             const canAdd = !selected && todayIds.length < todayMax;
+            const ingPreview = formatRecipeIngredientsPreview(r.ingredients, 3);
             return (
             <Link
               key={r.id}
@@ -76,12 +79,10 @@ export function TodayRecommendationClient() {
             >
               {r.images?.[0] ? (
                 <div className="border-b border-[color:var(--line)] bg-black/[0.02] dark:bg-white/[0.04]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <VisuallyLosslessThumb
                     src={recipeImageUrl(r.images[0])}
                     alt={r.name}
-                    loading="lazy"
-                    decoding="async"
+                    maxSide={640}
                     className="h-28 w-full object-cover"
                   />
                 </div>
@@ -93,6 +94,11 @@ export function TodayRecommendationClient() {
                 <div className="mt-2 text-[12px] text-[color:var(--muted-2)]">
                   {r.category} · {r.rating ? `${r.rating}/5` : "未评分"}
                 </div>
+                {ingPreview ? (
+                  <div className="mt-1.5 line-clamp-2 text-[11px] leading-4 text-[color:var(--muted-2)]">
+                    用料：{ingPreview}
+                  </div>
+                ) : null}
                 <div className="mt-3">
                   <Button
                     size="sm"

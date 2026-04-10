@@ -5,6 +5,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import type { Recipe } from "@/lib/recipes/types";
 import { recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
+import { formatRecipeIngredientsPreview } from "@/lib/recipes/formatIngredientsPreview";
 import { recipeDetailHref } from "@/lib/recipes/recipeRoutes";
 import { Badge } from "@/components/ui/Badge";
 import { StarRating } from "@/components/ui/StarRating";
@@ -65,6 +66,7 @@ export function RecipeCard({
   }, [catMenuOpen]);
 
   const href = recipeDetailHref(recipe.id);
+  const ingredientsPreview = formatRecipeIngredientsPreview(recipe.ingredients);
   const Wrapper: any = categoryEditable ? "div" : Link;
   const wrapperProps = categoryEditable
     ? {
@@ -188,6 +190,11 @@ export function RecipeCard({
           没有简介
         </p>
       )}
+      {ingredientsPreview ? (
+        <p className="mt-2 line-clamp-2 text-[12px] leading-5 text-[color:var(--muted-2)]">
+          用料：{ingredientsPreview}
+        </p>
+      ) : null}
 
       <div className="mt-4 flex items-center justify-between text-[12px] text-[color:var(--muted-2)]">
         <span>{formatDate(recipe.updatedAt)}</span>

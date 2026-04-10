@@ -3,6 +3,8 @@
 import * as React from "react";
 import type { Recipe } from "@/lib/recipes/types";
 import { recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
+import { VisuallyLosslessThumb } from "@/components/recipes/VisuallyLosslessThumb";
+import { formatRecipeIngredientsPreview } from "@/lib/recipes/formatIngredientsPreview";
 import { recipeDetailHref } from "@/lib/recipes/recipeRoutes";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
@@ -26,18 +28,17 @@ function CardFace({
   onTodayAction?: () => void;
 }) {
   const tags = r.tags ?? [];
+  const ingPreview = formatRecipeIngredientsPreview(r.ingredients, 3);
   return (
     <>
       <div className="h-36 w-full shrink-0 bg-black/[0.04] dark:bg-white/[0.06]">
         {r.images?.[0] ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <VisuallyLosslessThumb
             src={recipeImageUrl(r.images[0])}
             alt=""
-            loading="lazy"
-            decoding="async"
-            className="h-full w-full object-cover"
+            maxSide={560}
             draggable={false}
+            className="h-full w-full object-cover"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-[12px] text-[color:var(--muted-2)]">
@@ -67,6 +68,11 @@ function CardFace({
         ) : (
           <div className="text-[11px] text-[color:var(--muted-2)]">标签：无</div>
         )}
+        {ingPreview ? (
+          <div className="line-clamp-2 text-[11px] leading-4 text-[color:var(--muted-2)]">
+            用料：{ingPreview}
+          </div>
+        ) : null}
       </div>
 
       {showTodayAction ? (

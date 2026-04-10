@@ -27,6 +27,17 @@ export function TodayCookbookEditorClient() {
       .slice(0, todayMax);
   }, [recipes, todayIds, todayMax]);
 
+  /**
+   * 今日已选了 id，但菜谱列表仍为空：通常是首次灌库尚未完成，避免误显示「空」。
+   * 若菜谱已有数据却匹配不到 id，则视为失效选择，走下面的空态。
+   */
+  const waitingForRecipeList =
+    todayHydrated &&
+    recipesHydrated &&
+    todayIds.length > 0 &&
+    selectedRecipes.length === 0 &&
+    recipes.length === 0;
+
   const [busy, setBusy] = React.useState(false);
   const [exportError, setExportError] = React.useState<string | null>(null);
 
@@ -80,7 +91,7 @@ export function TodayCookbookEditorClient() {
         </div>
       ) : null}
 
-      {!recipesHydrated || !todayHydrated ? (
+      {!recipesHydrated || !todayHydrated || waitingForRecipeList ? (
         <div className="rounded-3xl border border-[color:var(--line)] bg-[color:var(--paper)] p-8 text-[13px] text-[color:var(--muted-2)]">
           读取中…
         </div>
