@@ -27,11 +27,11 @@ function CardFace({
   todayCanAdd?: boolean;
   onTodayAction?: () => void;
 }) {
-  const tags = r.tags ?? [];
+  const tags = (r.tags ?? []).slice(0, 4);
   const ingPreview = formatRecipeIngredientsPreview(r, 2, 2);
   return (
-    <>
-      <div className="h-36 w-full shrink-0 bg-black/[0.04] dark:bg-white/[0.06]">
+    <div className="flex h-full flex-col">
+      <div className="h-36 w-full shrink-0 bg-black/[0.04] sm:h-40 dark:bg-white/[0.06]">
         {r.images?.[0] ? (
           <VisuallyLosslessThumb
             src={recipeImageThumbUrl(r.images[0])}
@@ -46,16 +46,16 @@ function CardFace({
           </div>
         )}
       </div>
-      <div className="space-y-2 px-4 py-3">
-        <div className="font-[var(--font-noto-serif-sc)] text-[17px] leading-snug tracking-wide">
+      <div className="min-h-0 flex-1 space-y-1.5 overflow-hidden px-4 py-3">
+        <div className="line-clamp-2 font-[var(--font-noto-serif-sc)] text-[17px] leading-snug">
           {r.name}
         </div>
-        <div className="text-[12px] text-[color:var(--muted-2)]">{r.category}</div>
-        <div className="text-[12px] text-[color:var(--muted)]">
-          评分：{r.rating > 0 ? `${r.rating}/5` : "未评分"}
+        <div className="flex flex-wrap items-center gap-2 text-[12px] text-[color:var(--muted-2)]">
+          <span>{r.category}</span>
+          <span>评分：{r.rating > 0 ? `${r.rating}/5` : "未评分"}</span>
         </div>
         {tags.length > 0 ? (
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex max-h-[3.15rem] flex-wrap gap-1.5 overflow-hidden">
             {tags.map((t, i) => (
               <span
                 key={`${t}-${i}`}
@@ -76,7 +76,7 @@ function CardFace({
       </div>
 
       {showTodayAction ? (
-        <div className="mt-4 px-2">
+        <div className="shrink-0 border-t border-[color:var(--line)] p-3">
           <Button
             size="sm"
             variant={todaySelected ? "outline" : "primary"}
@@ -96,7 +96,7 @@ function CardFace({
           </Button>
         </div>
       ) : null}
-    </>
+    </div>
   );
 }
 
@@ -238,7 +238,7 @@ export function InspirationStack({ recipes }: { recipes: Recipe[] }) {
 
   if (n === 0) {
     return (
-        <div className="rounded-lg border border-[color:var(--line)] bg-black/[0.02] px-4 py-8 text-center text-[13px] text-[color:var(--muted)] dark:bg-white/[0.03]">
+      <div className="rounded-lg border border-[color:var(--line)] bg-black/[0.02] px-4 py-8 text-center text-[13px] text-[color:var(--muted)] dark:bg-white/[0.03]">
         添加菜谱后，这里会按本地规则为你叠一摞「灵感卡」。
       </div>
     );
@@ -256,7 +256,7 @@ export function InspirationStack({ recipes }: { recipes: Recipe[] }) {
         aria-label="上一张灵感"
         disabled={n <= 1}
         onClick={() => goPrev()}
-        className="absolute left-1 top-1/2 z-30 -translate-y-1/2 pointer-events-auto rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)]/90 px-3 py-2 text-[18px] leading-none text-[color:var(--foreground)] shadow-[var(--shadow-soft)] disabled:opacity-50 disabled:pointer-events-none"
+        className="pointer-events-auto absolute left-1 top-1/2 z-30 hidden -translate-y-1/2 rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)]/90 px-3 py-2 text-[18px] leading-none text-[color:var(--foreground)] shadow-[var(--shadow-soft)] disabled:pointer-events-none disabled:opacity-50 sm:block"
       >
         ‹
       </button>
@@ -265,13 +265,13 @@ export function InspirationStack({ recipes }: { recipes: Recipe[] }) {
         aria-label="下一张灵感"
         disabled={n <= 1}
         onClick={() => goNext()}
-        className="absolute right-1 top-1/2 z-30 -translate-y-1/2 pointer-events-auto rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)]/90 px-3 py-2 text-[18px] leading-none text-[color:var(--foreground)] shadow-[var(--shadow-soft)] disabled:opacity-50 disabled:pointer-events-none"
+        className="pointer-events-auto absolute right-1 top-1/2 z-30 hidden -translate-y-1/2 rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)]/90 px-3 py-2 text-[18px] leading-none text-[color:var(--foreground)] shadow-[var(--shadow-soft)] disabled:pointer-events-none disabled:opacity-50 sm:block"
       >
         ›
       </button>
 
-      <div className="relative mx-auto flex min-h-[min(52vh,380px)] w-full max-w-[300px] select-none items-center justify-center">
-        <div className="relative h-[min(52vh,380px)] w-full max-w-[280px]">
+      <div className="relative mx-auto h-[440px] w-full max-w-[320px] select-none sm:h-[470px] sm:max-w-[340px] md:h-[430px] md:max-w-[300px]">
+        <div className="relative h-full w-full">
           {Array.from({ length: Math.min(STACK_DEPTH, n) }, (_, depth) => {
             const backToFront = STACK_DEPTH - 1 - depth;
             const recipeIndex = (index + backToFront) % n;
@@ -292,7 +292,7 @@ export function InspirationStack({ recipes }: { recipes: Recipe[] }) {
             return (
               <div
                 key={`stack-slot-${backToFront}`}
-                className="absolute inset-x-0 top-1/2 -translate-y-1/2"
+                className="absolute inset-0"
                 style={{
                   zIndex: 10 - backToFront,
                   transform: base,
@@ -304,7 +304,7 @@ export function InspirationStack({ recipes }: { recipes: Recipe[] }) {
                 }}
               >
                 <div
-                  className={`overflow-hidden rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] shadow-[var(--shadow-soft)] ${
+                  className={`h-full overflow-hidden rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] shadow-[var(--shadow-soft)] ${
                     usePointer ? "cursor-grab touch-pan-y active:cursor-grabbing" : ""
                   } ${!usePointer && isFront ? "cursor-default" : ""} ${!isFront ? "pointer-events-none" : ""}`}
                   onPointerDown={usePointer ? onPointerDown : undefined}
@@ -318,37 +318,36 @@ export function InspirationStack({ recipes }: { recipes: Recipe[] }) {
                         : undefined,
                   }}
                 >
-                  <div
-                    className="block"
-                    role={isFront ? "link" : undefined}
-                    tabIndex={isFront ? 0 : -1}
-                    onClick={
-                      isFront
-                        ? () => {
-                            if (dragging) return;
-                            router.push(recipeDetailHref(r.id));
-                          }
-                        : undefined
-                    }
-                    onKeyDown={
-                      isFront
-                        ? (e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                              e.preventDefault();
-                              router.push(recipeDetailHref(r.id));
-                            }
-                          }
-                        : undefined
-                    }
-                  >
-                    <CardFace
-                      r={r}
-                      showTodayAction={isFront}
-                      todaySelected={todaySelected}
-                      todayCanAdd={todayCanAdd}
-                      onTodayAction={() => void addToToday(r.id)}
+                  {isFront ? (
+                    <div
+                      className="block h-full"
+                      role="link"
+                      tabIndex={0}
+                      onClick={() => {
+                        if (dragging) return;
+                        router.push(recipeDetailHref(r.id));
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          router.push(recipeDetailHref(r.id));
+                        }
+                      }}
+                    >
+                      <CardFace
+                        r={r}
+                        showTodayAction
+                        todaySelected={todaySelected}
+                        todayCanAdd={todayCanAdd}
+                        onTodayAction={() => void addToToday(r.id)}
+                      />
+                    </div>
+                  ) : (
+                    <div
+                      aria-hidden="true"
+                      className="h-full bg-[linear-gradient(135deg,rgba(255,255,255,0.10),rgba(255,255,255,0.02))] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))]"
                     />
-                  </div>
+                  )}
                 </div>
               </div>
             );
