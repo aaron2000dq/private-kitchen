@@ -4,10 +4,11 @@ import Link from "next/link";
 import * as React from "react";
 import { RecipeRepository } from "@/lib/recipes/repository";
 import { Recipe } from "@/lib/recipes/types";
-import { recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
+import { recipeImageThumbUrl, recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
 import { Badge } from "@/components/ui/Badge";
 import { StarRating } from "@/components/ui/StarRating";
 import { Button } from "@/components/ui/Button";
+import { VisuallyLosslessThumb } from "@/components/recipes/VisuallyLosslessThumb";
 
 function formatDate(iso: string) {
   try {
@@ -101,14 +102,13 @@ export function RecipeDetailClient({ id }: { id: string }) {
             {recipe.images.slice(0, 6).map((src, idx) => (
               <div
                 key={idx}
-                className="overflow-hidden rounded-2xl border border-[color:var(--line)] bg-black/[0.03] dark:bg-white/[0.05]"
+                className="overflow-hidden rounded-lg border border-[color:var(--line)] bg-black/[0.03] dark:bg-white/[0.05]"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={recipeImageUrl(src)}
+                <VisuallyLosslessThumb
+                  src={recipeImageThumbUrl(src)}
+                  fallbackSrc={recipeImageUrl(src)}
                   alt={`图片 ${idx + 1}`}
                   loading={idx === 0 ? "eager" : "lazy"}
-                  decoding="async"
                   className="h-36 w-full object-cover"
                 />
               </div>
@@ -222,4 +222,3 @@ export function RecipeDetailClient({ id }: { id: string }) {
     </div>
   );
 }
-

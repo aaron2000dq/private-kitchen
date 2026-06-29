@@ -13,9 +13,9 @@ export function Input({
   return (
     <input
       className={cn(
-        "h-11 w-full rounded-xl border border-[color:var(--line)] bg-[color:var(--paper)]",
+        "h-11 w-full rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)]",
         "px-3 text-[14px] text-[color:var(--foreground)] placeholder:text-[color:var(--muted-2)]",
-        "shadow-[0_1px_0_rgba(20,22,20,0.04)]",
+        "shadow-[0_1px_0_rgba(24,33,29,0.04)]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]",
         className,
       )}
@@ -23,4 +23,3 @@ export function Input({
     />
   );
 }
-

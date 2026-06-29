@@ -16,14 +16,14 @@ export function HomeInspirationSection() {
   );
 
   return (
-    <section className="rounded-3xl border border-[color:var(--line)] bg-[color:var(--paper)] p-6 shadow-[var(--shadow)]">
+    <section className="rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] p-4 shadow-[var(--shadow-soft)] sm:p-6">
       <div className="space-y-1">
         <Badge tone="muted">看看灵感</Badge>
-        <h2 className="font-[var(--font-noto-serif-sc)] text-[20px] leading-tight tracking-wide">
-          从菜谱库里翻翻看
+        <h2 className="font-[var(--font-noto-serif-sc)] text-[20px] leading-tight">
+          菜谱库里的好选择
         </h2>
-        <p className="max-w-xl text-[13px] leading-7 text-[color:var(--muted)]">
-          按时令关键词与评分做的本地排序，再按周做一次轻微洗牌；叠卡上用触控板双指左右轻扫即可翻页。
+        <p className="max-w-xl text-[13px] leading-6 text-[color:var(--muted)]">
+          本周更值得翻出来的几道菜。
         </p>
       </div>
       <div className="mt-6">

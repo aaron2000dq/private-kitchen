@@ -11,3 +11,20 @@ export function recipeImageUrl(src: string | undefined | null): string {
   const pathPart = s.startsWith("/") ? s : `/images/${s}`;
   return `${base}${pathPart}`;
 }
+
+export function recipeImageThumbUrl(src: string | undefined | null): string {
+  if (src == null) return "";
+  const s = String(src).trim();
+  if (!s) return "";
+  if (/^(https?:|blob:|data:)/i.test(s)) return s;
+
+  const pathPart = s.startsWith("/") ? s : `/images/${s}`;
+  if (!pathPart.startsWith("/images/")) return recipeImageUrl(s);
+
+  const filename = pathPart.slice(pathPart.lastIndexOf("/") + 1);
+  const stem = filename.replace(/\.[^.]+$/, "");
+  if (!stem) return recipeImageUrl(s);
+
+  const base = process.env.NEXT_PUBLIC_BASE_PATH || "";
+  return `${base}/images/thumbs/${stem}.webp`;
+}

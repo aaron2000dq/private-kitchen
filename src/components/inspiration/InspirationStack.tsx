@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import type { Recipe } from "@/lib/recipes/types";
-import { recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
+import { recipeImageThumbUrl, recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
 import { VisuallyLosslessThumb } from "@/components/recipes/VisuallyLosslessThumb";
 import { formatRecipeIngredientsPreview } from "@/lib/recipes/formatIngredientsPreview";
 import { recipeDetailHref } from "@/lib/recipes/recipeRoutes";
@@ -34,9 +34,9 @@ function CardFace({
       <div className="h-36 w-full shrink-0 bg-black/[0.04] dark:bg-white/[0.06]">
         {r.images?.[0] ? (
           <VisuallyLosslessThumb
-            src={recipeImageUrl(r.images[0])}
+            src={recipeImageThumbUrl(r.images[0])}
+            fallbackSrc={recipeImageUrl(r.images[0])}
             alt=""
-            maxSide={560}
             draggable={false}
             className="h-full w-full object-cover"
           />
@@ -238,7 +238,7 @@ export function InspirationStack({ recipes }: { recipes: Recipe[] }) {
 
   if (n === 0) {
     return (
-      <div className="rounded-2xl border border-[color:var(--line)] bg-black/[0.02] px-4 py-8 text-center text-[13px] text-[color:var(--muted)] dark:bg-white/[0.03]">
+        <div className="rounded-lg border border-[color:var(--line)] bg-black/[0.02] px-4 py-8 text-center text-[13px] text-[color:var(--muted)] dark:bg-white/[0.03]">
         添加菜谱后，这里会按本地规则为你叠一摞「灵感卡」。
       </div>
     );
@@ -256,7 +256,7 @@ export function InspirationStack({ recipes }: { recipes: Recipe[] }) {
         aria-label="上一张灵感"
         disabled={n <= 1}
         onClick={() => goPrev()}
-        className="absolute left-1 top-1/2 z-30 -translate-y-1/2 pointer-events-auto rounded-full border border-[color:var(--line)] bg-[color:var(--paper)]/90 px-3 py-2 text-[18px] leading-none text-[color:var(--foreground)] shadow-[var(--shadow)] disabled:opacity-50 disabled:pointer-events-none"
+        className="absolute left-1 top-1/2 z-30 -translate-y-1/2 pointer-events-auto rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)]/90 px-3 py-2 text-[18px] leading-none text-[color:var(--foreground)] shadow-[var(--shadow-soft)] disabled:opacity-50 disabled:pointer-events-none"
       >
         ‹
       </button>
@@ -265,7 +265,7 @@ export function InspirationStack({ recipes }: { recipes: Recipe[] }) {
         aria-label="下一张灵感"
         disabled={n <= 1}
         onClick={() => goNext()}
-        className="absolute right-1 top-1/2 z-30 -translate-y-1/2 pointer-events-auto rounded-full border border-[color:var(--line)] bg-[color:var(--paper)]/90 px-3 py-2 text-[18px] leading-none text-[color:var(--foreground)] shadow-[var(--shadow)] disabled:opacity-50 disabled:pointer-events-none"
+        className="absolute right-1 top-1/2 z-30 -translate-y-1/2 pointer-events-auto rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)]/90 px-3 py-2 text-[18px] leading-none text-[color:var(--foreground)] shadow-[var(--shadow-soft)] disabled:opacity-50 disabled:pointer-events-none"
       >
         ›
       </button>
@@ -304,7 +304,7 @@ export function InspirationStack({ recipes }: { recipes: Recipe[] }) {
                 }}
               >
                 <div
-                  className={`overflow-hidden rounded-[22px] border border-[color:var(--line)] bg-[color:var(--paper)] shadow-[var(--shadow)] ${
+                  className={`overflow-hidden rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] shadow-[var(--shadow-soft)] ${
                     usePointer ? "cursor-grab touch-pan-y active:cursor-grabbing" : ""
                   } ${!usePointer && isFront ? "cursor-default" : ""} ${!isFront ? "pointer-events-none" : ""}`}
                   onPointerDown={usePointer ? onPointerDown : undefined}
@@ -355,10 +355,6 @@ export function InspirationStack({ recipes }: { recipes: Recipe[] }) {
           })}
         </div>
       </div>
-
-      <p className="mt-4 text-center text-[12px] text-[color:var(--muted-2)]">
-        在卡片区域双指左右轻扫触控板即可翻页（手机可拖拽）；点击查看详情。
-      </p>
     </div>
   );
 }

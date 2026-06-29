@@ -7,6 +7,7 @@
     "dev": "next dev",
     "prebuild": "node scripts/copy-images-to-public.mjs",
     "build": "next build",
+    "prebuild:static": "node scripts/copy-images-to-public.mjs",
     "build:static": "STATIC_EXPORT=1 next build",
     "enrich:ingredients": "node scripts/enrich-recipe-ingredients-llm.mjs",
     "start": "next start",
@@ -27,6 +28,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

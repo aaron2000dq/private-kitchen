@@ -16,7 +16,7 @@ type GeneratedRecipe = {
 };
 
 export function getGeneratedRecipes(): GeneratedRecipe[] {
-  const recipes = (data as any)?.recipes;
+  const recipes = (data as { recipes?: unknown }).recipes;
   return Array.isArray(recipes) ? (recipes as GeneratedRecipe[]) : [];
 }
 
@@ -33,7 +33,11 @@ function ingredientRowsSig(rows: unknown[] | undefined): string {
   if (!Array.isArray(rows) || !rows.length) return "";
   return rows
     .slice(0, 20)
-    .map((x: any) => `${String(x?.name ?? "").trim()}:${String(x?.amount ?? "").trim()}`)
+    .map((x) => {
+      if (!x || typeof x !== "object") return ":";
+      const row = x as { name?: unknown; amount?: unknown };
+      return `${String(row.name ?? "").trim()}:${String(row.amount ?? "").trim()}`;
+    })
     .join(";");
 }
 

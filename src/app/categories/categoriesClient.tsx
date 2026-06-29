@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRecipes } from "@/lib/recipes/useRecipes";
 import { RecipeRepository } from "@/lib/recipes/repository";
-import { reclassifyRecipe, RecipeCategories } from "@/lib/recipes/classify";
+import { reclassifyRecipe, RecipeCategories, type RecipeCategory } from "@/lib/recipes/classify";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -12,6 +12,10 @@ import { RecipeCard } from "@/components/recipes/RecipeCard";
 
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
+}
+
+function isRecipeCategory(value: string): value is RecipeCategory {
+  return (RecipeCategories as readonly string[]).includes(value);
 }
 
 export function CategoriesClient() {
@@ -39,13 +43,13 @@ export function CategoriesClient() {
     for (const r of recipes) {
       const c = r.category?.trim();
       if (!c) continue;
-      if (RecipeCategories.includes(c as any)) present.add(c);
+      if (isRecipeCategory(c)) present.add(c);
     }
     return RecipeCategories.filter((c) => present.has(c));
   }, [recipes]);
 
   React.useEffect(() => {
-    if (active !== "全部" && categories.length && !categories.includes(active as any)) {
+    if (active !== "全部" && categories.length && !(categories as readonly string[]).includes(active)) {
       setActive("全部");
     }
   }, [active, categories]);
@@ -78,7 +82,7 @@ export function CategoriesClient() {
     const btn = el?.closest("button[data-cat]") as HTMLButtonElement | null;
     const cat = btn?.dataset.cat ?? null;
     if (!cat) return null;
-    if (!RecipeCategories.includes(cat as any)) return null;
+    if (!isRecipeCategory(cat)) return null;
     return cat;
   }, []);
 
@@ -317,4 +321,3 @@ export function CategoriesClient() {
     </div>
   );
 }
-

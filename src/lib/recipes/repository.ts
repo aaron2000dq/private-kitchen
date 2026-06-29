@@ -19,6 +19,10 @@ const INGREDIENT_MAIN_AUX_MIGRATION_KEY = "private-kitchen:ingredient-main-aux-v
 
 type LegacyRecipe = Recipe & { ingredients?: Recipe["mainIngredients"] };
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object";
+}
+
 interface PrivateKitchenDB extends DBSchema {
   recipes: {
     key: string;
@@ -41,8 +45,8 @@ function generateId(): string {
 function normalizeIngredientRows(raw: unknown): Recipe["mainIngredients"] {
   if (!Array.isArray(raw)) return [];
   return raw
-    .filter((x: any) => x && typeof x === "object")
-    .map((x: any) => ({
+    .filter(isRecord)
+    .map((x) => ({
       name: String(x.name ?? "").trim(),
       amount: String(x.amount ?? "").trim(),
       note: x.note != null && String(x.note).trim() ? String(x.note).trim() : undefined,
@@ -329,7 +333,7 @@ async function maybeSeedRecipesFromGeneratedJson(): Promise<void> {
 
   const now = new Date().toISOString();
   const tx = db.transaction("recipes", "readwrite");
-  for (const g of generated as any[]) {
+  for (const g of generated) {
     const name = String(g?.name ?? "").trim();
     if (!name) continue;
     const id = stableRecipeIdFromName(name);
@@ -350,13 +354,13 @@ async function maybeSeedRecipesFromGeneratedJson(): Promise<void> {
       auxiliaryIngredients,
       steps: Array.isArray(g?.steps)
         ? g.steps
-            .filter((x: any) => x && typeof x === "object")
-            .map((x: any, i: number) => ({
+            .filter(isRecord)
+            .map((x, i) => ({
               order: Number.isFinite(Number(x.order)) ? Number(x.order) : i + 1,
               content: String(x.content ?? "").trim(),
               tip: x.tip != null ? String(x.tip).trim() : undefined,
             }))
-            .filter((x: any) => x.content)
+            .filter((x) => x.content)
         : [],
       images: Array.isArray(g?.images) ? g.images.map(String).map((s: string) => s.trim()).filter(Boolean).slice(0, 10) : [],
       createdAt: now,
@@ -514,4 +518,3 @@ export const RecipeRepository = {
     await tx.done;
   },
 };
-

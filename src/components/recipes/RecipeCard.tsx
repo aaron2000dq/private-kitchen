@@ -4,17 +4,16 @@ import Link from "next/link";
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import type { Recipe } from "@/lib/recipes/types";
-import { recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
+import { recipeImageThumbUrl, recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
 import { formatRecipeIngredientsPreview } from "@/lib/recipes/formatIngredientsPreview";
 import { recipeDetailHref } from "@/lib/recipes/recipeRoutes";
 import { Badge } from "@/components/ui/Badge";
-import { StarRating } from "@/components/ui/StarRating";
 import { Button } from "@/components/ui/Button";
+import { VisuallyLosslessThumb } from "@/components/recipes/VisuallyLosslessThumb";
 
 function formatDate(iso: string) {
   try {
     return new Date(iso).toLocaleDateString("zh-CN", {
-      year: "numeric",
       month: "2-digit",
       day: "2-digit",
     });
@@ -40,8 +39,8 @@ export function RecipeCard({
   todaySelected?: boolean;
   onTodayAction?: () => void;
   draggable?: boolean;
-  onDragStart?: (e: React.DragEvent<HTMLAnchorElement>) => void;
-  onDragEnd?: (e: React.DragEvent<HTMLAnchorElement>) => void;
+  onDragStart?: (e: React.DragEvent<HTMLElement>) => void;
+  onDragEnd?: (e: React.DragEvent<HTMLElement>) => void;
   categoryEditable?: boolean;
   categoryOptions?: string[];
   onCategoryChange?: (next: string) => void | Promise<void>;
@@ -66,8 +65,9 @@ export function RecipeCard({
   }, [catMenuOpen]);
 
   const href = recipeDetailHref(recipe.id);
+  const image = recipe.images?.[0];
   const ingredientsPreview = formatRecipeIngredientsPreview(recipe);
-  const Wrapper: any = categoryEditable ? "div" : Link;
+  const Wrapper: React.ElementType = categoryEditable ? "div" : Link;
   const wrapperProps = categoryEditable
     ? {
         role: "link",
@@ -92,145 +92,144 @@ export function RecipeCard({
   return (
     <Wrapper
       {...wrapperProps}
-      className="group rounded-3xl border border-[color:var(--line)] bg-[color:var(--paper)] p-5 transition-[transform,box-shadow,background-color] duration-200 hover:-translate-y-0.5 hover:shadow-[var(--shadow)]"
+      className="group block overflow-hidden rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:border-[color:rgba(184,92,56,0.34)] hover:shadow-[var(--shadow-soft)]"
       draggable={draggable}
-      onDragStart={(e: any) => {
+      onDragStart={(e: React.DragEvent<HTMLElement>) => {
         onDragStart?.(e);
       }}
-      onDragEnd={onDragEnd as any}
+      onDragEnd={onDragEnd}
     >
-      {recipe.images?.[0] ? (
-        <div className="-mt-1 mb-4 overflow-hidden rounded-2xl border border-[color:var(--line)] bg-black/[0.03] dark:bg-white/[0.05]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={recipeImageUrl(recipe.images[0])}
+      <div className="relative aspect-[4/3] overflow-hidden border-b border-[color:var(--line)] bg-[color:var(--wash)]">
+        {image ? (
+          <VisuallyLosslessThumb
+            src={recipeImageThumbUrl(image)}
+            fallbackSrc={recipeImageUrl(image)}
             alt={recipe.name}
-            loading="lazy"
-            decoding="async"
-            className="h-40 w-full object-cover"
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           />
-        </div>
-      ) : null}
-
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <div className="truncate font-[var(--font-noto-serif-sc)] text-[18px] tracking-wide">
-            {recipe.name}
+        ) : (
+          <div className="flex h-full items-center justify-center text-[12px] text-[color:var(--muted-2)]">
+            无图
           </div>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            <div className="relative" ref={catMenuRef}>
-              <Badge
-                tone="accent"
-                className={categoryEditable ? "cursor-pointer" : undefined}
+        )}
+        {recipe.rating ? (
+          <div className="absolute right-2 top-2 rounded-md bg-[color:var(--paper)]/92 px-2 py-1 text-[11px] font-medium text-[color:var(--warm)] shadow-[var(--shadow-soft)]">
+            {recipe.rating}/5
+          </div>
+        ) : null}
+      </div>
+
+      <div className="p-3 sm:p-4">
+        <div className="min-h-[2.45rem] font-[var(--font-noto-serif-sc)] text-[16px] leading-tight text-[color:var(--foreground)] sm:text-[17px]">
+          <span className="line-clamp-2">{recipe.name}</span>
+        </div>
+
+        <div className="mt-2 flex flex-wrap items-center gap-1.5">
+          <div className="relative" ref={catMenuRef}>
+            <Badge
+              tone="accent"
+              className={categoryEditable ? "cursor-pointer" : undefined}
+              onClick={(e) => {
+                if (!categoryEditable || !categoryOptions.length || !onCategoryChange) return;
+                e.preventDefault();
+                e.stopPropagation();
+                setCatMenuOpen((v) => !v);
+              }}
+            >
+              {recipe.category}
+            </Badge>
+            {categoryEditable && categoryOptions.length && onCategoryChange ? (
+              <button
+                type="button"
+                className="absolute inset-0"
+                aria-label="修改分类"
+                data-cat-toggle="1"
                 onClick={(e) => {
-                  if (!categoryEditable || !categoryOptions.length || !onCategoryChange) return;
                   e.preventDefault();
                   e.stopPropagation();
                   setCatMenuOpen((v) => !v);
                 }}
+              />
+            ) : null}
+            {catMenuOpen ? (
+              <div
+                data-cat-menu="1"
+                className="absolute left-0 top-[calc(100%+6px)] z-30 w-max min-w-[160px] rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] p-2 shadow-[var(--shadow)]"
               >
-                {recipe.category}
-              </Badge>
-              {categoryEditable && categoryOptions.length && onCategoryChange ? (
-                <button
-                  type="button"
-                  className="absolute inset-0"
-                  aria-label="修改分类"
-                  data-cat-toggle="1"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setCatMenuOpen((v) => !v);
-                  }}
-                />
-              ) : null}
-              {catMenuOpen ? (
-                <div
-                  data-cat-menu="1"
-                  className="absolute left-0 top-[calc(100%+6px)] z-30 w-max min-w-[160px] rounded-2xl border border-[color:var(--line)] bg-[color:var(--paper)] p-2 shadow-[var(--shadow)]"
-                >
-                  <div className="max-h-60 overflow-auto">
-                    {categoryOptions.map((c) => (
-                      <button
-                        key={c}
-                        type="button"
-                        className="w-full rounded-xl px-3 py-2 text-left text-[13px] text-[color:var(--foreground)] transition-colors hover:bg-black/[0.03] dark:hover:bg-white/[0.06] disabled:opacity-50"
-                        disabled={c === recipe.category}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          void Promise.resolve(onCategoryChange?.(c)).finally(() => setCatMenuOpen(false));
-                        }}
-                      >
-                        {c}
-                      </button>
-                    ))}
-                  </div>
+                <div className="max-h-60 overflow-auto">
+                  {categoryOptions.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      className="w-full rounded-md px-3 py-2 text-left text-[13px] text-[color:var(--foreground)] transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.06] disabled:opacity-50"
+                      disabled={c === recipe.category}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        void Promise.resolve(onCategoryChange?.(c)).finally(() => setCatMenuOpen(false));
+                      }}
+                    >
+                      {c}
+                    </button>
+                  ))}
                 </div>
-              ) : null}
-            </div>
-            {recipe.tags?.slice(0, 2).map((t) => (
-              <Badge key={t} tone="muted">
-                {t}
-              </Badge>
-            ))}
+              </div>
+            ) : null}
           </div>
+          {recipe.tags?.slice(0, 2).map((t) => (
+            <Badge key={t} tone="muted">
+              {t}
+            </Badge>
+          ))}
         </div>
-        <div className="shrink-0">
-          <StarRating value={recipe.rating ?? 0} />
-        </div>
-      </div>
 
-      {recipe.description ? (
-        <p className="mt-4 line-clamp-2 text-[13px] leading-6 text-[color:var(--muted)]">
-          {recipe.description}
-        </p>
-      ) : (
-        <p className="mt-4 text-[13px] leading-6 text-[color:var(--muted-2)]">
-          没有简介
-        </p>
-      )}
-      {ingredientsPreview ? (
-        <p className="mt-2 line-clamp-2 text-[12px] leading-5 text-[color:var(--muted-2)]">
-          用料：{ingredientsPreview}
-        </p>
-      ) : null}
+        {recipe.description ? (
+          <p className="mt-3 line-clamp-2 text-[12px] leading-5 text-[color:var(--muted)] sm:text-[13px]">
+            {recipe.description}
+          </p>
+        ) : (
+          <p className="mt-3 text-[12px] leading-5 text-[color:var(--muted-2)]">没有简介</p>
+        )}
+        {ingredientsPreview ? (
+          <p className="mt-2 line-clamp-1 text-[11px] leading-4 text-[color:var(--muted-2)]">
+            {ingredientsPreview}
+          </p>
+        ) : null}
 
-      <div className="mt-4 flex items-center justify-between text-[12px] text-[color:var(--muted-2)]">
-        <span>{formatDate(recipe.updatedAt)}</span>
-        <button
-          type="button"
-          className="opacity-70 transition-opacity group-hover:opacity-100"
-          onClick={(e) => {
-            // Ensure "打开" always navigates, even if wrapper click is blocked by drag/select.
-            e.preventDefault();
-            e.stopPropagation();
-            router.push(href);
-          }}
-        >
-          打开 →
-        </button>
-      </div>
-
-      {showTodayAction ? (
-        <div className="mt-3">
-          <Button
-            size="sm"
-            variant={todaySelected ? "outline" : "primary"}
-            disabled={todaySelected || !onTodayAction}
-            data-today-action="1"
+        <div className="mt-3 flex items-center justify-between gap-2 text-[11px] text-[color:var(--muted-2)]">
+          <span>{formatDate(recipe.updatedAt)}</span>
+          <button
+            type="button"
+            className="shrink-0 rounded-md px-1.5 py-1 text-[color:var(--foreground)] opacity-70 transition-[background-color,opacity] group-hover:bg-black/[0.04] group-hover:opacity-100 dark:group-hover:bg-white/[0.06]"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              onTodayAction?.();
+              router.push(href);
             }}
-            className="w-full"
           >
-            {todaySelected ? "已在今日菜谱" : "今天吃这个"}
-          </Button>
+            打开
+          </button>
         </div>
-      ) : null}
+
+        {showTodayAction ? (
+          <div className="mt-3">
+            <Button
+              size="sm"
+              variant={todaySelected ? "outline" : "primary"}
+              disabled={todaySelected || !onTodayAction}
+              data-today-action="1"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onTodayAction?.();
+              }}
+              className="w-full"
+            >
+              {todaySelected ? "已加入" : "加入今日"}
+            </Button>
+          </div>
+        ) : null}
+      </div>
     </Wrapper>
   );
 }
-

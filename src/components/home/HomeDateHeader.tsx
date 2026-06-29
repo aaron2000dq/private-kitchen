@@ -17,17 +17,19 @@ export function HomeDateHeader() {
     return (
       <div className="space-y-2">
         <div className="h-8 w-48 animate-pulse rounded-lg bg-black/[0.06] dark:bg-white/[0.08]" />
-        <div className="h-16 w-full animate-pulse rounded-xl bg-black/[0.04] dark:bg-white/[0.06]" />
+        <div className="h-14 w-full animate-pulse rounded-lg bg-black/[0.04] dark:bg-white/[0.06]" />
       </div>
     );
   }
 
   return (
-    <header className="space-y-3">
-      <p className="font-[var(--font-noto-serif-sc)] text-[26px] leading-snug tracking-wide text-[color:var(--foreground)]">
+    <header className="space-y-2 pt-1">
+      <p className="font-[var(--font-noto-serif-sc)] text-[24px] leading-snug text-[color:var(--foreground)] sm:text-[28px]">
         {line1}
       </p>
-      <p className="max-w-2xl text-[14px] leading-7 text-[color:var(--muted)]">{line2}</p>
+      <p className="max-w-2xl text-[13px] leading-6 text-[color:var(--muted)] sm:text-[14px] sm:leading-7">
+        {line2}
+      </p>
     </header>
   );
 }

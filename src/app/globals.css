@@ -1,23 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f6f6f3;
-  --foreground: #141614;
-  --paper: #fbfbf8;
-  --muted: #5d6a60;
-  --muted-2: #7d8a81;
-  --line: rgba(20, 22, 20, 0.12);
-  --ring: rgba(107, 142, 107, 0.45);
-  --accent: #6b8e6b;
-  --accent-2: #a3b18a;
-  --warm: #c98a63;
-  --shadow: 0 1px 0 rgba(20, 22, 20, 0.06), 0 18px 40px rgba(20, 22, 20, 0.07);
+  --background: #f4f5f0;
+  --foreground: #18211d;
+  --paper: #fffefa;
+  --paper-strong: #ffffff;
+  --wash: #ecefe7;
+  --muted: #58665d;
+  --muted-2: #7d877f;
+  --line: rgba(24, 33, 29, 0.13);
+  --ring: rgba(184, 92, 56, 0.42);
+  --accent: #3f6f55;
+  --accent-2: #d7ad45;
+  --warm: #b85c38;
+  --shadow: 0 16px 34px rgba(24, 33, 29, 0.10);
+  --shadow-soft: 0 8px 22px rgba(24, 33, 29, 0.08);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-paper: var(--paper);
+  --color-paper-strong: var(--paper-strong);
+  --color-wash: var(--wash);
   --color-muted: var(--muted);
   --color-muted-2: var(--muted-2);
   --color-line: var(--line);
@@ -32,17 +37,20 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0b0d0b;
-    --foreground: #eceee9;
-    --paper: rgba(255, 255, 255, 0.06);
-    --muted: rgba(236, 238, 233, 0.72);
-    --muted-2: rgba(236, 238, 233, 0.52);
-    --line: rgba(236, 238, 233, 0.14);
-    --ring: rgba(163, 177, 138, 0.38);
-    --accent: #a3b18a;
-    --accent-2: #6b8e6b;
-    --warm: #c98a63;
-    --shadow: 0 1px 0 rgba(0, 0, 0, 0.35), 0 18px 40px rgba(0, 0, 0, 0.55);
+    --background: #101410;
+    --foreground: #eff2eb;
+    --paper: rgba(255, 255, 255, 0.075);
+    --paper-strong: rgba(255, 255, 255, 0.105);
+    --wash: rgba(255, 255, 255, 0.06);
+    --muted: rgba(239, 242, 235, 0.74);
+    --muted-2: rgba(239, 242, 235, 0.54);
+    --line: rgba(239, 242, 235, 0.15);
+    --ring: rgba(215, 173, 69, 0.38);
+    --accent: #91b793;
+    --accent-2: #d7ad45;
+    --warm: #e18a62;
+    --shadow: 0 18px 38px rgba(0, 0, 0, 0.45);
+    --shadow-soft: 0 10px 24px rgba(0, 0, 0, 0.35);
   }
 }
 
@@ -75,22 +83,20 @@ html {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  opacity: 0.10;
+  opacity: 0.18;
   mix-blend-mode: multiply;
-  background-image: radial-gradient(circle at 20% 10%, rgba(0, 0, 0, 0.06), transparent 45%),
-    radial-gradient(circle at 80% 20%, rgba(0, 0, 0, 0.045), transparent 55%),
-    radial-gradient(circle at 30% 80%, rgba(0, 0, 0, 0.05), transparent 50%),
-    radial-gradient(circle at 70% 90%, rgba(0, 0, 0, 0.035), transparent 60%);
+  background-image:
+    linear-gradient(rgba(24, 33, 29, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(24, 33, 29, 0.025) 1px, transparent 1px);
+  background-size: 26px 26px;
 }
 
 @media (prefers-color-scheme: dark) {
   .grain::before {
-    opacity: 0.16;
+    opacity: 0.12;
     mix-blend-mode: screen;
-    background-image: radial-gradient(circle at 20% 10%, rgba(255, 255, 255, 0.07), transparent 45%),
-      radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.06), transparent 55%),
-      radial-gradient(circle at 30% 80%, rgba(255, 255, 255, 0.055), transparent 50%),
-      radial-gradient(circle at 70% 90%, rgba(255, 255, 255, 0.05), transparent 60%);
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
   }
 }
-

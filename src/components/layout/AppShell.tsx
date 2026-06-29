@@ -16,8 +16,7 @@ const nav = [
 
 function isNavActive(itemHref: string, pathname: string): boolean {
   if (itemHref === "/") return pathname === "/";
-  // 「菜谱」仅指「编辑今日的菜谱」页，避免 /recipes/all、/recipes/new 等也显示为选中
-  if (itemHref === "/recipes") return pathname === "/recipes" || pathname === "/recipes/";
+  if (itemHref === "/recipes") return pathname === "/recipes" || pathname.startsWith("/recipes/");
   if (itemHref === "/categories") return pathname === "/categories" || pathname.startsWith("/categories/");
   if (itemHref === "/import") return pathname === "/import" || pathname.startsWith("/import/");
   return pathname === itemHref || pathname.startsWith(`${itemHref}/`);
@@ -28,19 +27,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-full grain">
-      <header className="sticky top-0 z-30 backdrop-blur supports-[backdrop-filter]:bg-[color:rgba(246,246,243,0.68)] dark:supports-[backdrop-filter]:bg-[color:rgba(11,13,11,0.55)] border-b border-[color:var(--line)]">
-        <div className="mx-auto w-full max-w-6xl px-5">
-          <div className="flex h-16 items-center justify-between gap-6">
+      <header className="sticky top-0 z-30 border-b border-[color:var(--line)] bg-[color:var(--background)]/82 backdrop-blur supports-[backdrop-filter]:bg-[color:var(--background)]/68">
+        <div className="mx-auto w-full max-w-6xl px-4 sm:px-5">
+          <div className="flex h-14 items-center justify-between gap-4 md:h-16">
             <Link
               href="/"
-              className="group inline-flex items-baseline gap-3"
+              className="group inline-flex items-center gap-2"
               aria-label="私人厨房首页"
             >
-              <span className="font-[var(--font-noto-serif-sc)] text-[18px] tracking-wide">
+              <span className="h-2.5 w-2.5 rounded-sm bg-[color:var(--warm)]" />
+              <span className="font-[var(--font-noto-serif-sc)] text-[18px]">
                 私人厨房
-              </span>
-              <span className="hidden text-[12px] text-[color:var(--muted-2)] md:inline">
-                记录 · 归类 · 推荐
               </span>
             </Link>
 
@@ -52,10 +49,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      "rounded-xl px-3 py-2 text-[13px] transition-colors",
+                      "rounded-lg px-3 py-2 text-[13px] transition-colors",
                       active
-                        ? "bg-black/[0.04] dark:bg-white/[0.07] text-[color:var(--foreground)]"
-                        : "text-[color:var(--muted)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06]",
+                        ? "bg-[color:var(--foreground)] text-[color:var(--background)]"
+                        : "text-[color:var(--muted)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]",
                     )}
                   >
                     {item.label}
@@ -67,17 +64,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl px-5 py-10">{children}</main>
+      <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-5 md:py-10">{children}</main>
 
-      <footer className="mx-auto w-full max-w-6xl px-5 pb-10">
-        <div className="mt-6 border-t border-[color:var(--line)] pt-6 text-[12px] text-[color:var(--muted-2)]">
+      <footer className="mx-auto w-full max-w-6xl px-4 pb-8 sm:px-5">
+        <div className="mt-6 border-t border-[color:var(--line)] pt-5 text-[12px] text-[color:var(--muted-2)]">
           <span className="font-[var(--font-noto-serif-sc)]">私人厨房</span>{" "}
           <span className="opacity-80">· 保存在本地浏览器</span>
         </div>
       </footer>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[color:var(--line)] bg-[color:var(--paper)]/90 backdrop-blur md:hidden">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-around px-4">
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[color:var(--line)] bg-[color:var(--paper)]/94 backdrop-blur md:hidden">
+        <div className="mx-auto grid h-16 max-w-6xl grid-cols-4 items-center gap-1 px-3 pb-[env(safe-area-inset-bottom)]">
           {nav.map((item) => {
             const active = isNavActive(item.href, pathname);
             return (
@@ -85,20 +82,22 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "rounded-xl px-3 py-2 text-[12px]",
+                  "relative flex h-11 items-center justify-center rounded-lg px-2 text-[12px]",
                   active
-                    ? "text-[color:var(--foreground)]"
+                    ? "bg-[color:var(--wash)] text-[color:var(--foreground)]"
                     : "text-[color:var(--muted)]",
                 )}
               >
+                {active ? (
+                  <span className="absolute left-1/2 top-1 h-0.5 w-5 -translate-x-1/2 rounded-full bg-[color:var(--warm)]" />
+                ) : null}
                 {item.label}
               </Link>
             );
           })}
         </div>
       </nav>
-      <div className="h-14 md:hidden" />
+      <div className="h-16 md:hidden" />
     </div>
   );
 }
-

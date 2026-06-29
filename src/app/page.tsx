@@ -10,25 +10,27 @@ import { TodayRecommendationClient } from "./todayRecommendationClient";
 export default function Home() {
   return (
     <AppShell>
-      <div className="mx-auto max-w-3xl space-y-10">
+      <div className="mx-auto max-w-3xl space-y-6 md:space-y-8">
         <ClientOnly>
           <HomeDateHeader />
           <TodayRecommendationClient />
           <HomeInspirationSection />
         </ClientOnly>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <Link href="/recipes/new">
-            <Button>新增菜谱</Button>
+        <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
+          <Link href="/recipes/new" className="contents sm:block">
+            <Button className="w-full sm:w-auto">新增菜谱</Button>
           </Link>
-          <Link href="/recipes/all">
-            <Button variant="outline">查看所有菜谱</Button>
+          <Link href="/recipes" className="contents sm:block">
+            <Button variant="outline" className="w-full sm:w-auto">
+              查看菜谱库
+            </Button>
           </Link>
         </div>
 
-        <div className="rounded-3xl border border-[color:var(--line)] bg-[color:var(--paper)] p-6">
+        <div className="rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] p-4 sm:p-5">
           <Badge tone="warm">提示</Badge>
-          <p className="mt-3 text-[13px] leading-7 text-[color:var(--muted)]">
+          <p className="mt-3 text-[13px] leading-6 text-[color:var(--muted)]">
             首版数据保存在浏览器本地。清理浏览器数据会导致菜谱丢失；后续我们会补充导出/备份。
           </p>
         </div>

@@ -1,11 +1,10 @@
 import { AppShell } from "@/components/layout/AppShell";
-import { TodayCookbookEditorClient } from "./todayCookbookEditorClient";
+import { RecipesListClient } from "./recipesListClient";
 
 export default function RecipesPage() {
   return (
     <AppShell>
-      <TodayCookbookEditorClient />
+      <RecipesListClient showHeader showTodayShelf />
     </AppShell>
   );
 }
-

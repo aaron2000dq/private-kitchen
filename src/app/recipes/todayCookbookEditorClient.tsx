@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/Button";
 import { useRecipes } from "@/lib/recipes/useRecipes";
 import { useTodayCookbook } from "@/lib/today/useTodayCookbook";
 import { exportTodayCookbookToPng } from "@/lib/today/exportTodayCookbookToImage";
-import { recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
+import { recipeImageThumbUrl, recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
+import { VisuallyLosslessThumb } from "@/components/recipes/VisuallyLosslessThumb";
 
 export function TodayCookbookEditorClient() {
   const { recipes, hydrated: recipesHydrated } = useRecipes();
@@ -112,13 +113,11 @@ export function TodayCookbookEditorClient() {
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
                   {r.images?.[0] ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={recipeImageUrl(r.images[0])}
+                    <VisuallyLosslessThumb
+                      src={recipeImageThumbUrl(r.images[0])}
+                      fallbackSrc={recipeImageUrl(r.images[0])}
                       alt={r.name}
-                      loading="lazy"
-                      decoding="async"
-                      className="h-32 w-full rounded-2xl border border-[color:var(--line)] bg-black/[0.03] object-cover"
+                      className="h-32 w-full rounded-lg border border-[color:var(--line)] bg-black/[0.03] object-cover"
                     />
                   ) : (
                     <div className="flex h-32 w-full items-center justify-center rounded-2xl border border-[color:var(--line)] bg-black/[0.02] text-[12px] text-[color:var(--muted-2)]">
@@ -158,4 +157,3 @@ export function TodayCookbookEditorClient() {
     </div>
   );
 }
-
