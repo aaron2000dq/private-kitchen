@@ -87,7 +87,7 @@ export function RecipesListClient({
     try {
       await exportTodayCookbookToPng(selectedRecipes);
     } catch (e) {
-      setExportError(e instanceof Error ? e.message : "导出失败");
+      setExportError(e instanceof Error ? e.message : "分享失败");
     } finally {
       setBusy(false);
     }
@@ -132,7 +132,7 @@ export function RecipesListClient({
                 onClick={onExport}
                 disabled={!todayHydrated || selectedRecipes.length === 0 || busy}
               >
-                {busy ? "导出中" : "导出"}
+                {busy ? "生成中" : "分享小票"}
               </Button>
             </div>
           </div>

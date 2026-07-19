@@ -49,7 +49,7 @@ export function TodayRecommendationClient() {
             </h2>
             <p className="max-w-2xl text-[13px] leading-6 text-[color:var(--muted)]">
               {todayIds.length
-                ? "今日菜单已选好，可以在菜谱页继续增删和导出。"
+                ? "今日菜单已选好，可以在菜谱页继续增删和分享小票。"
                 : data?.reason?.trim()
                   ? data.reason
                   : "正在从本地菜谱里搭配今天这餐。"}

@@ -55,7 +55,7 @@ export function TodayCookbookEditorClient() {
     try {
       await exportTodayCookbookToPng(selectedRecipes);
     } catch (e) {
-      setExportError(e instanceof Error ? e.message : "导出失败");
+      setExportError(e instanceof Error ? e.message : "分享失败");
     } finally {
       setBusy(false);
     }
@@ -69,7 +69,7 @@ export function TodayCookbookEditorClient() {
             编辑今日的菜谱
           </h1>
           <p className="text-[13px] leading-6 text-[color:var(--muted)]">
-            在「今日」和「分类」的菜品卡片里点「今天吃这个」，这里可以清空、删除、导出图片。
+            在「今日」和「分类」的菜品卡片里点「今天吃这个」，这里可以清空、删除、分享小票。
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -81,7 +81,7 @@ export function TodayCookbookEditorClient() {
             清空
           </Button>
           <Button onClick={onExport} disabled={!todayHydrated || selectedRecipes.length === 0 || busy}>
-            {busy ? "导出中…" : "导出为图片"}
+            {busy ? "生成中..." : "分享小票"}
           </Button>
         </div>
       </div>
