@@ -10,9 +10,33 @@ type ReceiptRow = {
 const RECEIPT_SERIF =
   '"Source Han Serif SC", "Source Han Serif CN", "Noto Serif CJK SC", "Noto Serif SC", "Songti SC", STSong, SimSun, serif';
 const RECEIPT_MONO = 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace';
+const RECEIPT_BACKGROUND_SRC = `${process.env.NEXT_PUBLIC_BASE_PATH || ""}/images/private-kitchen-receipt-paper-v2.webp`;
+const RECEIPT_BACKGROUND_RATIO = 1821 / 864;
 
 function font(size: number, weight = 500, family = RECEIPT_SERIF) {
   return `${weight} ${size}px ${family}`;
+}
+
+async function loadImage(src: string): Promise<HTMLImageElement | null> {
+  const image = new Image();
+  image.decoding = "async";
+
+  const loaded = new Promise<HTMLImageElement>((resolve, reject) => {
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error(`Failed to load ${src}`));
+  });
+
+  image.src = src;
+
+  try {
+    await loaded;
+    if (typeof image.decode === "function") {
+      await image.decode().catch(() => undefined);
+    }
+    return image;
+  } catch {
+    return null;
+  }
 }
 
 async function ensureReceiptFonts() {
@@ -283,7 +307,7 @@ function isAbortError(error: unknown) {
 }
 
 async function shareOrDownload(blob: Blob, fileName: string, title: string) {
-  const file = new File([blob], fileName, { type: "image/png" });
+  const file = new File([blob], fileName, { type: blob.type || "image/jpeg" });
   const shareData: ShareData = {
     title,
     files: [file],
@@ -311,24 +335,26 @@ export async function exportTodayCookbookToPng(selected: Recipe[], fileName?: st
   if (!items.length) throw new Error("还没有选择要分享的菜");
 
   await ensureReceiptFonts();
+  const receiptBackground = await loadImage(RECEIPT_BACKGROUND_SRC);
+  const hasGeneratedBackground = receiptBackground != null;
 
   const now = new Date();
   const { title, fileStamp } = receiptDateParts(now);
-  const downloadName = fileName ?? `${fileStamp}-私房家宴小票.png`;
+  const downloadName = fileName ?? `${fileStamp}-私房家宴小票.jpg`;
 
   const scale = 2;
   const W = 760;
-  const paperX = 40;
-  const paperY = 32;
+  const paperX = hasGeneratedBackground ? 54 : 40;
+  const paperY = hasGeneratedBackground ? 0 : 32;
   const paperW = W - paperX * 2;
-  const padX = 64;
+  const padX = hasGeneratedBackground ? 72 : 64;
   const contentX = paperX + padX;
   const contentW = paperW - padX * 2;
-  const numberW = 68;
+  const numberW = hasGeneratedBackground ? 76 : 68;
   const dishX = contentX + numberW;
-  const dishW = contentW - numberW - 32;
-  const dishLineH = 38;
-  const rowPadY = 18;
+  const dishW = contentW - numberW - (hasGeneratedBackground ? 54 : 32);
+  const dishLineH = hasGeneratedBackground ? 42 : 38;
+  const rowPadY = hasGeneratedBackground ? 20 : 18;
 
   const probe = document.createElement("canvas").getContext("2d");
   if (!probe) throw new Error("Canvas not supported");
@@ -343,13 +369,17 @@ export async function exportTodayCookbookToPng(selected: Recipe[], fileName?: st
     };
   });
 
-  const titleY = paperY + 124;
-  const dividerY = paperY + 184;
-  const listStartY = paperY + 214;
+  const titleY = hasGeneratedBackground ? 332 : paperY + 124;
+  const dividerY = hasGeneratedBackground ? 424 : paperY + 184;
+  const listStartY = hasGeneratedBackground ? 468 : paperY + 214;
   const listHeight = rows.reduce((sum, row, index) => sum + row.height + (index < rows.length - 1 ? 10 : 0), 0);
   const footerH = 92;
   const paperH = Math.max(720, listStartY - paperY + listHeight + footerH);
-  const H = paperH + paperY * 2;
+  const H = hasGeneratedBackground ? Math.max(Math.round(W * RECEIPT_BACKGROUND_RATIO), paperH + paperY * 2) : paperH + paperY * 2;
+  const listBottom = hasGeneratedBackground ? H - 356 : listStartY + listHeight;
+  const generatedRowGap = hasGeneratedBackground && rows.length > 1
+    ? Math.max(8, Math.min(34, (listBottom - listStartY - rows.reduce((sum, row) => sum + row.height, 0)) / (rows.length - 1)))
+    : 10;
 
   const canvas = document.createElement("canvas");
   canvas.width = W * scale;
@@ -357,21 +387,26 @@ export async function exportTodayCookbookToPng(selected: Recipe[], fileName?: st
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas not supported");
   ctx.scale(scale, scale);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
 
-  drawReceiptPaper(ctx, W, paperX, paperY, paperW, paperH);
-
-  const markY = paperY + 78;
-  drawBotanicalMark(ctx, W / 2, markY);
+  if (receiptBackground) {
+    ctx.drawImage(receiptBackground, 0, 0, W, H);
+  } else {
+    drawReceiptPaper(ctx, W, paperX, paperY, paperW, paperH);
+    const markY = paperY + 78;
+    drawBotanicalMark(ctx, W / 2, markY);
+  }
 
   ctx.textBaseline = "top";
   ctx.textAlign = "center";
   ctx.fillStyle = "#17211B";
-  fillCenteredTextFit(ctx, title, W / 2, titleY, contentW - 24, 30, 24, 560, RECEIPT_SERIF);
+  fillCenteredTextFit(ctx, title, W / 2, titleY, contentW + (hasGeneratedBackground ? 58 : -24), hasGeneratedBackground ? 36 : 30, 24, 560, RECEIPT_SERIF);
 
   ctx.fillStyle = "rgba(161, 125, 62, 0.86)";
   ctx.beginPath();
-  ctx.arc(W / 2 - 12, titleY + 50, 2.6, 0, Math.PI * 2);
-  ctx.arc(W / 2 + 12, titleY + 50, 2.6, 0, Math.PI * 2);
+  ctx.arc(W / 2 - 12, titleY + (hasGeneratedBackground ? 66 : 50), 2.6, 0, Math.PI * 2);
+  ctx.arc(W / 2 + 12, titleY + (hasGeneratedBackground ? 66 : 50), 2.6, 0, Math.PI * 2);
   ctx.fill();
 
   drawDashedLine(ctx, contentX, dividerY, contentX + contentW, 0.28);
@@ -413,24 +448,26 @@ export async function exportTodayCookbookToPng(selected: Recipe[], fileName?: st
     y += row.height;
     if (index < rows.length - 1) {
       drawDashedLine(ctx, contentX, y, contentX + contentW, 0.18);
-      y += 10;
+      y += generatedRowGap;
     }
   }
 
-  const footerY = paperY + paperH - 106;
-  drawDashedLine(ctx, contentX + 102, footerY + 18, W / 2 - 28, 0.28);
-  drawDashedLine(ctx, W / 2 + 28, footerY + 18, contentX + contentW - 102, 0.28);
-  ctx.fillStyle = "rgba(161, 125, 62, 0.82)";
-  ctx.beginPath();
-  ctx.moveTo(W / 2, footerY + 10);
-  ctx.lineTo(W / 2 + 8, footerY + 18);
-  ctx.lineTo(W / 2, footerY + 26);
-  ctx.lineTo(W / 2 - 8, footerY + 18);
-  ctx.closePath();
-  ctx.fill();
-  drawSeal(ctx, W / 2, footerY + 56);
+  if (!hasGeneratedBackground) {
+    const footerY = paperY + paperH - 106;
+    drawDashedLine(ctx, contentX + 102, footerY + 18, W / 2 - 28, 0.28);
+    drawDashedLine(ctx, W / 2 + 28, footerY + 18, contentX + contentW - 102, 0.28);
+    ctx.fillStyle = "rgba(161, 125, 62, 0.82)";
+    ctx.beginPath();
+    ctx.moveTo(W / 2, footerY + 10);
+    ctx.lineTo(W / 2 + 8, footerY + 18);
+    ctx.lineTo(W / 2, footerY + 26);
+    ctx.lineTo(W / 2 - 8, footerY + 18);
+    ctx.closePath();
+    ctx.fill();
+    drawSeal(ctx, W / 2, footerY + 56);
+  }
 
-  const blob: Blob | null = await new Promise((resolve) => canvas.toBlob((b) => resolve(b), "image/png"));
+  const blob: Blob | null = await new Promise((resolve) => canvas.toBlob((b) => resolve(b), "image/jpeg", 0.92));
   if (!blob) throw new Error("Failed to export image");
 
   await shareOrDownload(blob, downloadName, title);

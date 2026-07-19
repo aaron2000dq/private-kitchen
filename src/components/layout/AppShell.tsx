@@ -24,9 +24,13 @@ function isNavActive(itemHref: string, pathname: string): boolean {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+  const shellStyle = {
+    "--app-paper-texture": `url("${basePath}/images/private-kitchen-paper-texture.webp")`,
+  } as React.CSSProperties;
 
   return (
-    <div className="min-h-full grain">
+    <div className="min-h-full grain" style={shellStyle}>
       <header className="sticky top-0 z-30 border-b border-[color:var(--line)] bg-[color:var(--background)]/82 backdrop-blur supports-[backdrop-filter]:bg-[color:var(--background)]/68">
         <div className="mx-auto w-full max-w-6xl px-4 sm:px-5">
           <div className="flex h-14 items-center justify-between gap-4 md:h-16">

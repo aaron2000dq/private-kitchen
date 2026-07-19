@@ -79,26 +79,35 @@ html {
 
 .grain {
   position: relative;
-}
-.grain::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.18;
-  mix-blend-mode: multiply;
+  background-color: var(--background);
   background-image:
-    linear-gradient(rgba(24, 33, 29, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(24, 33, 29, 0.025) 1px, transparent 1px);
-  background-size: 26px 26px;
+    linear-gradient(180deg, rgba(244, 245, 240, 0.78), rgba(244, 245, 240, 0.92)),
+    linear-gradient(rgba(24, 33, 29, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(24, 33, 29, 0.014) 1px, transparent 1px),
+    var(--app-paper-texture, none);
+  background-position:
+    center top,
+    center top,
+    center top,
+    center top;
+  background-size:
+    auto,
+    26px 26px,
+    26px 26px,
+    min(920px, 170vw) auto;
 }
 
 @media (prefers-color-scheme: dark) {
-  .grain::before {
-    opacity: 0.12;
-    mix-blend-mode: screen;
+  .grain {
     background-image:
-      linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+      linear-gradient(rgba(16, 20, 16, 0.9), rgba(16, 20, 16, 0.95)),
+      linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      var(--app-paper-texture, none);
+    background-size:
+      auto,
+      26px 26px,
+      26px 26px,
+      min(920px, 170vw) auto;
   }
 }
