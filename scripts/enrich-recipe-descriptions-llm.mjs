@@ -40,7 +40,6 @@ const baseUrl = (getEnv("OPENAI_BASE_URL") ?? "https://api.minimaxi.com/anthropi
 const model = getEnv("OPENAI_MODEL") ?? "MiniMax-M2.7";
 const isAnthropic = baseUrl.includes("/anthropic");
 const FORCE = process.argv.includes("--force");
-const RETRY_FAILED = process.argv.includes("--retry-failed") || FORCE;
 
 function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
@@ -284,4 +283,3 @@ for (let offset = 0; offset < targets.length; offset += CHUNK) {
 fs.writeFileSync(INPUT, JSON.stringify({ ...data, recipes }, null, 2) + "\n", "utf8");
 saveCheckpoint(cp);
 console.log("done");
-

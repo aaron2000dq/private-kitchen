@@ -1,13 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import * as React from "react";
 import { RecipeRepository } from "@/lib/recipes/repository";
 import { Recipe } from "@/lib/recipes/types";
 import { recipeImageThumbUrl, recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
 import { Badge } from "@/components/ui/Badge";
 import { StarRating } from "@/components/ui/StarRating";
-import { Button } from "@/components/ui/Button";
+import { ButtonLink } from "@/components/ui/Button";
 import { VisuallyLosslessThumb } from "@/components/recipes/VisuallyLosslessThumb";
 
 function formatDate(iso: string) {
@@ -53,9 +52,7 @@ export function RecipeDetailClient({ id }: { id: string }) {
           这道菜谱可能已被删除，或当前浏览器没有这份数据。
         </p>
         <div className="mt-4">
-          <Link href="/recipes/all">
-            <Button variant="outline">回到列表</Button>
-          </Link>
+          <ButtonLink href="/recipes/all" variant="outline">回到列表</ButtonLink>
         </div>
       </div>
     );

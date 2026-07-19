@@ -1,6 +1,5 @@
-import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
-import { Button } from "@/components/ui/Button";
+import { ButtonLink } from "@/components/ui/Button";
 import { EditRecipeClient } from "./editRecipeClient";
 import { getGeneratedRecipes } from "@/lib/recipes/generatedRecipes";
 import { stableRecipeIdFromName } from "@/lib/recipes/stableRecipeId";
@@ -23,9 +22,7 @@ export default async function EditRecipePage({
   return (
     <AppShell>
       <div className="flex items-center justify-between gap-4">
-        <Link href={recipeDetailHref(id)}>
-          <Button variant="ghost">← 返回</Button>
-        </Link>
+        <ButtonLink href={recipeDetailHref(id)} variant="ghost">← 返回</ButtonLink>
       </div>
       <div className="mt-6">
         <EditRecipeClient id={id} />
@@ -33,4 +30,3 @@ export default async function EditRecipePage({
     </AppShell>
   );
 }
-

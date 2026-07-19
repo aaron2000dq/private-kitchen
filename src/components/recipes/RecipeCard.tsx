@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import * as React from "react";
-import { useRouter } from "next/navigation";
 import type { Recipe } from "@/lib/recipes/types";
 import { recipeImageThumbUrl, recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
 import { formatRecipeIngredientsPreview } from "@/lib/recipes/formatIngredientsPreview";
@@ -45,7 +44,6 @@ export function RecipeCard({
   categoryOptions?: string[];
   onCategoryChange?: (next: string) => void | Promise<void>;
 }) {
-  const router = useRouter();
   const [catMenuOpen, setCatMenuOpen] = React.useState(false);
   const catMenuRef = React.useRef<HTMLDivElement | null>(null);
 
@@ -67,31 +65,9 @@ export function RecipeCard({
   const href = recipeDetailHref(recipe.id);
   const image = recipe.images?.[0];
   const ingredientsPreview = formatRecipeIngredientsPreview(recipe);
-  const Wrapper: React.ElementType = categoryEditable ? "div" : Link;
-  const wrapperProps = categoryEditable
-    ? {
-        role: "link",
-        tabIndex: 0,
-        onClick: (e: React.MouseEvent) => {
-          const t = e.target as HTMLElement | null;
-          if (t?.closest("[data-cat-toggle='1'], [data-cat-menu='1']")) return;
-          if (t?.closest("[data-today-action='1']")) return;
-          router.push(href);
-        },
-        onKeyDown: (e: React.KeyboardEvent) => {
-          if (e.key !== "Enter" && e.key !== " ") return;
-          const t = e.target as HTMLElement | null;
-          if (t?.closest("[data-cat-toggle='1'], [data-cat-menu='1']")) return;
-          if (t?.closest("[data-today-action='1']")) return;
-          e.preventDefault();
-          router.push(href);
-        },
-      }
-    : { href };
 
   return (
-    <Wrapper
-      {...wrapperProps}
+    <article
       className="group block overflow-hidden rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:border-[color:rgba(184,92,56,0.34)] hover:shadow-[var(--shadow-soft)]"
       draggable={draggable}
       onDragStart={(e: React.DragEvent<HTMLElement>) => {
@@ -99,7 +75,11 @@ export function RecipeCard({
       }}
       onDragEnd={onDragEnd}
     >
-      <div className="relative aspect-[4/3] overflow-hidden border-b border-[color:var(--line)] bg-[color:var(--wash)]">
+      <Link
+        href={href}
+        className="relative block aspect-[4/3] overflow-hidden border-b border-[color:var(--line)] bg-[color:var(--wash)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[color:var(--ring)]"
+        aria-label={`打开菜谱：${recipe.name}`}
+      >
         {image ? (
           <VisuallyLosslessThumb
             src={recipeImageThumbUrl(image)}
@@ -117,12 +97,15 @@ export function RecipeCard({
             {recipe.rating}/5
           </div>
         ) : null}
-      </div>
+      </Link>
 
       <div className="p-3 sm:p-4">
-        <div className="min-h-[2.45rem] font-[var(--font-noto-serif-sc)] text-[16px] leading-tight text-[color:var(--foreground)] sm:text-[17px]">
+        <Link
+          href={href}
+          className="block min-h-[2.45rem] font-[var(--font-noto-serif-sc)] text-[16px] leading-tight text-[color:var(--foreground)] transition-colors hover:text-[color:var(--warm)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)] sm:text-[17px]"
+        >
           <span className="line-clamp-2">{recipe.name}</span>
-        </div>
+        </Link>
 
         <div className="mt-2 flex flex-wrap items-center gap-1.5">
           <div className="relative" ref={catMenuRef}>
@@ -183,32 +166,32 @@ export function RecipeCard({
           ))}
         </div>
 
-        {recipe.description ? (
-          <p className="mt-3 line-clamp-2 text-[12px] leading-5 text-[color:var(--muted)] sm:text-[13px]">
-            {recipe.description}
-          </p>
-        ) : (
-          <p className="mt-3 text-[12px] leading-5 text-[color:var(--muted-2)]">没有简介</p>
-        )}
-        {ingredientsPreview ? (
-          <p className="mt-2 line-clamp-1 text-[11px] leading-4 text-[color:var(--muted-2)]">
-            {ingredientsPreview}
-          </p>
-        ) : null}
+        <Link
+          href={href}
+          className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]"
+        >
+          {recipe.description ? (
+            <p className="mt-3 line-clamp-2 text-[12px] leading-5 text-[color:var(--muted)] sm:text-[13px]">
+              {recipe.description}
+            </p>
+          ) : (
+            <p className="mt-3 text-[12px] leading-5 text-[color:var(--muted-2)]">没有简介</p>
+          )}
+          {ingredientsPreview ? (
+            <p className="mt-2 line-clamp-1 text-[11px] leading-4 text-[color:var(--muted-2)]">
+              {ingredientsPreview}
+            </p>
+          ) : null}
+        </Link>
 
         <div className="mt-3 flex items-center justify-between gap-2 text-[11px] text-[color:var(--muted-2)]">
           <span>{formatDate(recipe.updatedAt)}</span>
-          <button
-            type="button"
-            className="shrink-0 rounded-md px-1.5 py-1 text-[color:var(--foreground)] opacity-70 transition-[background-color,opacity] group-hover:bg-black/[0.04] group-hover:opacity-100 dark:group-hover:bg-white/[0.06]"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              router.push(href);
-            }}
+          <Link
+            href={href}
+            className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border border-[color:var(--line)] bg-[color:var(--paper-strong)] px-2.5 text-[color:var(--foreground)] opacity-80 transition-[background-color,opacity] group-hover:bg-black/[0.04] group-hover:opacity-100 dark:group-hover:bg-white/[0.06]"
           >
             打开
-          </button>
+          </Link>
         </div>
 
         {showTodayAction ? (
@@ -218,9 +201,7 @@ export function RecipeCard({
               variant={todaySelected ? "outline" : "primary"}
               disabled={todaySelected || !onTodayAction}
               data-today-action="1"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
+              onClick={() => {
                 onTodayAction?.();
               }}
               className="w-full"
@@ -230,6 +211,6 @@ export function RecipeCard({
           </div>
         ) : null}
       </div>
-    </Wrapper>
+    </article>
   );
 }

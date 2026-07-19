@@ -219,7 +219,7 @@ export function RecipeFormClient({
       <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
         <section className="space-y-6">
           <div className="rounded-3xl border border-[color:var(--line)] bg-[color:var(--paper)] p-6">
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
               <Badge tone="muted">基本信息</Badge>
               <StarRating value={rating} onChange={setRating} label="评分" />
             </div>
@@ -549,4 +549,3 @@ export function RecipeFormClient({
     </div>
   );
 }
-

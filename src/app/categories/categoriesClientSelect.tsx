@@ -315,7 +315,7 @@ function MobileCategoryShelf({
 }) {
   return (
     <div className="md:hidden">
-      <section className="fixed inset-x-0 bottom-16 top-14 z-20 flex flex-col overflow-hidden border-y border-[color:var(--line)] bg-[color:var(--paper)] shadow-[var(--shadow-soft)]">
+      <section className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] top-14 z-20 flex flex-col overflow-hidden border-y border-[color:var(--line)] bg-[color:var(--paper)] shadow-[var(--shadow-soft)]">
         <div className="shrink-0 space-y-4 p-4">
           <div className="flex items-start gap-3">
             <div className="grid h-14 w-14 shrink-0 place-items-center rounded-lg border border-[color:rgba(63,111,85,0.18)] bg-[linear-gradient(135deg,rgba(63,111,85,0.12),rgba(215,173,69,0.16))] font-[var(--font-noto-serif-sc)] text-[16px] text-[color:var(--accent)]">

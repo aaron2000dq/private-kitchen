@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/Button";
+import { ButtonLink } from "@/components/ui/Button";
 import { RecipeDetailClient } from "../[id]/recipeDetailClient";
 import { recipeEditHref } from "@/lib/recipes/recipeRoutes";
 
@@ -17,9 +16,7 @@ export function RecipeDetailWithQuery() {
           链接里缺少菜谱 id。请从列表或首页卡片进入。
         </p>
         <div className="mt-4">
-          <Link href="/recipes/all">
-            <Button variant="outline">回到菜谱库</Button>
-          </Link>
+          <ButtonLink href="/recipes/all" variant="outline">回到菜谱库</ButtonLink>
         </div>
       </div>
     );
@@ -28,12 +25,8 @@ export function RecipeDetailWithQuery() {
   return (
     <>
       <div className="flex items-center justify-between gap-4">
-        <Link href="/recipes/all">
-          <Button variant="ghost">← 返回</Button>
-        </Link>
-        <Link href={recipeEditHref(id)}>
-          <Button variant="outline">编辑</Button>
-        </Link>
+        <ButtonLink href="/recipes/all" variant="ghost">← 返回</ButtonLink>
+        <ButtonLink href={recipeEditHref(id)} variant="outline">编辑</ButtonLink>
       </div>
       <div className="mt-6">
         <RecipeDetailClient id={id} />

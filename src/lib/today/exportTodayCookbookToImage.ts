@@ -11,7 +11,6 @@ const RECEIPT_SERIF =
   '"Source Han Serif SC", "Source Han Serif CN", "Noto Serif CJK SC", "Noto Serif SC", "Songti SC", STSong, SimSun, serif';
 const RECEIPT_MONO = 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace';
 const RECEIPT_BACKGROUND_SRC = `${process.env.NEXT_PUBLIC_BASE_PATH || ""}/images/private-kitchen-receipt-paper-v2.webp`;
-const RECEIPT_BACKGROUND_RATIO = 1821 / 864;
 
 function font(size: number, weight = 500, family = RECEIPT_SERIF) {
   return `${weight} ${size}px ${family}`;
@@ -302,6 +301,46 @@ function drawReceiptPaper(ctx: CanvasRenderingContext2D, canvasW: number, paperX
   drawCornerFrame(ctx, paperX, paperY, paperW, paperH);
 }
 
+function drawGeneratedReceiptBackground(
+  ctx: CanvasRenderingContext2D,
+  image: HTMLImageElement,
+  width: number,
+  height: number,
+) {
+  const sourceW = image.naturalWidth || image.width;
+  const sourceH = image.naturalHeight || image.height;
+  const scale = width / sourceW;
+  const topSourceH = 760;
+  const bottomSourceY = 1500;
+  const topTargetH = topSourceH * scale;
+  const bottomTargetH = (sourceH - bottomSourceY) * scale;
+  const middleTargetH = Math.max(1, height - topTargetH - bottomTargetH);
+
+  ctx.drawImage(image, 0, 0, sourceW, topSourceH, 0, 0, width, topTargetH);
+  ctx.drawImage(
+    image,
+    0,
+    topSourceH,
+    sourceW,
+    bottomSourceY - topSourceH,
+    0,
+    topTargetH,
+    width,
+    middleTargetH,
+  );
+  ctx.drawImage(
+    image,
+    0,
+    bottomSourceY,
+    sourceW,
+    sourceH - bottomSourceY,
+    0,
+    height - bottomTargetH,
+    width,
+    bottomTargetH,
+  );
+}
+
 function isAbortError(error: unknown) {
   return error instanceof DOMException && error.name === "AbortError";
 }
@@ -372,13 +411,18 @@ export async function exportTodayCookbookToPng(selected: Recipe[], fileName?: st
   const titleY = hasGeneratedBackground ? 332 : paperY + 124;
   const dividerY = hasGeneratedBackground ? 424 : paperY + 184;
   const listStartY = hasGeneratedBackground ? 468 : paperY + 214;
-  const listHeight = rows.reduce((sum, row, index) => sum + row.height + (index < rows.length - 1 ? 10 : 0), 0);
+  const rowsBodyHeight = rows.reduce((sum, row) => sum + row.height, 0);
+  const naturalRowGap = hasGeneratedBackground ? 20 : 10;
+  const listHeight = rowsBodyHeight + Math.max(0, rows.length - 1) * naturalRowGap;
   const footerH = 92;
   const paperH = Math.max(720, listStartY - paperY + listHeight + footerH);
-  const H = hasGeneratedBackground ? Math.max(Math.round(W * RECEIPT_BACKGROUND_RATIO), paperH + paperY * 2) : paperH + paperY * 2;
-  const listBottom = hasGeneratedBackground ? H - 356 : listStartY + listHeight;
+  const generatedFooterOffset = 276;
+  const H = hasGeneratedBackground
+    ? Math.max(1080, listStartY + listHeight + generatedFooterOffset)
+    : paperH + paperY * 2;
+  const listBottom = hasGeneratedBackground ? H - generatedFooterOffset : listStartY + listHeight;
   const generatedRowGap = hasGeneratedBackground && rows.length > 1
-    ? Math.max(8, Math.min(34, (listBottom - listStartY - rows.reduce((sum, row) => sum + row.height, 0)) / (rows.length - 1)))
+    ? Math.max(6, Math.min(28, (listBottom - listStartY - rowsBodyHeight) / (rows.length - 1)))
     : 10;
 
   const canvas = document.createElement("canvas");
@@ -391,7 +435,7 @@ export async function exportTodayCookbookToPng(selected: Recipe[], fileName?: st
   ctx.imageSmoothingQuality = "high";
 
   if (receiptBackground) {
-    ctx.drawImage(receiptBackground, 0, 0, W, H);
+    drawGeneratedReceiptBackground(ctx, receiptBackground, W, H);
   } else {
     drawReceiptPaper(ctx, W, paperX, paperY, paperW, paperH);
     const markY = paperY + 78;

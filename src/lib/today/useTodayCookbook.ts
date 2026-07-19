@@ -9,7 +9,7 @@ const DEFAULT_MAX = 10;
 export function useTodayCookbook(max: number = DEFAULT_MAX) {
   const [hydrated, setHydrated] = React.useState(false);
   const [value, setValue] = React.useState<TodayCookbook | null>(null);
-  const ids = value?.ids ?? [];
+  const ids = React.useMemo(() => value?.ids ?? [], [value?.ids]);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -69,4 +69,3 @@ export function useTodayCookbook(max: number = DEFAULT_MAX) {
     clear,
   };
 }
-

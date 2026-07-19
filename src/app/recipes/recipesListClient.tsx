@@ -8,7 +8,7 @@ import { exportTodayCookbookToPng } from "@/lib/today/exportTodayCookbookToImage
 import { recipeImageThumbUrl, recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
+import { Button, ButtonLink } from "@/components/ui/Button";
 import { RecipeCard } from "@/components/recipes/RecipeCard";
 import { VisuallyLosslessThumb } from "@/components/recipes/VisuallyLosslessThumb";
 
@@ -103,9 +103,7 @@ export function RecipesListClient({
               {hydrated ? `${recipes.length} 道家常菜` : "读取本地菜谱"}
             </p>
           </div>
-          <Link href="/recipes/new">
-            <Button>新增</Button>
-          </Link>
+          <ButtonLink href="/recipes/new">新增</ButtonLink>
         </div>
       ) : null}
 

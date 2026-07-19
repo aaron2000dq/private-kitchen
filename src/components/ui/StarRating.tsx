@@ -9,8 +9,8 @@ function cn(...parts: Array<string | false | null | undefined>) {
 function StarIcon({ filled }: { filled: boolean }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="18"
+      height="18"
       viewBox="0 0 24 24"
       aria-hidden="true"
       className={cn(
@@ -47,7 +47,7 @@ export function StarRating({
       {label ? (
         <span className="text-[13px] text-[color:var(--muted)]">{label}</span>
       ) : null}
-      <div className="inline-flex items-center gap-1">
+      <div className="inline-flex items-center gap-0.5">
         {Array.from({ length: max }).map((_, idx) => {
           const v = idx + 1;
           const filled = v <= current;
@@ -58,7 +58,7 @@ export function StarRating({
               key={v}
               type="button"
               className={cn(
-                "rounded-md p-1",
+                "flex h-9 w-9 items-center justify-center rounded-md",
                 interactive
                   ? "cursor-pointer hover:bg-black/[0.03] dark:hover:bg-white/[0.06]"
                   : "cursor-default",
@@ -76,4 +76,3 @@ export function StarRating({
     </div>
   );
 }
-

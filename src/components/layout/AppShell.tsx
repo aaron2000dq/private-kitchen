@@ -77,8 +77,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </footer>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[color:var(--line)] bg-[color:var(--paper)]/94 backdrop-blur md:hidden">
-        <div className="mx-auto grid h-16 max-w-6xl grid-cols-4 items-center gap-1 px-3 pb-[env(safe-area-inset-bottom)]">
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[color:var(--line)] bg-[color:var(--paper)]/94 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
+        <div className="mx-auto grid h-16 max-w-6xl grid-cols-4 items-center gap-1 px-3">
           {nav.map((item) => {
             const active = isNavActive(item.href, pathname);
             return (
@@ -101,7 +101,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           })}
         </div>
       </nav>
-      <div className="h-16 md:hidden" />
+      <div className="h-[calc(4rem+env(safe-area-inset-bottom))] md:hidden" />
     </div>
   );
 }

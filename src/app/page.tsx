@@ -1,10 +1,9 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
+import { ButtonLink } from "@/components/ui/Button";
 import { HomeDateHeader } from "@/components/home/HomeDateHeader";
 import { HomeInspirationSection } from "@/components/home/HomeInspirationSection";
 import { ClientOnly } from "@/components/common/ClientOnly";
-import Link from "next/link";
 import { TodayRecommendationClient } from "./todayRecommendationClient";
 
 export default function Home() {
@@ -18,14 +17,12 @@ export default function Home() {
         </ClientOnly>
 
         <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
-          <Link href="/recipes/new" className="contents sm:block">
-            <Button className="w-full sm:w-auto">新增菜谱</Button>
-          </Link>
-          <Link href="/recipes" className="contents sm:block">
-            <Button variant="outline" className="w-full sm:w-auto">
-              查看菜谱库
-            </Button>
-          </Link>
+          <ButtonLink href="/recipes/new" className="w-full sm:w-auto">
+            新增菜谱
+          </ButtonLink>
+          <ButtonLink href="/recipes" variant="outline" className="w-full sm:w-auto">
+            查看菜谱库
+          </ButtonLink>
         </div>
 
         <div className="rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] p-4 sm:p-5">

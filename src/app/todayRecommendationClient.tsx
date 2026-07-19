@@ -67,13 +67,17 @@ export function TodayRecommendationClient() {
             const selected = isTodaySelected(r.id);
             const canAdd = !selected && todayIds.length < todayMax;
             const ingPreview = formatRecipeIngredientsPreview(r, 2, 2);
+            const href = recipeDetailHref(r.id);
             return (
-              <Link
+              <article
                 key={r.id}
-                href={recipeDetailHref(r.id)}
                 className="group overflow-hidden rounded-lg border border-[color:var(--line)] bg-[color:var(--paper-strong)] text-[13px] transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:border-[color:rgba(184,92,56,0.36)] hover:shadow-[var(--shadow-soft)]"
               >
-                <div className="aspect-[4/3] w-full overflow-hidden border-b border-[color:var(--line)] bg-[color:var(--wash)]">
+                <Link
+                  href={href}
+                  className="block aspect-[4/3] w-full overflow-hidden border-b border-[color:var(--line)] bg-[color:var(--wash)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[color:var(--ring)]"
+                  aria-label={`打开菜谱：${r.name}`}
+                >
                   {r.images?.[0] ? (
                     <VisuallyLosslessThumb
                       src={recipeImageThumbUrl(r.images[0])}
@@ -86,11 +90,14 @@ export function TodayRecommendationClient() {
                       无图
                     </div>
                   )}
-                </div>
+                </Link>
                 <div className="px-3 py-3">
-                  <div className="line-clamp-2 font-[var(--font-noto-serif-sc)] text-[16px] leading-tight">
+                  <Link
+                    href={href}
+                    className="line-clamp-2 font-[var(--font-noto-serif-sc)] text-[16px] leading-tight transition-colors hover:text-[color:var(--warm)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]"
+                  >
                     {r.name}
-                  </div>
+                  </Link>
                   <div className="mt-2 flex items-center gap-2 text-[11px] text-[color:var(--muted-2)]">
                     <span className="truncate">{r.category}</span>
                     <span>{r.rating ? `${r.rating}/5` : "未评分"}</span>
@@ -106,9 +113,7 @@ export function TodayRecommendationClient() {
                       variant={selected ? "outline" : "primary"}
                       disabled={selected || !canAdd}
                       className="w-full"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
+                      onClick={() => {
                         if (canAdd) void addToToday(r.id);
                       }}
                     >
@@ -116,7 +121,7 @@ export function TodayRecommendationClient() {
                     </Button>
                   </div>
                 </div>
-              </Link>
+              </article>
             );
           })
         ) : (
