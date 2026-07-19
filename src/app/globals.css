@@ -31,6 +31,8 @@
   --color-warm: var(--warm);
   --font-sans: ui-sans-serif, system-ui, -apple-system, "PingFang SC",
     "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  --font-noto-serif-sc: "Source Han Serif SC", "Source Han Serif CN",
+    "Noto Serif CJK SC", "Noto Serif SC", "Songti SC", STSong, SimSun, serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     "Liberation Mono", "Courier New", monospace;
 }

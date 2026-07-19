@@ -7,8 +7,63 @@ type ReceiptRow = {
   height: number;
 };
 
-function font(size: number, weight = 500, family = "ui-sans-serif") {
-  return `${weight} ${size}px ${family}, system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif`;
+const RECEIPT_SERIF =
+  '"Source Han Serif SC", "Source Han Serif CN", "Noto Serif CJK SC", "Noto Serif SC", "Songti SC", STSong, SimSun, serif';
+const RECEIPT_MONO = 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace';
+
+function font(size: number, weight = 500, family = RECEIPT_SERIF) {
+  return `${weight} ${size}px ${family}`;
+}
+
+async function ensureReceiptFonts() {
+  if (!("fonts" in document)) return;
+
+  try {
+    await Promise.all([
+      document.fonts.load(font(29, 560, RECEIPT_SERIF)),
+      document.fonts.load(font(30, 520, RECEIPT_SERIF)),
+      document.fonts.load(font(16, 620, RECEIPT_MONO)),
+    ]);
+    await document.fonts.ready;
+  } catch {
+    // System fallbacks are good enough for export if font loading is unavailable.
+  }
+}
+
+function fitFontToWidth(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+  initialSize: number,
+  minSize: number,
+  weight: number,
+  family = RECEIPT_SERIF,
+) {
+  let size = initialSize;
+
+  while (size > minSize) {
+    ctx.font = font(size, weight, family);
+    if (ctx.measureText(text).width <= maxWidth) break;
+    size -= 1;
+  }
+
+  ctx.font = font(size, weight, family);
+  return size;
+}
+
+function fillCenteredTextFit(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  cx: number,
+  y: number,
+  maxWidth: number,
+  initialSize: number,
+  minSize: number,
+  weight: number,
+  family = RECEIPT_SERIF,
+) {
+  fitFontToWidth(ctx, text, maxWidth, initialSize, minSize, weight, family);
+  ctx.fillText(text, cx, y);
 }
 
 function wrapTextLines(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
@@ -55,9 +110,9 @@ function receiptDateParts(date: Date) {
 
 function drawDashedLine(ctx: CanvasRenderingContext2D, x1: number, y: number, x2: number, alpha = 0.22) {
   ctx.save();
-  ctx.strokeStyle = `rgba(35, 42, 36, ${alpha})`;
-  ctx.lineWidth = 1.6;
-  ctx.setLineDash([7, 10]);
+  ctx.strokeStyle = `rgba(47, 55, 49, ${alpha})`;
+  ctx.lineWidth = 1.25;
+  ctx.setLineDash([6, 11]);
   ctx.beginPath();
   ctx.moveTo(x1, y);
   ctx.lineTo(x2, y);
@@ -145,21 +200,21 @@ function drawCornerFrame(ctx: CanvasRenderingContext2D, x: number, y: number, w:
 
 function drawBotanicalMark(ctx: CanvasRenderingContext2D, cx: number, cy: number) {
   ctx.save();
-  ctx.strokeStyle = "rgba(63, 111, 85, 0.62)";
-  ctx.fillStyle = "rgba(63, 111, 85, 0.42)";
-  ctx.lineWidth = 2.2;
+  ctx.strokeStyle = "rgba(63, 111, 85, 0.56)";
+  ctx.fillStyle = "rgba(63, 111, 85, 0.36)";
+  ctx.lineWidth = 1.8;
   ctx.lineCap = "round";
 
   ctx.beginPath();
-  ctx.moveTo(cx, cy + 26);
-  ctx.bezierCurveTo(cx - 3, cy + 8, cx + 2, cy - 8, cx, cy - 26);
+  ctx.moveTo(cx, cy + 23);
+  ctx.bezierCurveTo(cx - 2, cy + 7, cx + 2, cy - 8, cx, cy - 23);
   ctx.stroke();
 
   const leaves = [
-    [-15, -15, -28, -21],
-    [12, -6, 28, -12],
-    [-12, 8, -28, 2],
-    [10, 17, 25, 15],
+    [-13, -13, -24, -19],
+    [11, -5, 25, -11],
+    [-10, 8, -25, 3],
+    [9, 16, 23, 14],
   ] as const;
   for (const [dx, dy, tipX, tipY] of leaves) {
     ctx.beginPath();
@@ -169,10 +224,10 @@ function drawBotanicalMark(ctx: CanvasRenderingContext2D, cx: number, cy: number
     ctx.fill();
   }
 
-  ctx.strokeStyle = "rgba(161, 125, 62, 0.62)";
+  ctx.strokeStyle = "rgba(161, 125, 62, 0.54)";
   ctx.lineWidth = 1.3;
   ctx.beginPath();
-  ctx.arc(cx, cy, 50, 0, Math.PI * 2);
+  ctx.arc(cx, cy, 43, 0, Math.PI * 2);
   ctx.stroke();
   ctx.restore();
 }
@@ -255,6 +310,8 @@ export async function exportTodayCookbookToPng(selected: Recipe[], fileName?: st
   const items = selected.slice(0, 10);
   if (!items.length) throw new Error("还没有选择要分享的菜");
 
+  await ensureReceiptFonts();
+
   const now = new Date();
   const { title, fileStamp } = receiptDateParts(now);
   const downloadName = fileName ?? `${fileStamp}-私房家宴小票.png`;
@@ -267,30 +324,30 @@ export async function exportTodayCookbookToPng(selected: Recipe[], fileName?: st
   const padX = 64;
   const contentX = paperX + padX;
   const contentW = paperW - padX * 2;
-  const numberW = 76;
+  const numberW = 68;
   const dishX = contentX + numberW;
-  const dishW = contentW - numberW;
-  const dishLineH = 44;
-  const rowPadY = 22;
+  const dishW = contentW - numberW - 32;
+  const dishLineH = 38;
+  const rowPadY = 18;
 
   const probe = document.createElement("canvas").getContext("2d");
   if (!probe) throw new Error("Canvas not supported");
-  probe.font = font(36, 700, 'ui-sans-serif, "Noto Serif SC"');
+  probe.font = font(30, 520, RECEIPT_SERIF);
 
   const rows: ReceiptRow[] = items.map((recipe) => {
     const lines = wrapTextLines(probe, recipe.name, dishW).slice(0, 3);
-    const textH = Math.max(48, lines.length * dishLineH);
+    const textH = Math.max(40, lines.length * dishLineH);
     return {
       lines,
       height: textH + rowPadY * 2,
     };
   });
 
-  const titleY = paperY + 132;
-  const dividerY = paperY + 202;
-  const listStartY = paperY + 235;
-  const listHeight = rows.reduce((sum, row, index) => sum + row.height + (index < rows.length - 1 ? 12 : 0), 0);
-  const footerH = 98;
+  const titleY = paperY + 124;
+  const dividerY = paperY + 184;
+  const listStartY = paperY + 214;
+  const listHeight = rows.reduce((sum, row, index) => sum + row.height + (index < rows.length - 1 ? 10 : 0), 0);
+  const footerH = 92;
   const paperH = Math.max(720, listStartY - paperY + listHeight + footerH);
   const H = paperH + paperY * 2;
 
@@ -303,19 +360,18 @@ export async function exportTodayCookbookToPng(selected: Recipe[], fileName?: st
 
   drawReceiptPaper(ctx, W, paperX, paperY, paperW, paperH);
 
-  const markY = paperY + 82;
+  const markY = paperY + 78;
   drawBotanicalMark(ctx, W / 2, markY);
 
   ctx.textBaseline = "top";
   ctx.textAlign = "center";
   ctx.fillStyle = "#17211B";
-  ctx.font = font(36, 760, 'ui-sans-serif, "Noto Serif SC"');
-  ctx.fillText(title, W / 2, titleY);
+  fillCenteredTextFit(ctx, title, W / 2, titleY, contentW - 24, 30, 24, 560, RECEIPT_SERIF);
 
   ctx.fillStyle = "rgba(161, 125, 62, 0.86)";
   ctx.beginPath();
-  ctx.arc(W / 2 - 13, titleY + 62, 3.4, 0, Math.PI * 2);
-  ctx.arc(W / 2 + 13, titleY + 62, 3.4, 0, Math.PI * 2);
+  ctx.arc(W / 2 - 12, titleY + 50, 2.6, 0, Math.PI * 2);
+  ctx.arc(W / 2 + 12, titleY + 50, 2.6, 0, Math.PI * 2);
   ctx.fill();
 
   drawDashedLine(ctx, contentX, dividerY, contentX + contentW, 0.28);
@@ -327,37 +383,37 @@ export async function exportTodayCookbookToPng(selected: Recipe[], fileName?: st
     const numberY = top + 4;
 
     ctx.save();
-    ctx.strokeStyle = "rgba(161, 125, 62, 0.52)";
+    ctx.strokeStyle = "rgba(161, 125, 62, 0.42)";
     ctx.fillStyle = "rgba(255, 253, 246, 0.72)";
-    ctx.lineWidth = 1.3;
+    ctx.lineWidth = 1.1;
     ctx.beginPath();
-    ctx.arc(contentX + 22, numberY + 16, 23, 0, Math.PI * 2);
+    ctx.arc(contentX + 20, numberY + 15, 19, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
     ctx.restore();
 
     ctx.textAlign = "center";
-    ctx.fillStyle = "rgba(23, 33, 27, 0.48)";
-    ctx.font = font(19, 760, "ui-monospace");
-    ctx.fillText(String(index + 1).padStart(2, "0"), contentX + 22, numberY + 5);
+    ctx.fillStyle = "rgba(23, 33, 27, 0.44)";
+    ctx.font = font(16, 620, RECEIPT_MONO);
+    ctx.fillText(String(index + 1).padStart(2, "0"), contentX + 20, numberY + 5.5);
 
     ctx.textAlign = "left";
     ctx.fillStyle = "#17211B";
-    ctx.font = font(36, 780, 'ui-sans-serif, "Noto Serif SC"');
+    ctx.font = font(30, 520, RECEIPT_SERIF);
     for (let lineIndex = 0; lineIndex < row.lines.length; lineIndex += 1) {
       ctx.fillText(row.lines[lineIndex]!, dishX, top + lineIndex * dishLineH);
     }
 
-    ctx.fillStyle = "rgba(63, 111, 85, 0.42)";
+    ctx.fillStyle = "rgba(63, 111, 85, 0.34)";
     ctx.beginPath();
-    ctx.arc(contentX + contentW - 16, top + 19, 4, 0, Math.PI * 2);
-    ctx.arc(contentX + contentW - 1, top + 19, 2.4, 0, Math.PI * 2);
+    ctx.arc(contentX + contentW - 18, top + 18, 3.2, 0, Math.PI * 2);
+    ctx.arc(contentX + contentW - 5, top + 18, 2.1, 0, Math.PI * 2);
     ctx.fill();
 
     y += row.height;
     if (index < rows.length - 1) {
       drawDashedLine(ctx, contentX, y, contentX + contentW, 0.18);
-      y += 12;
+      y += 10;
     }
   }
 
