@@ -64,6 +64,23 @@ export type TodayMenuInsights = {
   }>;
 };
 
+export type DinnerPrepPlanStep = {
+  label: string;
+  time: string;
+  title: string;
+  detail: string;
+  tone: "warm" | "accent" | "muted";
+};
+
+export type DinnerPrepPlan = {
+  serveTime: string;
+  startTime: string;
+  totalMinutes: number;
+  intensity: string;
+  headline: string;
+  steps: DinnerPrepPlanStep[];
+};
+
 function recipeText(recipe: Recipe): string {
   return recipeSearchText(recipe);
 }
@@ -159,6 +176,37 @@ function cookingWeight(recipe: Recipe): number {
   return 1;
 }
 
+function estimateRecipeMinutes(recipe: Recipe): number {
+  const text = recipeText(recipe);
+  const role = mealRoleOf(recipe);
+  if (/(牛腩|猪蹄|排骨|老鸭|鸡汤|砂锅|煲|炖|卤|粥)/.test(text)) return 52;
+  if (/(蒸|焖|红烧|烤|煎|汤|羹)/.test(text)) return role === "soup" ? 42 : 32;
+  if (role === "staple") return 24;
+  if (role === "vegetable") return 14;
+  return 20;
+}
+
+function parseTimeMinutes(value: string): number {
+  const match = /^(\d{1,2}):(\d{2})$/.exec(value.trim());
+  if (!match) return 19 * 60;
+  const hour = Math.min(23, Math.max(0, Number(match[1])));
+  const minute = Math.min(59, Math.max(0, Number(match[2])));
+  return hour * 60 + minute;
+}
+
+function formatClock(totalMinutes: number): string {
+  const minutesInDay = 24 * 60;
+  const rounded = Math.round(totalMinutes / 5) * 5;
+  const normalized = ((rounded % minutesInDay) + minutesInDay) % minutesInDay;
+  const hour = Math.floor(normalized / 60);
+  const minute = normalized % 60;
+  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+}
+
+function roundUpToFive(minutes: number): number {
+  return Math.ceil(minutes / 5) * 5;
+}
+
 function cleanIngredientName(name: string): string {
   return name
     .replace(/[：:，,。；;、]/g, " ")
@@ -235,6 +283,104 @@ function buildTimeline(recipes: Recipe[]): TodayMenuInsights["timeline"] {
       detail: quick.length ? `${quick.slice(0, 2).join("、")} 最后快炒或装盘。` : "最后留 10 分钟做摆盘和小票分享。",
     },
   ];
+}
+
+export function buildDinnerPrepPlan(recipes: Recipe[], serveTime = "19:00"): DinnerPrepPlan {
+  const normalizedServeTime = formatClock(parseTimeMinutes(serveTime));
+
+  if (recipes.length === 0) {
+    return {
+      serveTime: normalizedServeTime,
+      startTime: normalizedServeTime,
+      totalMinutes: 0,
+      intensity: "待定",
+      headline: "选好菜单后生成开饭排程",
+      steps: [
+        {
+          label: "01",
+          time: normalizedServeTime,
+          title: "先定开饭时间",
+          detail: "选好菜以后，这里会按开饭时间倒推备料、开火和出锅顺序。",
+          tone: "muted",
+        },
+      ],
+    };
+  }
+
+  const weightedRecipes = recipes
+    .map((recipe) => ({
+      recipe,
+      minutes: estimateRecipeMinutes(recipe),
+      weight: cookingWeight(recipe),
+    }))
+    .sort((a, b) => b.minutes - a.minutes || b.weight - a.weight || a.recipe.name.localeCompare(b.recipe.name, "zh-CN"));
+  const slow = weightedRecipes.filter((entry) => entry.minutes >= 42);
+  const medium = weightedRecipes.filter((entry) => entry.minutes >= 24 && entry.minutes < 42);
+  const quick = weightedRecipes.filter((entry) => entry.minutes < 24);
+  const longest = weightedRecipes[0]?.minutes ?? 0;
+  const prepOverhead = Math.min(34, 8 + recipes.length * 4);
+  const parallelSaving = Math.max(0, recipes.length - 3) * 4;
+  const totalMinutes = Math.min(125, Math.max(30, roundUpToFive(longest + prepOverhead - parallelSaving)));
+  const serveMinutes = parseTimeMinutes(normalizedServeTime);
+  const startMinutes = serveMinutes - totalMinutes;
+  const intensity =
+    totalMinutes <= 45 ? "轻松" : totalMinutes <= 75 ? "稳妥" : totalMinutes <= 100 ? "偏忙" : "家宴级";
+  const slowNames = slow.map((entry) => entry.recipe.name);
+  const mediumNames = medium.map((entry) => entry.recipe.name);
+  const quickNames = quick.map((entry) => entry.recipe.name);
+
+  const steps: DinnerPrepPlanStep[] = [
+    {
+      label: "01",
+      time: formatClock(startMinutes),
+      title: "开始备料",
+      detail: `先洗切、分装调料和主辅料，${recipes.length} 道菜预计留 ${totalMinutes} 分钟更从容。`,
+      tone: "muted",
+    },
+    {
+      label: "02",
+      time: formatClock(serveMinutes - Math.min(56, Math.max(34, longest))),
+      title: slow.length ? "慢菜先上炉" : "先处理耐放菜",
+      detail: slow.length
+        ? `${slowNames.slice(0, 2).join("、")} 先炖/煲/焖，避免临开饭时占火。`
+        : "没有明显慢菜，可以先做主食、汤底或需要提前入味的菜。",
+      tone: slow.length ? "warm" : "muted",
+    },
+    {
+      label: "03",
+      time: formatClock(serveMinutes - 26),
+      title: medium.length ? "中段接热菜" : "中段整理台面",
+      detail: medium.length
+        ? `${mediumNames.slice(0, 3).join("、")} 这一段接上，留出最后调味和装盘时间。`
+        : "把盘子、汤碗和配菜摆好，快手菜先别急着下锅。",
+      tone: "accent",
+    },
+    {
+      label: "04",
+      time: formatClock(serveMinutes - 12),
+      title: quick.length ? "最后快炒装盘" : "最后收汁摆盘",
+      detail: quick.length
+        ? `${quickNames.slice(0, 3).join("、")} 最后做，热气和口感最稳。`
+        : "最后检查咸淡、收汁和摆盘，热菜按出锅顺序上桌。",
+      tone: "accent",
+    },
+    {
+      label: "05",
+      time: normalizedServeTime,
+      title: "开饭上桌",
+      detail: "汤羹先落位，热菜接上，主食和小食补齐桌面节奏。",
+      tone: "warm",
+    },
+  ];
+
+  return {
+    serveTime: normalizedServeTime,
+    startTime: formatClock(startMinutes),
+    totalMinutes,
+    intensity,
+    headline: `${formatClock(startMinutes)} 开始更稳，${normalizedServeTime} 开饭。`,
+    steps,
+  };
 }
 
 export function buildTodayMenuInsights(recipes: Recipe[]): TodayMenuInsights {

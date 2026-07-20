@@ -19,6 +19,7 @@ import { VisuallyLosslessThumb } from "@/components/recipes/VisuallyLosslessThum
 import {
   MENU_PLAN_PRESETS,
   MenuPlanScene,
+  buildDinnerPrepPlan,
   buildTodayMenuInsights,
   pickBalancedTodayMenu,
 } from "@/lib/today/menuInsights";
@@ -34,7 +35,9 @@ const FILL_ROLE_PRIORITY: MealRole[] = ["main", "vegetable", "soup", "staple", "
 const TABLE_ROLE_ORDER: TableMealRole[] = ["main", "vegetable", "soup", "staple", "small"];
 const LOCKED_MENU_KEY = "private-kitchen:locked-today-menu:v1";
 const MENU_TEMPLATES_KEY = "private-kitchen:menu-templates:v1";
+const DINNER_TIME_KEY = "private-kitchen:dinner-time:v1";
 const MENU_TEMPLATE_LIMIT = 6;
+const DINNER_TIME_OPTIONS = ["18:30", "19:00", "19:30", "20:00"];
 
 const MENU_TABLE_SLOTS: Array<{
   key: TableMealRole;
@@ -139,6 +142,27 @@ function persistMenuTemplates(templates: MenuTemplate[]) {
     window.localStorage.setItem(MENU_TEMPLATES_KEY, JSON.stringify(templates.slice(0, MENU_TEMPLATE_LIMIT)));
   } catch {
     // Templates are local convenience data; the live menu should keep working if storage is unavailable.
+  }
+}
+
+function readDinnerTime(): string {
+  if (typeof window === "undefined") return "19:00";
+
+  try {
+    const raw = window.localStorage.getItem(DINNER_TIME_KEY);
+    return raw && /^\d{1,2}:\d{2}$/.test(raw) ? raw : "19:00";
+  } catch {
+    return "19:00";
+  }
+}
+
+function persistDinnerTime(time: string) {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.localStorage.setItem(DINNER_TIME_KEY, time);
+  } catch {
+    // Dinner time is only used for local planning; the menu remains usable without storage.
   }
 }
 
@@ -374,6 +398,8 @@ export function RecipesListClient({
   const [menuTip, setMenuTip] = React.useState<string | null>(null);
   const [planScene, setPlanScene] = React.useState<MenuPlanScene>("balanced");
   const [guideMode, setGuideMode] = React.useState<KitchenGuideMode>("shopping");
+  const [dinnerTime, setDinnerTime] = React.useState("19:00");
+  const [dinnerTimeHydrated, setDinnerTimeHydrated] = React.useState(false);
 
   React.useEffect(() => {
     setLockedIds(new Set(readLockedMenuIds()));
@@ -386,6 +412,11 @@ export function RecipesListClient({
   }, []);
 
   React.useEffect(() => {
+    setDinnerTime(readDinnerTime());
+    setDinnerTimeHydrated(true);
+  }, []);
+
+  React.useEffect(() => {
     if (!locksHydrated) return;
     persistLockedMenuIds(Array.from(lockedIds));
   }, [lockedIds, locksHydrated]);
@@ -394,6 +425,11 @@ export function RecipesListClient({
     if (!templatesHydrated) return;
     persistMenuTemplates(menuTemplates);
   }, [menuTemplates, templatesHydrated]);
+
+  React.useEffect(() => {
+    if (!dinnerTimeHydrated) return;
+    persistDinnerTime(dinnerTime);
+  }, [dinnerTime, dinnerTimeHydrated]);
 
   const planScenes = React.useMemo(
     () =>
@@ -461,6 +497,10 @@ export function RecipesListClient({
   const menuInsights = React.useMemo(
     () => buildTodayMenuInsights(selectedRecipes),
     [selectedRecipes],
+  );
+  const dinnerPrepPlan = React.useMemo(
+    () => buildDinnerPrepPlan(selectedRecipes, dinnerTime),
+    [dinnerTime, selectedRecipes],
   );
   const fillSuggestions = React.useMemo(() => {
     if (!selectedRecipes.length || selectedRecipes.length >= todayMax) return [];
@@ -1142,9 +1182,11 @@ export function RecipesListClient({
                 </div>
                 <div className="shrink-0 text-right">
                   <div className="text-[13px] font-medium text-[color:var(--accent)]">
-                    {prepProgress.doneCount}/{shoppingTotal || 0}
+                    {guideMode === "shopping" ? `${prepProgress.doneCount}/${shoppingTotal || 0}` : dinnerPrepPlan.startTime}
                   </div>
-                  <div className="mt-0.5 text-[11px] text-[color:var(--muted-2)]">已备</div>
+                  <div className="mt-0.5 text-[11px] text-[color:var(--muted-2)]">
+                    {guideMode === "shopping" ? "已备" : "开工"}
+                  </div>
                 </div>
               </div>
 
@@ -1158,7 +1200,7 @@ export function RecipesListClient({
               <div className="mt-3 grid grid-cols-2 gap-2">
                 {([
                   ["shopping", "采购", `${shoppingTotal || 0}项`],
-                  ["prep", "备菜", `${menuInsights.timeline.length}步`],
+                  ["prep", "备菜", `${dinnerPrepPlan.steps.length}步`],
                 ] as const).map(([mode, label, meta]) => {
                   const active = guideMode === mode;
                   return (
@@ -1255,26 +1297,75 @@ export function RecipesListClient({
                   )}
                 </div>
               ) : (
-                <ol className="mt-3 space-y-2">
-                  {menuInsights.timeline.map((step) => (
-                    <li
-                      key={step.label}
-                      className="grid grid-cols-[2.25rem_1fr] gap-2 rounded-lg border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/72 px-3 py-3"
-                    >
-                      <span className="flex h-8 w-8 items-center justify-center rounded-full border border-[color:rgba(185,148,75,0.42)] text-[11px] text-[color:var(--muted)]">
-                        {step.label}
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block text-[13px] font-medium leading-5">
-                          {step.title}
+                <div className="mt-3 space-y-3">
+                  <div className="rounded-lg border border-[color:rgba(185,148,75,0.24)] bg-[color:rgba(185,148,75,0.06)] p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="text-[11px] text-[color:var(--muted-2)]">开饭时间</div>
+                        <div className="pk-serif mt-1 text-[18px] leading-tight">{dinnerPrepPlan.serveTime}</div>
+                      </div>
+                      <Badge tone="warm" className="shrink-0">
+                        {dinnerPrepPlan.intensity}
+                      </Badge>
+                    </div>
+                    <div className="mt-3 grid grid-cols-4 gap-1.5">
+                      {DINNER_TIME_OPTIONS.map((time) => {
+                        const active = dinnerTime === time;
+                        return (
+                          <button
+                            key={time}
+                            type="button"
+                            aria-pressed={active}
+                            className={cn(
+                              "h-8 rounded-md border text-[12px] transition-colors",
+                              active
+                                ? "border-[color:var(--foreground)] bg-[color:var(--foreground)] text-[color:var(--background)]"
+                                : "border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/72 text-[color:var(--muted)]",
+                            )}
+                            onClick={() => setDinnerTime(time)}
+                          >
+                            {time}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="mt-3 rounded-md border border-[color:rgba(63,111,85,0.18)] bg-[color:rgba(63,111,85,0.07)] px-3 py-2 text-[12px] leading-5 text-[color:var(--accent)]">
+                      {dinnerPrepPlan.headline}
+                    </div>
+                  </div>
+
+                  <ol className="space-y-2">
+                    {dinnerPrepPlan.steps.map((step) => (
+                      <li
+                        key={`${step.label}-${step.time}`}
+                        className="grid grid-cols-[3.25rem_1fr] gap-2 rounded-lg border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/72 px-3 py-3"
+                      >
+                        <span
+                          className={cn(
+                            "flex min-h-10 flex-col items-center justify-center rounded-md border text-center leading-none",
+                            step.tone === "warm" &&
+                              "border-[color:rgba(184,92,56,0.24)] bg-[color:rgba(184,92,56,0.08)] text-[color:var(--warm)]",
+                            step.tone === "accent" &&
+                              "border-[color:rgba(63,111,85,0.24)] bg-[color:rgba(63,111,85,0.08)] text-[color:var(--accent)]",
+                            step.tone === "muted" &&
+                              "border-[color:rgba(185,148,75,0.30)] bg-[color:var(--paper-strong)]/70 text-[color:var(--muted)]",
+                          )}
+                        >
+                          <span className="text-[11px] font-medium">{step.time}</span>
+                          <span className="mt-1 text-[9px] opacity-70">{step.label}</span>
                         </span>
-                        <span className="mt-0.5 block text-[12px] leading-5 text-[color:var(--muted)]">
-                          {step.detail}
+                        <span className="min-w-0">
+                          <span className="block text-[13px] font-medium leading-5">
+                            {step.title}
+                          </span>
+                          <span className="mt-0.5 block text-[12px] leading-5 text-[color:var(--muted)]">
+                            {step.detail}
+                          </span>
                         </span>
-                      </span>
-                    </li>
-                  ))}
-                </ol>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
               )}
             </div>
           ) : null}
