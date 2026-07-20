@@ -7,6 +7,17 @@ type ReceiptRow = {
   height: number;
 };
 
+type ReceiptSection = {
+  key: ReceiptRole;
+  label: string;
+  shortLabel: string;
+  note: string;
+  rows: ReceiptRow[];
+  height: number;
+};
+
+type ReceiptRole = "main" | "vegetable" | "soup" | "staple" | "small";
+
 const RECEIPT_SERIF =
   '"Source Han Serif SC", "Source Han Serif CN", "Noto Serif CJK SC", "Noto Serif SC", "Songti SC", STSong, SimSun, serif';
 const RECEIPT_MONO = 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace';
@@ -105,6 +116,80 @@ function wrapTextLines(ctx: CanvasRenderingContext2D, text: string, maxWidth: nu
 
   if (line) lines.push(line);
   return lines.length ? lines : [text];
+}
+
+function recipeText(recipe: Recipe): string {
+  return `${recipe.name} ${recipe.category} ${recipe.description} ${(recipe.tags ?? []).join(" ")}`;
+}
+
+function receiptRole(recipe: Recipe): ReceiptRole {
+  const name = recipe.name;
+  const tags = (recipe.tags ?? []).join(" ");
+  const mainIngredients = (recipe.mainIngredients ?? []).map((item) => item.name).join(" ");
+  const primaryText = `${name} ${recipe.category} ${tags} ${mainIngredients}`;
+
+  if (/(汤|羹|粥)/.test(name) || /(炖汤|家常汤|暖汤)/.test(tags)) return "soup";
+  if (/(饭|面|粉|米粉|河粉|炒饭|拌面|烩饭|煲仔饭|饼|点心)/.test(name) || /(主食|点心)/.test(tags)) {
+    return "staple";
+  }
+  if (/(鸡|鸭|鱼|虾|蟹|牛|羊|猪|肉|排骨|鸡翅|牛蛙|蛋|豆腐|肥牛|小肠|五花|牛腩|猪蹄|腊肠|腊肉)/.test(primaryText)) {
+    return "main";
+  }
+  if (/(青菜|白菜|菠菜|生菜|油麦菜|空心菜|丝瓜|豆角|西兰花|包菜|茄子|苦瓜|莴笋|蒲菜|菜苔|蔬|素菜)/.test(primaryText)) {
+    return "vegetable";
+  }
+  if (/(汤|羹|粥)/.test(recipeText(recipe))) return "soup";
+  return "small";
+}
+
+const RECEIPT_SECTION_META: Record<ReceiptRole, { label: string; shortLabel: string; note: string; order: number }> = {
+  main: { label: "热菜主菜", shortLabel: "主菜", note: "撑起席面", order: 1 },
+  vegetable: { label: "时令蔬菜", shortLabel: "蔬菜", note: "清爽解腻", order: 2 },
+  soup: { label: "汤羹暖碗", shortLabel: "汤羹", note: "收住烟火", order: 3 },
+  staple: { label: "主食点心", shortLabel: "点心", note: "压稳一餐", order: 4 },
+  small: { label: "家常小食", shortLabel: "小食", note: "添一点兴致", order: 5 },
+};
+
+function buildReceiptSections(
+  recipes: Recipe[],
+  ctx: CanvasRenderingContext2D,
+  dishW: number,
+  dishLineH: number,
+  rowPadY: number,
+): ReceiptSection[] {
+  const grouped = new Map<ReceiptRole, ReceiptRow[]>();
+
+  recipes.forEach((recipe) => {
+    const role = receiptRole(recipe);
+    const lines = wrapTextLines(ctx, recipe.name, dishW).slice(0, 2);
+    const textH = Math.max(38, lines.length * dishLineH);
+    const row: ReceiptRow = {
+      lines,
+      height: textH + rowPadY * 2,
+    };
+    grouped.set(role, [...(grouped.get(role) ?? []), row]);
+  });
+
+  return Array.from(grouped.entries())
+    .sort((a, b) => RECEIPT_SECTION_META[a[0]].order - RECEIPT_SECTION_META[b[0]].order)
+    .map(([key, rows]) => {
+      const meta = RECEIPT_SECTION_META[key];
+      return {
+        key,
+        label: meta.label,
+        shortLabel: meta.shortLabel,
+        note: meta.note,
+        rows,
+        height: 42 + rows.reduce((sum, row) => sum + row.height, 0) + Math.max(0, rows.length - 1) * 7,
+      };
+    });
+}
+
+function receiptSummary(sections: ReceiptSection[], count: number): string {
+  const labels = sections
+    .map((section) => `${section.shortLabel}${section.rows.length}`)
+    .join(" · ");
+  return labels ? `共 ${count} 道 · ${labels}` : `共 ${count} 道`;
 }
 
 function roundRectPath(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
@@ -365,8 +450,13 @@ async function shareOrDownload(blob: Blob, fileName: string, title: string) {
   const a = document.createElement("a");
   a.href = url;
   a.download = fileName;
+  a.style.display = "none";
+  document.body.appendChild(a);
   a.click();
-  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  window.setTimeout(() => {
+    a.remove();
+    URL.revokeObjectURL(url);
+  }, 1000);
 }
 
 export async function exportTodayCookbookToPng(selected: Recipe[], fileName?: string) {
@@ -391,39 +481,27 @@ export async function exportTodayCookbookToPng(selected: Recipe[], fileName?: st
   const contentW = paperW - padX * 2;
   const numberW = hasGeneratedBackground ? 76 : 68;
   const dishX = contentX + numberW;
-  const dishW = contentW - numberW - (hasGeneratedBackground ? 54 : 32);
-  const dishLineH = hasGeneratedBackground ? 42 : 38;
-  const rowPadY = hasGeneratedBackground ? 20 : 18;
+  const dishW = contentW - numberW - (hasGeneratedBackground ? 40 : 28);
+  const dishLineH = hasGeneratedBackground ? 35 : 33;
+  const rowPadY = hasGeneratedBackground ? 15 : 14;
 
   const probe = document.createElement("canvas").getContext("2d");
   if (!probe) throw new Error("Canvas not supported");
   probe.font = font(30, 520, RECEIPT_SERIF);
 
-  const rows: ReceiptRow[] = items.map((recipe) => {
-    const lines = wrapTextLines(probe, recipe.name, dishW).slice(0, 3);
-    const textH = Math.max(40, lines.length * dishLineH);
-    return {
-      lines,
-      height: textH + rowPadY * 2,
-    };
-  });
+  const sections = buildReceiptSections(items, probe, dishW, dishLineH, rowPadY);
 
-  const titleY = hasGeneratedBackground ? 332 : paperY + 124;
-  const dividerY = hasGeneratedBackground ? 424 : paperY + 184;
-  const listStartY = hasGeneratedBackground ? 468 : paperY + 214;
-  const rowsBodyHeight = rows.reduce((sum, row) => sum + row.height, 0);
-  const naturalRowGap = hasGeneratedBackground ? 20 : 10;
-  const listHeight = rowsBodyHeight + Math.max(0, rows.length - 1) * naturalRowGap;
-  const footerH = 92;
+  const titleY = hasGeneratedBackground ? 302 : paperY + 118;
+  const subtitleY = titleY + (hasGeneratedBackground ? 58 : 50);
+  const dividerY = subtitleY + 54;
+  const listStartY = dividerY + 34;
+  const listHeight = sections.reduce((sum, section) => sum + section.height, 0) + Math.max(0, sections.length - 1) * 17;
+  const footerH = hasGeneratedBackground ? 230 : 120;
   const paperH = Math.max(720, listStartY - paperY + listHeight + footerH);
   const generatedFooterOffset = 276;
   const H = hasGeneratedBackground
     ? Math.max(1080, listStartY + listHeight + generatedFooterOffset)
     : paperH + paperY * 2;
-  const listBottom = hasGeneratedBackground ? H - generatedFooterOffset : listStartY + listHeight;
-  const generatedRowGap = hasGeneratedBackground && rows.length > 1
-    ? Math.max(6, Math.min(28, (listBottom - listStartY - rowsBodyHeight) / (rows.length - 1)))
-    : 10;
 
   const canvas = document.createElement("canvas");
   canvas.width = W * scale;
@@ -445,70 +523,111 @@ export async function exportTodayCookbookToPng(selected: Recipe[], fileName?: st
   ctx.textBaseline = "top";
   ctx.textAlign = "center";
   ctx.fillStyle = "#17211B";
-  fillCenteredTextFit(ctx, title, W / 2, titleY, contentW + (hasGeneratedBackground ? 58 : -24), hasGeneratedBackground ? 36 : 30, 24, 560, RECEIPT_SERIF);
+  fillCenteredTextFit(ctx, title, W / 2, titleY, contentW + (hasGeneratedBackground ? 58 : -24), hasGeneratedBackground ? 34 : 30, 24, 560, RECEIPT_SERIF);
 
   ctx.fillStyle = "rgba(161, 125, 62, 0.86)";
   ctx.beginPath();
-  ctx.arc(W / 2 - 12, titleY + (hasGeneratedBackground ? 66 : 50), 2.6, 0, Math.PI * 2);
-  ctx.arc(W / 2 + 12, titleY + (hasGeneratedBackground ? 66 : 50), 2.6, 0, Math.PI * 2);
+  ctx.arc(W / 2 - 12, subtitleY - 11, 2.6, 0, Math.PI * 2);
+  ctx.arc(W / 2 + 12, subtitleY - 11, 2.6, 0, Math.PI * 2);
   ctx.fill();
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = "rgba(23, 33, 27, 0.54)";
+  ctx.font = font(15, 520, RECEIPT_SERIF);
+  ctx.fillText(`今日席单 · ${items.length} 道 · 仅含已选菜`, W / 2, subtitleY);
 
   drawDashedLine(ctx, contentX, dividerY, contentX + contentW, 0.28);
 
   let y = listStartY;
-  for (let index = 0; index < rows.length; index += 1) {
-    const row = rows[index]!;
-    const top = y + rowPadY;
-    const numberY = top + 4;
+  let displayNumber = 1;
+  for (let sectionIndex = 0; sectionIndex < sections.length; sectionIndex += 1) {
+    const section = sections[sectionIndex]!;
 
     ctx.save();
-    ctx.strokeStyle = "rgba(161, 125, 62, 0.42)";
-    ctx.fillStyle = "rgba(255, 253, 246, 0.72)";
-    ctx.lineWidth = 1.1;
-    ctx.beginPath();
-    ctx.arc(contentX + 20, numberY + 15, 19, 0, Math.PI * 2);
+    roundRectPath(ctx, contentX, y, contentW, 32, 10);
+    ctx.fillStyle = "rgba(63, 111, 85, 0.075)";
     ctx.fill();
+    ctx.strokeStyle = "rgba(63, 111, 85, 0.22)";
+    ctx.lineWidth = 1;
     ctx.stroke();
     ctx.restore();
 
-    ctx.textAlign = "center";
-    ctx.fillStyle = "rgba(23, 33, 27, 0.44)";
-    ctx.font = font(16, 620, RECEIPT_MONO);
-    ctx.fillText(String(index + 1).padStart(2, "0"), contentX + 20, numberY + 5.5);
-
     ctx.textAlign = "left";
-    ctx.fillStyle = "#17211B";
-    ctx.font = font(30, 520, RECEIPT_SERIF);
-    for (let lineIndex = 0; lineIndex < row.lines.length; lineIndex += 1) {
-      ctx.fillText(row.lines[lineIndex]!, dishX, top + lineIndex * dishLineH);
+    ctx.fillStyle = "rgba(23, 33, 27, 0.72)";
+    ctx.font = font(16, 560, RECEIPT_SERIF);
+    ctx.fillText(section.label, contentX + 14, y + 7);
+
+    ctx.textAlign = "right";
+    ctx.fillStyle = "rgba(23, 33, 27, 0.42)";
+    ctx.font = font(12, 520, RECEIPT_SERIF);
+    ctx.fillText(`${section.note} · ${section.rows.length} 道`, contentX + contentW - 14, y + 10);
+
+    y += 42;
+
+    for (let rowIndex = 0; rowIndex < section.rows.length; rowIndex += 1) {
+      const row = section.rows[rowIndex]!;
+      const top = y + rowPadY;
+      const numberY = top + 1;
+
+      ctx.save();
+      ctx.strokeStyle = "rgba(161, 125, 62, 0.40)";
+      ctx.fillStyle = "rgba(255, 253, 246, 0.72)";
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.arc(contentX + 21, numberY + 15, 18, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.textAlign = "center";
+      ctx.fillStyle = "rgba(23, 33, 27, 0.43)";
+      ctx.font = font(15, 620, RECEIPT_MONO);
+      ctx.fillText(String(displayNumber).padStart(2, "0"), contentX + 21, numberY + 5.5);
+      displayNumber += 1;
+
+      ctx.textAlign = "left";
+      ctx.fillStyle = "#17211B";
+      ctx.font = font(27, 540, RECEIPT_SERIF);
+      for (let lineIndex = 0; lineIndex < row.lines.length; lineIndex += 1) {
+        ctx.fillText(row.lines[lineIndex]!, dishX, top + lineIndex * dishLineH);
+      }
+
+      ctx.fillStyle = "rgba(63, 111, 85, 0.32)";
+      ctx.beginPath();
+      ctx.arc(contentX + contentW - 20, top + 17, 3.1, 0, Math.PI * 2);
+      ctx.arc(contentX + contentW - 8, top + 17, 2.1, 0, Math.PI * 2);
+      ctx.fill();
+
+      y += row.height;
+      if (rowIndex < section.rows.length - 1) {
+        drawDashedLine(ctx, dishX, y, contentX + contentW, 0.12);
+        y += 7;
+      }
     }
 
-    ctx.fillStyle = "rgba(63, 111, 85, 0.34)";
-    ctx.beginPath();
-    ctx.arc(contentX + contentW - 18, top + 18, 3.2, 0, Math.PI * 2);
-    ctx.arc(contentX + contentW - 5, top + 18, 2.1, 0, Math.PI * 2);
-    ctx.fill();
-
-    y += row.height;
-    if (index < rows.length - 1) {
-      drawDashedLine(ctx, contentX, y, contentX + contentW, 0.18);
-      y += generatedRowGap;
+    if (sectionIndex < sections.length - 1) {
+      y += 17;
     }
   }
 
+  const footerY = hasGeneratedBackground ? H - 256 : paperY + paperH - 110;
+  drawDashedLine(ctx, contentX + 92, footerY + 18, W / 2 - 28, 0.28);
+  drawDashedLine(ctx, W / 2 + 28, footerY + 18, contentX + contentW - 92, 0.28);
+  ctx.fillStyle = "rgba(161, 125, 62, 0.82)";
+  ctx.beginPath();
+  ctx.moveTo(W / 2, footerY + 10);
+  ctx.lineTo(W / 2 + 8, footerY + 18);
+  ctx.lineTo(W / 2, footerY + 26);
+  ctx.lineTo(W / 2 - 8, footerY + 18);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = "rgba(23, 33, 27, 0.54)";
+  ctx.font = font(14, 500, RECEIPT_SERIF);
+  ctx.fillText(receiptSummary(sections, items.length), W / 2, footerY + 40);
   if (!hasGeneratedBackground) {
-    const footerY = paperY + paperH - 106;
-    drawDashedLine(ctx, contentX + 102, footerY + 18, W / 2 - 28, 0.28);
-    drawDashedLine(ctx, W / 2 + 28, footerY + 18, contentX + contentW - 102, 0.28);
-    ctx.fillStyle = "rgba(161, 125, 62, 0.82)";
-    ctx.beginPath();
-    ctx.moveTo(W / 2, footerY + 10);
-    ctx.lineTo(W / 2 + 8, footerY + 18);
-    ctx.lineTo(W / 2, footerY + 26);
-    ctx.lineTo(W / 2 - 8, footerY + 18);
-    ctx.closePath();
-    ctx.fill();
-    drawSeal(ctx, W / 2, footerY + 56);
+    drawSeal(ctx, W / 2, footerY + 78);
   }
 
   const blob: Blob | null = await new Promise((resolve) => canvas.toBlob((b) => resolve(b), "image/jpeg", 0.92));

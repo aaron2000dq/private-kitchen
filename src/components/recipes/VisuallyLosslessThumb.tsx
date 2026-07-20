@@ -9,6 +9,7 @@ export function VisuallyLosslessThumb({
   className,
   draggable,
   loading = "lazy",
+  fetchPriority,
 }: {
   src: string;
   fallbackSrc?: string;
@@ -16,6 +17,7 @@ export function VisuallyLosslessThumb({
   className?: string;
   draggable?: boolean;
   loading?: "eager" | "lazy";
+  fetchPriority?: "high" | "low" | "auto";
 }) {
   const [current, setCurrent] = React.useState(src);
 
@@ -29,6 +31,7 @@ export function VisuallyLosslessThumb({
       src={current}
       alt={alt}
       loading={loading}
+      fetchPriority={fetchPriority}
       decoding="async"
       className={className}
       draggable={draggable}

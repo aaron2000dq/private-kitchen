@@ -63,7 +63,7 @@ export function TodayRecommendationClient() {
 
       <div className="grid gap-3 px-3 pb-4 sm:grid-cols-3 sm:px-4">
         {display.length ? (
-          display.map((r) => {
+          display.map((r, index) => {
             const selected = isTodaySelected(r.id);
             const canAdd = !selected && todayIds.length < todayMax;
             const ingPreview = formatRecipeIngredientsPreview(r, 2, 2);
@@ -83,6 +83,8 @@ export function TodayRecommendationClient() {
                       src={recipeImageThumbUrl(r.images[0])}
                       fallbackSrc={recipeImageUrl(r.images[0])}
                       alt={r.name}
+                      loading={index === 0 ? "eager" : "lazy"}
+                      fetchPriority={index === 0 ? "high" : "auto"}
                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                     />
                   ) : (
