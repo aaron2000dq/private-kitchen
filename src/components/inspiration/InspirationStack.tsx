@@ -31,7 +31,7 @@ function CardFace({
   const ingPreview = formatRecipeIngredientsPreview(r, 2, 2);
   return (
     <div className="flex h-full flex-col">
-      <div className="h-36 w-full shrink-0 bg-black/[0.04] sm:h-40 dark:bg-white/[0.06]">
+      <div className="h-36 w-full shrink-0 border-b border-[color:var(--line)] bg-[color:var(--wash)] sm:h-40">
         {r.images?.[0] ? (
           <VisuallyLosslessThumb
             src={recipeImageThumbUrl(r.images[0])}
@@ -47,7 +47,7 @@ function CardFace({
         )}
       </div>
       <div className="min-h-0 flex-1 space-y-1.5 overflow-hidden px-4 py-3">
-        <div className="line-clamp-2 font-[var(--font-noto-serif-sc)] text-[17px] leading-snug">
+        <div className="pk-serif line-clamp-2 text-[17px] leading-snug">
           {r.name}
         </div>
         <div className="flex flex-wrap items-center gap-2 text-[12px] text-[color:var(--muted-2)]">
@@ -59,7 +59,7 @@ function CardFace({
             {tags.map((t, i) => (
               <span
                 key={`${t}-${i}`}
-                className="rounded-md border border-[color:var(--line)] bg-black/[0.03] px-2 py-0.5 text-[11px] leading-tight text-[color:var(--muted)] dark:bg-white/[0.06]"
+                className="rounded-md border border-[color:var(--line)] bg-[color:var(--paper-strong)]/80 px-2 py-0.5 text-[11px] leading-tight text-[color:var(--muted)]"
               >
                 {t}
               </span>
@@ -76,7 +76,7 @@ function CardFace({
       </div>
 
       {showTodayAction ? (
-        <div className="shrink-0 border-t border-[color:var(--line)] p-3">
+        <div className="shrink-0 border-t border-dashed border-[color:rgba(24,33,29,0.18)] p-3">
           <Button
             size="sm"
             variant={todaySelected ? "outline" : "primary"}
@@ -238,7 +238,7 @@ export function InspirationStack({ recipes }: { recipes: Recipe[] }) {
 
   if (n === 0) {
     return (
-      <div className="rounded-lg border border-[color:var(--line)] bg-black/[0.02] px-4 py-8 text-center text-[13px] text-[color:var(--muted)] dark:bg-white/[0.03]">
+      <div className="pk-panel-plain px-4 py-8 text-center text-[13px] text-[color:var(--muted)]">
         添加菜谱后，这里会按本地规则为你叠一摞「灵感卡」。
       </div>
     );
@@ -256,7 +256,7 @@ export function InspirationStack({ recipes }: { recipes: Recipe[] }) {
         aria-label="上一张灵感"
         disabled={n <= 1}
         onClick={() => goPrev()}
-        className="pointer-events-auto absolute left-1 top-1/2 z-30 hidden -translate-y-1/2 rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)]/90 px-3 py-2 text-[18px] leading-none text-[color:var(--foreground)] shadow-[var(--shadow-soft)] disabled:pointer-events-none disabled:opacity-50 sm:block"
+        className="pointer-events-auto absolute left-1 top-1/2 z-30 hidden -translate-y-1/2 rounded-lg border border-[color:var(--menu-line)] bg-[color:var(--paper)]/90 px-3 py-2 text-[18px] leading-none text-[color:var(--foreground)] shadow-[var(--shadow-soft)] disabled:pointer-events-none disabled:opacity-50 sm:block"
       >
         ‹
       </button>

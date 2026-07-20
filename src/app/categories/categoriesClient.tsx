@@ -187,7 +187,7 @@ export function CategoriesClient() {
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {hydrated && filtered.length === 0 ? (
-          <div className="md:col-span-2 xl:col-span-3 rounded-3xl border border-[color:var(--line)] bg-[color:var(--paper)] p-10 text-center">
+          <div className="md:col-span-2 xl:col-span-3 rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] p-10 text-center">
             <Badge tone="muted">空</Badge>
             <p className="mt-3 text-[13px] leading-7 text-[color:var(--muted)]">
               这个分类暂时没有内容。

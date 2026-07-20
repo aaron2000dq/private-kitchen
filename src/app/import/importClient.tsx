@@ -210,7 +210,8 @@ export function ImportClient() {
   return (
     <div className="space-y-8">
       <div className="space-y-2">
-        <h1 className="font-[var(--font-noto-serif-sc)] text-[26px] tracking-wide">
+        <div className="pk-section-label">批量收录</div>
+        <h1 className="pk-serif text-[28px] tracking-wide">
           批量导入
         </h1>
         <p className="text-[13px] leading-6 text-[color:var(--muted)]">
@@ -219,18 +220,18 @@ export function ImportClient() {
       </div>
 
       {error ? (
-        <div className="rounded-2xl border border-[color:rgba(201,138,99,0.35)] bg-[color:rgba(201,138,99,0.10)] px-4 py-3 text-[13px]">
+        <div className="rounded-lg border border-[color:rgba(201,138,99,0.35)] bg-[color:rgba(201,138,99,0.10)] px-4 py-3 text-[13px]">
           {error}
         </div>
       ) : null}
       {doneMsg ? (
-        <div className="rounded-2xl border border-[color:rgba(107,142,107,0.35)] bg-[color:rgba(107,142,107,0.10)] px-4 py-3 text-[13px]">
+        <div className="rounded-lg border border-[color:rgba(107,142,107,0.35)] bg-[color:rgba(107,142,107,0.10)] px-4 py-3 text-[13px]">
           {doneMsg}
         </div>
       ) : null}
 
       <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
-        <section className="rounded-3xl border border-[color:var(--line)] bg-[color:var(--paper)] p-6">
+        <section className="pk-panel-plain p-5 sm:p-6">
           <div className="flex items-center justify-between gap-4">
             <Badge tone="muted">图片（可选）</Badge>
             <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-[color:var(--line)] px-3 py-2 text-[13px] text-[color:var(--muted)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06]">
@@ -254,7 +255,7 @@ export function ImportClient() {
                 {files.slice(0, 9).map((f) => (
                   <div
                     key={f.name}
-                    className="rounded-2xl border border-[color:var(--line)] bg-black/[0.03] p-2 text-[12px] text-[color:var(--muted)] dark:bg-white/[0.05]"
+                    className="rounded-lg border border-[color:var(--line)] bg-[color:var(--paper-strong)]/70 p-2 text-[12px] text-[color:var(--muted)]"
                     title={f.name}
                   >
                     <div className="truncate">{f.name}</div>
@@ -268,7 +269,7 @@ export function ImportClient() {
           </div>
         </section>
 
-        <section className="rounded-3xl border border-[color:var(--line)] bg-[color:var(--paper)] p-6">
+        <section className="pk-panel-plain p-5 sm:p-6">
           <div className="flex items-center justify-between gap-4">
             <Badge tone="muted">JSON</Badge>
             <div className="flex items-center gap-2">
@@ -308,7 +309,7 @@ export function ImportClient() {
         </section>
       </div>
 
-      <section className="rounded-3xl border border-[color:var(--line)] bg-[color:var(--paper)] p-6">
+      <section className="pk-panel-plain p-5 sm:p-6">
         <div className="flex items-center justify-between gap-4">
           <Badge tone="muted">预览</Badge>
           <span className="text-[12px] text-[color:var(--muted-2)]">
@@ -321,11 +322,11 @@ export function ImportClient() {
             {drafts.map((d, idx) => (
               <div
                 key={idx}
-                className="rounded-3xl border border-[color:var(--line)] bg-black/[0.01] p-5 dark:bg-white/[0.03]"
+                className="rounded-lg border border-[color:var(--line)] bg-[color:var(--paper-strong)]/70 p-5"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="truncate font-[var(--font-noto-serif-sc)] text-[18px] tracking-wide">
+                    <div className="pk-serif truncate text-[18px] tracking-wide">
                       {d.recipe.name || "（未命名）"}
                     </div>
                     <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -343,7 +344,7 @@ export function ImportClient() {
                 </div>
 
                 {d.issues.length ? (
-                  <div className="mt-4 rounded-2xl border border-[color:rgba(201,138,99,0.35)] bg-[color:rgba(201,138,99,0.10)] px-3 py-2 text-[12px] leading-6">
+                  <div className="mt-4 rounded-lg border border-[color:rgba(201,138,99,0.35)] bg-[color:rgba(201,138,99,0.10)] px-3 py-2 text-[12px] leading-6">
                     {d.issues.map((x) => (
                       <div key={x}>- {x}</div>
                     ))}
@@ -368,4 +369,3 @@ export function ImportClient() {
     </div>
   );
 }
-

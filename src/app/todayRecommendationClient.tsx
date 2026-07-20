@@ -39,12 +39,12 @@ export function TodayRecommendationClient() {
   const display = selectedRecipes.length ? selectedRecipes : recommended;
 
   return (
-    <section className="overflow-hidden rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] shadow-[var(--shadow-soft)]">
-      <div className="border-b border-[color:var(--line)] px-4 py-4 sm:px-6">
-        <div className="flex items-start justify-between gap-4">
+    <section className="pk-panel">
+      <div className="px-4 py-5 sm:px-6">
+        <div className="flex items-start justify-between gap-4 border-b border-dashed border-[color:rgba(24,33,29,0.18)] pb-4">
           <div className="min-w-0 space-y-2">
             <Badge tone="warm">{todayIds.length ? "今日菜单" : "今日推荐"}</Badge>
-            <h2 className="font-[var(--font-noto-serif-sc)] text-[23px] leading-tight text-[color:var(--foreground)]">
+            <h2 className="pk-serif text-[24px] leading-tight text-[color:var(--foreground)]">
               今天吃这几道
             </h2>
             <p className="max-w-2xl text-[13px] leading-6 text-[color:var(--muted)]">
@@ -61,7 +61,7 @@ export function TodayRecommendationClient() {
         </div>
       </div>
 
-      <div className="grid gap-3 p-3 sm:grid-cols-3 sm:p-4">
+      <div className="grid gap-3 px-3 pb-4 sm:grid-cols-3 sm:px-4">
         {display.length ? (
           display.map((r) => {
             const selected = isTodaySelected(r.id);
@@ -71,7 +71,7 @@ export function TodayRecommendationClient() {
             return (
               <article
                 key={r.id}
-                className="group overflow-hidden rounded-lg border border-[color:var(--line)] bg-[color:var(--paper-strong)] text-[13px] transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:border-[color:rgba(184,92,56,0.36)] hover:shadow-[var(--shadow-soft)]"
+                className="group overflow-hidden rounded-lg border border-[color:var(--line)] bg-[color:var(--paper-strong)] text-[13px] shadow-[0_1px_0_rgba(24,33,29,0.04)] transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:border-[color:rgba(184,92,56,0.36)] hover:shadow-[var(--shadow-soft)]"
               >
                 <Link
                   href={href}
@@ -94,7 +94,7 @@ export function TodayRecommendationClient() {
                 <div className="px-3 py-3">
                   <Link
                     href={href}
-                    className="line-clamp-2 font-[var(--font-noto-serif-sc)] text-[16px] leading-tight transition-colors hover:text-[color:var(--warm)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]"
+                  className="pk-serif line-clamp-2 text-[16px] leading-tight transition-colors hover:text-[color:var(--warm)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]"
                   >
                     {r.name}
                   </Link>

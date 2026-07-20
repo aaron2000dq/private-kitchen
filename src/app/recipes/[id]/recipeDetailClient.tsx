@@ -38,7 +38,7 @@ export function RecipeDetailClient({ id }: { id: string }) {
 
   if (!hydrated) {
     return (
-      <div className="rounded-3xl border border-[color:var(--line)] bg-[color:var(--paper)] p-8">
+      <div className="pk-panel-plain p-8">
         <p className="text-[13px] text-[color:var(--muted-2)]">读取中…</p>
       </div>
     );
@@ -46,7 +46,7 @@ export function RecipeDetailClient({ id }: { id: string }) {
 
   if (!recipe) {
     return (
-      <div className="rounded-3xl border border-[color:var(--line)] bg-[color:var(--paper)] p-8">
+      <div className="pk-panel-plain p-8">
         <Badge tone="muted">未找到</Badge>
         <p className="mt-3 text-[13px] leading-7 text-[color:var(--muted)]">
           这道菜谱可能已被删除，或当前浏览器没有这份数据。
@@ -60,7 +60,7 @@ export function RecipeDetailClient({ id }: { id: string }) {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-3xl border border-[color:var(--line)] bg-[color:var(--paper)] p-6 shadow-[var(--shadow)]">
+      <section className="pk-panel p-5 sm:p-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
@@ -79,7 +79,7 @@ export function RecipeDetailClient({ id }: { id: string }) {
                     : "适中"}
               </Badge>
             </div>
-            <h1 className="mt-4 truncate font-[var(--font-noto-serif-sc)] text-[30px] leading-tight tracking-wide">
+            <h1 className="pk-serif mt-4 truncate text-[31px] leading-tight tracking-wide sm:text-[36px]">
               {recipe.name}
             </h1>
             {recipe.description ? (
@@ -120,7 +120,7 @@ export function RecipeDetailClient({ id }: { id: string }) {
       </section>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <section className="rounded-3xl border border-[color:var(--line)] bg-[color:var(--paper)] p-6">
+        <section className="pk-panel-plain p-5 sm:p-6">
           <Badge tone="muted">用料</Badge>
           {recipe.mainIngredients?.length || recipe.auxiliaryIngredients?.length ? (
             <div className="mt-4 space-y-6">
@@ -131,7 +131,7 @@ export function RecipeDetailClient({ id }: { id: string }) {
                     {recipe.mainIngredients.map((i, idx) => (
                       <li
                         key={`m-${idx}`}
-                        className="flex items-baseline justify-between gap-4 rounded-2xl border border-[color:var(--line)] bg-black/[0.01] px-4 py-3 text-[13px] dark:bg-white/[0.03]"
+                        className="flex items-baseline justify-between gap-4 rounded-lg border border-[color:var(--line)] bg-[color:var(--paper-strong)]/70 px-4 py-3 text-[13px]"
                       >
                         <div className="min-w-0">
                           <div className="truncate">{i.name || "—"}</div>
@@ -159,7 +159,7 @@ export function RecipeDetailClient({ id }: { id: string }) {
                     {recipe.auxiliaryIngredients.map((i, idx) => (
                       <li
                         key={`a-${idx}`}
-                        className="flex items-baseline justify-between gap-4 rounded-2xl border border-[color:var(--line)] bg-black/[0.01] px-4 py-3 text-[13px] dark:bg-white/[0.03]"
+                        className="flex items-baseline justify-between gap-4 rounded-lg border border-[color:var(--line)] bg-[color:var(--paper-strong)]/70 px-4 py-3 text-[13px]"
                       >
                         <div className="min-w-0">
                           <div className="truncate">{i.name || "—"}</div>
@@ -183,7 +183,7 @@ export function RecipeDetailClient({ id }: { id: string }) {
           )}
         </section>
 
-        <section className="rounded-3xl border border-[color:var(--line)] bg-[color:var(--paper)] p-6">
+        <section className="pk-panel-plain p-5 sm:p-6">
           <Badge tone="muted">步骤</Badge>
           {recipe.steps?.length ? (
             <ol className="mt-4 space-y-3">
@@ -193,7 +193,7 @@ export function RecipeDetailClient({ id }: { id: string }) {
                 .map((s) => (
                   <li
                     key={s.order}
-                    className="rounded-2xl border border-[color:var(--line)] bg-black/[0.01] p-4 text-[13px] leading-7 dark:bg-white/[0.03]"
+                    className="rounded-lg border border-[color:var(--line)] bg-[color:var(--paper-strong)]/70 p-4 text-[13px] leading-7"
                   >
                     <div className="flex items-start gap-3">
                       <div className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-full border border-[color:var(--line)] text-[12px] text-[color:var(--muted)]">

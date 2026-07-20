@@ -23,13 +23,16 @@ export function HomeDateHeader() {
   }
 
   return (
-    <header className="space-y-2 pt-1">
-      <p className="font-[var(--font-noto-serif-sc)] text-[24px] leading-snug text-[color:var(--foreground)] sm:text-[28px]">
-        {line1}
-      </p>
-      <p className="max-w-2xl text-[13px] leading-6 text-[color:var(--muted)] sm:text-[14px] sm:leading-7">
-        {line2}
-      </p>
+    <header className="pk-panel px-5 py-6 sm:px-7 sm:py-8">
+      <div className="mx-auto max-w-2xl text-center">
+        <div className="pk-section-label justify-center">今日席单</div>
+        <p className="pk-serif mt-4 text-[25px] leading-snug text-[color:var(--foreground)] sm:text-[34px]">
+          {line1}
+        </p>
+        <p className="mx-auto mt-4 max-w-xl text-[13px] leading-7 text-[color:var(--muted)] sm:text-[14px]">
+          {line2}
+        </p>
+      </div>
     </header>
   );
 }

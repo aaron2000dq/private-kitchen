@@ -68,7 +68,7 @@ export function RecipeCard({
 
   return (
     <article
-      className="group block overflow-hidden rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:border-[color:rgba(184,92,56,0.34)] hover:shadow-[var(--shadow-soft)]"
+      className="group block overflow-hidden rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] shadow-[0_1px_0_rgba(24,33,29,0.04)] transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:border-[color:var(--menu-line)] hover:shadow-[var(--shadow-soft)]"
       draggable={draggable}
       onDragStart={(e: React.DragEvent<HTMLElement>) => {
         onDragStart?.(e);
@@ -93,7 +93,7 @@ export function RecipeCard({
           </div>
         )}
         {recipe.rating ? (
-          <div className="absolute right-2 top-2 rounded-md bg-[color:var(--paper)]/92 px-2 py-1 text-[11px] font-medium text-[color:var(--warm)] shadow-[var(--shadow-soft)]">
+          <div className="absolute right-2 top-2 rounded-md border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/92 px-2 py-1 text-[11px] font-medium text-[color:var(--warm)] shadow-[var(--shadow-soft)]">
             {recipe.rating}/5
           </div>
         ) : null}
@@ -102,7 +102,7 @@ export function RecipeCard({
       <div className="p-3 sm:p-4">
         <Link
           href={href}
-          className="block min-h-[2.45rem] font-[var(--font-noto-serif-sc)] text-[16px] leading-tight text-[color:var(--foreground)] transition-colors hover:text-[color:var(--warm)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)] sm:text-[17px]"
+          className="pk-serif block min-h-[2.45rem] text-[16px] leading-tight text-[color:var(--foreground)] transition-colors hover:text-[color:var(--warm)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)] sm:text-[17px]"
         >
           <span className="line-clamp-2">{recipe.name}</span>
         </Link>
@@ -184,7 +184,7 @@ export function RecipeCard({
           ) : null}
         </Link>
 
-        <div className="mt-3 flex items-center justify-between gap-2 text-[11px] text-[color:var(--muted-2)]">
+        <div className="mt-3 flex items-center justify-between gap-2 border-t border-dashed border-[color:rgba(24,33,29,0.16)] pt-3 text-[11px] text-[color:var(--muted-2)]">
           <span>{formatDate(recipe.updatedAt)}</span>
           <Link
             href={href}

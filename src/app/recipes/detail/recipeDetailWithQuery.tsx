@@ -11,7 +11,7 @@ export function RecipeDetailWithQuery() {
 
   if (!id) {
     return (
-      <div className="rounded-3xl border border-[color:var(--line)] bg-[color:var(--paper)] p-8">
+      <div className="rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] p-8">
         <p className="text-[13px] leading-7 text-[color:var(--muted)]">
           链接里缺少菜谱 id。请从列表或首页卡片进入。
         </p>

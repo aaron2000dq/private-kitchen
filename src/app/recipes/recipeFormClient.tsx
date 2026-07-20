@@ -188,7 +188,8 @@ export function RecipeFormClient({
     <div className="space-y-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="space-y-2">
-          <h1 className="font-[var(--font-noto-serif-sc)] text-[26px] tracking-wide">
+          <div className="pk-section-label">{mode === "create" ? "收录新菜" : "修订菜谱"}</div>
+          <h1 className="pk-serif text-[28px] tracking-wide">
             {mode === "create" ? "新增菜谱" : "编辑菜谱"}
           </h1>
           <p className="text-[13px] leading-6 text-[color:var(--muted)]">
@@ -211,14 +212,14 @@ export function RecipeFormClient({
       </div>
 
       {error ? (
-        <div className="rounded-2xl border border-[color:rgba(201,138,99,0.35)] bg-[color:rgba(201,138,99,0.10)] px-4 py-3 text-[13px] text-[color:var(--foreground)]">
+        <div className="rounded-lg border border-[color:rgba(201,138,99,0.35)] bg-[color:rgba(201,138,99,0.10)] px-4 py-3 text-[13px] text-[color:var(--foreground)]">
           {error}
         </div>
       ) : null}
 
       <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
         <section className="space-y-6">
-          <div className="rounded-3xl border border-[color:var(--line)] bg-[color:var(--paper)] p-6">
+          <div className="pk-panel-plain p-5 sm:p-6">
             <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
               <Badge tone="muted">基本信息</Badge>
               <StarRating value={rating} onChange={setRating} label="评分" />
@@ -275,7 +276,7 @@ export function RecipeFormClient({
             </div>
           </div>
 
-          <div className="rounded-3xl border border-[color:var(--line)] bg-[color:var(--paper)] p-6">
+          <div className="pk-panel-plain p-5 sm:p-6">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <Badge tone="muted">主要食材</Badge>
@@ -342,7 +343,7 @@ export function RecipeFormClient({
             </div>
           </div>
 
-          <div className="rounded-3xl border border-[color:var(--line)] bg-[color:var(--paper)] p-6">
+          <div className="pk-panel-plain p-5 sm:p-6">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <Badge tone="muted">辅料</Badge>
@@ -413,7 +414,7 @@ export function RecipeFormClient({
         </section>
 
         <section className="space-y-6">
-          <div className="rounded-3xl border border-[color:var(--line)] bg-[color:var(--paper)] p-6">
+          <div className="pk-panel-plain p-5 sm:p-6">
             <div className="flex items-center justify-between gap-4">
               <Badge tone="muted">步骤</Badge>
               <Button
@@ -428,7 +429,7 @@ export function RecipeFormClient({
 
             <div className="mt-5 space-y-3">
               {steps.map((row, idx) => (
-                <div key={idx} className="rounded-2xl border border-[color:var(--line)] bg-black/[0.01] p-3 dark:bg-white/[0.03]">
+                <div key={idx} className="rounded-lg border border-[color:var(--line)] bg-[color:var(--paper-strong)]/70 p-3">
                   <div className="flex items-center justify-between gap-3">
                     <div className="text-[12px] text-[color:var(--muted)]">步骤 {idx + 1}</div>
                     <div className="flex items-center gap-2">
@@ -503,7 +504,7 @@ export function RecipeFormClient({
             </div>
           </div>
 
-          <div className="rounded-3xl border border-[color:var(--line)] bg-[color:var(--paper)] p-6">
+          <div className="pk-panel-plain p-5 sm:p-6">
             <div className="flex items-center justify-between gap-4">
               <Badge tone="muted">图片</Badge>
               <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-[color:var(--line)] bg-transparent px-3 py-2 text-[13px] text-[color:var(--muted)] hover:bg-black/[0.03] dark:hover:bg-white/[0.06]">
@@ -527,7 +528,7 @@ export function RecipeFormClient({
                 {images.map((src, idx) => (
                   <div
                     key={idx}
-                    className="group relative overflow-hidden rounded-2xl border border-[color:var(--line)] bg-black/[0.03] dark:bg-white/[0.05]"
+                    className="group relative overflow-hidden rounded-lg border border-[color:var(--line)] bg-[color:var(--paper-strong)]/70"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={src} alt={`图片 ${idx + 1}`} className="h-28 w-full object-cover" />

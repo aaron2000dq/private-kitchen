@@ -318,7 +318,7 @@ function MobileCategoryShelf({
       <section className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] top-14 z-20 flex flex-col overflow-hidden border-y border-[color:var(--line)] bg-[color:var(--paper)] shadow-[var(--shadow-soft)]">
         <div className="shrink-0 space-y-4 p-4">
           <div className="flex items-start gap-3">
-            <div className="grid h-14 w-14 shrink-0 place-items-center rounded-lg border border-[color:rgba(63,111,85,0.18)] bg-[linear-gradient(135deg,rgba(63,111,85,0.12),rgba(215,173,69,0.16))] font-[var(--font-noto-serif-sc)] text-[16px] text-[color:var(--accent)]">
+            <div className="pk-serif grid h-14 w-14 shrink-0 place-items-center rounded-lg border border-[color:var(--menu-line)] bg-[linear-gradient(135deg,rgba(63,111,85,0.10),rgba(185,148,75,0.16))] text-[16px] text-[color:var(--accent)] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.45)]">
               私厨
             </div>
             <div className="min-w-0 flex-1">
@@ -326,7 +326,7 @@ function MobileCategoryShelf({
                 <Badge tone="accent" className="shrink-0">
                   Lv.2
                 </Badge>
-                <h1 className="truncate font-[var(--font-noto-serif-sc)] text-[22px] leading-8">
+                <h1 className="pk-serif truncate text-[22px] leading-8">
                   私人厨房
                 </h1>
               </div>
@@ -350,7 +350,7 @@ function MobileCategoryShelf({
               </span>
               <button
                 type="button"
-                className="pb-2 text-[15px] text-[color:var(--muted)] disabled:opacity-45"
+                className="min-h-9 rounded-lg px-2 pb-2 text-[15px] text-[color:var(--muted)] disabled:opacity-45"
                 disabled={!hydrated || busy}
                 onClick={onReclassify}
               >
@@ -377,7 +377,7 @@ function MobileCategoryShelf({
         </div>
 
         <div className="grid min-h-0 flex-1 grid-cols-[104px_minmax(0,1fr)] overflow-hidden border-t border-[color:var(--line)]">
-          <aside className="min-h-0 overflow-y-auto border-r border-[color:var(--line)] bg-[color:var(--wash)]/42 pb-28">
+          <aside className="min-h-0 overflow-y-auto border-r border-[color:var(--line)] bg-[color:var(--wash)]/50 pb-28">
             {categories.length ? (
               categories.map((category) => {
                 const active = shelfActiveCategory === category.name;
@@ -407,7 +407,7 @@ function MobileCategoryShelf({
                     >
                       {categoryMark(category.name)}
                     </span>
-                    <span className="block truncate text-[13px] font-medium leading-5">
+                    <span className="pk-serif block truncate text-[14px] leading-5">
                       {category.name}
                     </span>
                     <span className="block text-[11px] leading-4 text-[color:var(--muted-2)]">
@@ -431,7 +431,7 @@ function MobileCategoryShelf({
             <div className="sticky top-0 z-10 border-b border-[color:var(--line)] bg-[color:var(--paper-strong)]/95 px-3 py-3 backdrop-blur">
               <div className="flex items-end justify-between gap-3">
                 <div className="min-w-0">
-                  <h2 className="truncate font-[var(--font-noto-serif-sc)] text-[20px] leading-7">
+                  <h2 className="pk-serif truncate text-[20px] leading-7">
                     {shelfActiveCategory ?? "暂无分类"}
                   </h2>
                   <p className="text-[11px] leading-4 text-[color:var(--muted-2)]">
@@ -495,10 +495,10 @@ function MobileCategoryShelf({
       </section>
 
       <div className="fixed inset-x-3 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-30 md:hidden">
-        <div className="mx-auto flex max-w-lg items-center gap-2 rounded-full border border-[color:var(--line)] bg-[color:var(--paper)]/96 p-2 shadow-[0_12px_28px_rgba(24,33,29,0.16)] backdrop-blur">
+        <div className="mx-auto flex max-w-lg items-center gap-2 rounded-lg border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/96 p-2 shadow-[0_12px_28px_rgba(24,33,29,0.16)] backdrop-blur">
           <Link
             href="/"
-            className="flex h-11 min-w-0 flex-1 items-center gap-2 rounded-full px-3 text-left text-[13px] text-[color:var(--foreground)]"
+            className="flex h-11 min-w-0 flex-1 items-center gap-2 rounded-lg px-3 text-left text-[13px] text-[color:var(--foreground)]"
           >
             <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[color:rgba(63,111,85,0.12)] text-[color:var(--accent)]">
               菜
@@ -512,7 +512,7 @@ function MobileCategoryShelf({
           </Link>
           <button
             type="button"
-            className="h-10 shrink-0 rounded-full border border-[color:rgba(63,111,85,0.32)] px-3 text-[13px] font-medium text-[color:var(--accent)] disabled:opacity-45"
+            className="h-10 shrink-0 rounded-lg border border-[color:rgba(63,111,85,0.32)] px-3 text-[13px] font-medium text-[color:var(--accent)] disabled:opacity-45"
             disabled={!canRandomPick || busy}
             onClick={onRandomPick}
           >
@@ -520,7 +520,7 @@ function MobileCategoryShelf({
           </button>
           <Link
             href="/"
-            className="inline-flex h-10 shrink-0 items-center justify-center rounded-full bg-[color:var(--foreground)] px-4 text-[13px] font-medium text-[color:var(--background)]"
+            className="inline-flex h-10 shrink-0 items-center justify-center rounded-lg bg-[color:var(--foreground)] px-4 text-[13px] font-medium text-[color:var(--background)]"
           >
             查看
           </Link>
@@ -612,7 +612,7 @@ function ShelfRecipeRow({
         <select
           id={`category-${recipe.id}`}
           value={recipe.category}
-          className="h-7 w-12 rounded-md border border-[color:var(--line)] bg-[color:var(--paper)] px-1 text-[11px] text-[color:var(--muted)]"
+          className="h-9 w-12 rounded-md border border-[color:var(--line)] bg-[color:var(--paper)] px-1 text-[11px] text-[color:var(--muted)]"
           onChange={(e) => {
             const next = e.target.value;
             if (!isRecipeCategory(next)) return;
@@ -647,9 +647,11 @@ function DesktopCategoryHeader({
   onReclassify: () => void;
 }) {
   return (
-    <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <div className="pk-panel p-5 md:p-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
       <div className="space-y-2">
-        <h1 className="font-[var(--font-noto-serif-sc)] text-[26px] tracking-wide">分类</h1>
+        <div className="pk-section-label">分类货架</div>
+        <h1 className="pk-serif text-[28px] tracking-wide">分类</h1>
         <p className="text-[13px] leading-6 text-[color:var(--muted)]">
           按类别聚合，你会更容易找到想做的那一道。
         </p>
@@ -667,6 +669,7 @@ function DesktopCategoryHeader({
           </Button>
           {msg ? <span className="text-[12px] text-[color:var(--muted-2)]">{msg}</span> : null}
         </div>
+      </div>
       </div>
     </div>
   );
@@ -686,7 +689,7 @@ function DesktopCategoryFilters({
   hydrated: boolean;
 }) {
   return (
-    <div className="sticky top-16 z-20 flex flex-wrap items-center gap-2 border-b border-[color:var(--line)] bg-[color:var(--paper)]/90 backdrop-blur py-3">
+    <div className="sticky top-16 z-20 flex flex-wrap items-center gap-2 rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)]/90 px-3 py-3 shadow-[var(--shadow-soft)] backdrop-blur">
       <button
         type="button"
         onClick={() => setActive("全部")}
@@ -743,7 +746,7 @@ function DesktopCategoryGrid({
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       {hydrated && recipes.length === 0 ? (
-        <div className="rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] p-10 text-center md:col-span-2 xl:col-span-3">
+        <div className="pk-panel-plain p-10 text-center md:col-span-2 xl:col-span-3">
           <Badge tone="muted">空</Badge>
           <p className="mt-3 text-[13px] leading-7 text-[color:var(--muted)]">
             这个分类暂时没有内容。

@@ -11,6 +11,10 @@ const imageExt = /\.(jpe?g|png|webp)$/i;
 const thumbWidth = 720;
 const thumbHeight = 540;
 
+function isAppAsset(name) {
+  return /^private-kitchen-.+\.webp$/i.test(name);
+}
+
 function stripExt(name) {
   return name.replace(/\.[^.]+$/, "");
 }
@@ -32,7 +36,14 @@ if (!fs.existsSync(from)) {
 await fsp.mkdir(to, { recursive: true });
 await fsp.mkdir(thumbs, { recursive: true });
 
-let copied = 0;
+for (const name of await fsp.readdir(to)) {
+  const dest = path.join(to, name);
+  const stat = await fsp.stat(dest);
+  if (stat.isFile()) await fsp.unlink(dest);
+}
+
+const expectedThumbs = new Set();
+let copiedAssets = 0;
 let thumbed = 0;
 let skippedThumbs = 0;
 
@@ -43,13 +54,17 @@ for (const name of await fsp.readdir(from)) {
   const stat = await fsp.stat(src);
   if (!stat.isFile()) continue;
 
-  const dest = path.join(to, name);
-  await fsp.copyFile(src, dest);
-  copied++;
+  if (isAppAsset(name)) {
+    const dest = path.join(to, name);
+    await fsp.copyFile(src, dest);
+    copiedAssets++;
+    continue;
+  }
 
   if (!imageExt.test(name)) continue;
 
   const thumbDest = path.join(thumbs, `${stripExt(name)}.webp`);
+  expectedThumbs.add(path.basename(thumbDest));
   if (await isFresh(src, thumbDest)) {
     skippedThumbs++;
     continue;
@@ -68,6 +83,12 @@ for (const name of await fsp.readdir(from)) {
   thumbed++;
 }
 
+for (const name of await fsp.readdir(thumbs)) {
+  if (!expectedThumbs.has(name)) {
+    await fsp.unlink(path.join(thumbs, name));
+  }
+}
+
 console.log(
-  `[copy-images] copied ${copied} file(s), generated ${thumbed} thumbnail(s), reused ${skippedThumbs}.`,
+  `[copy-images] copied ${copiedAssets} app asset(s), generated ${thumbed} thumbnail(s), reused ${skippedThumbs}.`,
 );

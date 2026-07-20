@@ -98,7 +98,8 @@ export function RecipesListClient({
       {showHeader ? (
         <div className="flex items-end justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="font-[var(--font-noto-serif-sc)] text-[28px] leading-tight">菜谱库</h1>
+            <div className="pk-section-label">私房菜谱</div>
+            <h1 className="pk-serif text-[30px] leading-tight">菜谱库</h1>
             <p className="text-[13px] leading-6 text-[color:var(--muted)]">
               {hydrated ? `${recipes.length} 道家常菜` : "读取本地菜谱"}
             </p>
@@ -108,7 +109,7 @@ export function RecipesListClient({
       ) : null}
 
       {showTodayShelf ? (
-        <section className="rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] p-3 shadow-[var(--shadow-soft)] sm:p-4">
+        <section className="pk-panel p-3 pb-5 sm:p-4 sm:pb-5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 space-y-1">
               <Badge tone="warm">今日菜单</Badge>
@@ -142,13 +143,13 @@ export function RecipesListClient({
           ) : null}
 
           {selectedRecipes.length ? (
-            <div className="mt-3 flex gap-3 overflow-x-auto pb-1">
+            <div className="pk-scrollbar mt-3 flex gap-3 overflow-x-auto pb-1">
               {selectedRecipes.map((recipe) => {
                 const image = recipe.images?.[0];
                 return (
                   <div
                     key={recipe.id}
-                    className="w-36 shrink-0 overflow-hidden rounded-lg border border-[color:var(--line)] bg-[color:var(--paper-strong)]"
+                    className="w-36 shrink-0 overflow-hidden rounded-lg border border-[color:var(--line)] bg-[color:var(--paper-strong)] shadow-[0_1px_0_rgba(24,33,29,0.04)]"
                   >
                     <div className="aspect-[4/3] bg-[color:var(--wash)]">
                       {image ? (
@@ -165,7 +166,7 @@ export function RecipesListClient({
                       )}
                     </div>
                     <div className="space-y-2 p-2.5">
-                      <div className="line-clamp-2 min-h-[2rem] font-[var(--font-noto-serif-sc)] text-[13px] leading-4">
+                      <div className="pk-serif line-clamp-2 min-h-[2rem] text-[13px] leading-4">
                         {recipe.name}
                       </div>
                       <Button
@@ -190,13 +191,13 @@ export function RecipesListClient({
         </section>
       ) : null}
 
-      <div className="sticky top-14 z-20 -mx-4 space-y-3 border-y border-[color:var(--line)] bg-[color:var(--background)]/94 px-4 py-3 backdrop-blur sm:static sm:mx-0 sm:rounded-lg sm:border sm:bg-[color:var(--paper)] sm:p-3">
+      <div className="sticky top-14 z-20 -mx-4 space-y-3 border-y border-[color:var(--line)] bg-[color:var(--background)]/94 px-4 py-3 backdrop-blur sm:static sm:mx-0 sm:rounded-lg sm:border sm:bg-[color:var(--paper)]/88 sm:p-3 sm:shadow-[var(--shadow-soft)]">
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="搜索菜名、食材、标签"
         />
-        <div className="flex gap-2 overflow-x-auto pb-0.5">
+        <div className="pk-scrollbar flex gap-2 overflow-x-auto pb-0.5">
           <button
             type="button"
             className={cn(
@@ -252,7 +253,7 @@ export function RecipesListClient({
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] p-8 text-center">
+        <div className="pk-panel-plain p-8 text-center">
           <div className="mx-auto max-w-md space-y-3">
             <Badge tone="muted">空</Badge>
             <p className="text-[14px] leading-7 text-[color:var(--muted)]">

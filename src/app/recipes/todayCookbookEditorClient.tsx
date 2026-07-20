@@ -65,7 +65,8 @@ export function TodayCookbookEditorClient() {
     <div className="space-y-8">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div className="space-y-2">
-          <h1 className="font-[var(--font-noto-serif-sc)] text-[26px] tracking-wide">
+          <div className="pk-section-label">今日家宴</div>
+          <h1 className="pk-serif text-[28px] tracking-wide">
             编辑今日的菜谱
           </h1>
           <p className="text-[13px] leading-6 text-[color:var(--muted)]">
@@ -87,17 +88,17 @@ export function TodayCookbookEditorClient() {
       </div>
 
       {exportError ? (
-        <div className="rounded-2xl border border-[color:rgba(201,138,99,0.35)] bg-[color:rgba(201,138,99,0.10)] px-4 py-3 text-[13px]">
+        <div className="rounded-lg border border-[color:rgba(201,138,99,0.35)] bg-[color:rgba(201,138,99,0.10)] px-4 py-3 text-[13px]">
           {exportError}
         </div>
       ) : null}
 
       {!recipesHydrated || !todayHydrated || waitingForRecipeList ? (
-        <div className="rounded-3xl border border-[color:var(--line)] bg-[color:var(--paper)] p-8 text-[13px] text-[color:var(--muted-2)]">
+        <div className="pk-panel-plain p-8 text-[13px] text-[color:var(--muted-2)]">
           读取中…
         </div>
       ) : selectedRecipes.length === 0 ? (
-        <div className="rounded-3xl border border-[color:var(--line)] bg-[color:var(--paper)] p-8">
+        <div className="pk-panel-plain p-8">
           <Badge tone="muted">空</Badge>
           <p className="mt-3 text-[13px] leading-7 text-[color:var(--muted)]">
             还没有设置今日菜谱。去「今日」或「分类」挑最多 10 道吧。
@@ -108,24 +109,24 @@ export function TodayCookbookEditorClient() {
           {selectedRecipes.map((r) => (
             <div
               key={r.id}
-              className="rounded-3xl border border-[color:var(--line)] bg-[color:var(--paper)] p-5"
+              className="overflow-hidden rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] shadow-[var(--shadow-soft)]"
             >
-              <div className="flex items-start justify-between gap-4">
+              <div className="relative">
                 <div className="min-w-0">
                   {r.images?.[0] ? (
                     <VisuallyLosslessThumb
                       src={recipeImageThumbUrl(r.images[0])}
                       fallbackSrc={recipeImageUrl(r.images[0])}
                       alt={r.name}
-                      className="h-32 w-full rounded-lg border border-[color:var(--line)] bg-black/[0.03] object-cover"
+                      className="h-36 w-full border-b border-[color:var(--line)] bg-[color:var(--wash)] object-cover"
                     />
                   ) : (
-                    <div className="flex h-32 w-full items-center justify-center rounded-2xl border border-[color:var(--line)] bg-black/[0.02] text-[12px] text-[color:var(--muted-2)]">
+                    <div className="flex h-36 w-full items-center justify-center border-b border-[color:var(--line)] bg-[color:var(--wash)] text-[12px] text-[color:var(--muted-2)]">
                       无图
                     </div>
                   )}
                 </div>
-                <div className="shrink-0">
+                <div className="absolute right-3 top-3 shrink-0">
                   <Button
                     size="sm"
                     variant="outline"
@@ -137,8 +138,8 @@ export function TodayCookbookEditorClient() {
                 </div>
               </div>
 
-              <div className="mt-4 space-y-2">
-                <div className="truncate font-[var(--font-noto-serif-sc)] text-[18px] tracking-wide">
+              <div className="space-y-2 p-4">
+                <div className="pk-serif truncate text-[18px] tracking-wide">
                   {r.name}
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
