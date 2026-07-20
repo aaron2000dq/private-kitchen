@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/Badge";
 import { StarRating } from "@/components/ui/StarRating";
 import { ButtonLink } from "@/components/ui/Button";
 import { VisuallyLosslessThumb } from "@/components/recipes/VisuallyLosslessThumb";
+import { RecipeCookingMode } from "@/components/recipes/RecipeCookingMode";
 
 function formatDate(iso: string) {
   try {
@@ -87,6 +88,12 @@ export function RecipeDetailClient({ id }: { id: string }) {
                 {recipe.description}
               </p>
             ) : null}
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
+              <RecipeCookingMode recipe={recipe} />
+              <div className="text-[12px] leading-5 text-[color:var(--muted-2)]">
+                大字步骤、滑动切换、计时器都会保存在本机。
+              </div>
+            </div>
           </div>
 
           <div className="shrink-0">
