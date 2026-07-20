@@ -23,6 +23,17 @@ import {
   buildTodayMenuInsights,
   pickBalancedTodayMenu,
 } from "@/lib/today/menuInsights";
+import {
+  GUEST_CONSTRAINT_OPTIONS,
+  buildGuestFitPlan,
+  createGuestProfile,
+  filterGuestSafeRecipes,
+  guestConstraintLabels,
+  persistGuestProfile,
+  readGuestProfile,
+  type GuestConstraintKey,
+  type GuestProfile,
+} from "@/lib/today/guestProfile";
 
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
@@ -204,6 +215,19 @@ function sameStringSet(a: Set<string>, b: Set<string>): boolean {
 
 function sameOrderedIds(a: string[], b: string[]): boolean {
   return a.length === b.length && a.every((id, index) => id === b[index]);
+}
+
+function mergeUniqueRecipes(...lists: Recipe[][]): Recipe[] {
+  const seen = new Set<string>();
+  const merged: Recipe[] = [];
+  for (const list of lists) {
+    for (const recipe of list) {
+      if (seen.has(recipe.id)) continue;
+      seen.add(recipe.id);
+      merged.push(recipe);
+    }
+  }
+  return merged;
 }
 
 function tableRoleOf(recipe: Recipe): TableMealRole {
@@ -442,6 +466,8 @@ export function RecipesListClient({
   const [dinnerTimeHydrated, setDinnerTimeHydrated] = React.useState(false);
   const [dinerCount, setDinerCount] = React.useState(2);
   const [dinerCountHydrated, setDinerCountHydrated] = React.useState(false);
+  const [guestProfile, setGuestProfile] = React.useState<GuestProfile>(() => createGuestProfile());
+  const [guestHydrated, setGuestHydrated] = React.useState(false);
 
   React.useEffect(() => {
     setLockedIds(new Set(readLockedMenuIds()));
@@ -464,6 +490,11 @@ export function RecipesListClient({
   }, []);
 
   React.useEffect(() => {
+    setGuestProfile(readGuestProfile());
+    setGuestHydrated(true);
+  }, []);
+
+  React.useEffect(() => {
     if (!locksHydrated) return;
     persistLockedMenuIds(Array.from(lockedIds));
   }, [lockedIds, locksHydrated]);
@@ -482,6 +513,11 @@ export function RecipesListClient({
     if (!dinerCountHydrated) return;
     persistDinerCount(dinerCount);
   }, [dinerCount, dinerCountHydrated]);
+
+  React.useEffect(() => {
+    if (!guestHydrated) return;
+    persistGuestProfile(guestProfile);
+  }, [guestHydrated, guestProfile]);
 
   const planScenes = React.useMemo(
     () =>
@@ -550,17 +586,30 @@ export function RecipesListClient({
     () => buildTodayMenuInsights(selectedRecipes, dinerCount),
     [dinerCount, selectedRecipes],
   );
+  const guestFit = React.useMemo(
+    () => buildGuestFitPlan(selectedRecipes, guestProfile),
+    [guestProfile, selectedRecipes],
+  );
+  const guestSafeRecipes = React.useMemo(
+    () => filterGuestSafeRecipes(recipes, guestProfile),
+    [guestProfile, recipes],
+  );
+  const hasGuestConstraints = guestProfile.constraintKeys.length > 0;
+  const guestAwareRecipePool = React.useMemo(
+    () => (hasGuestConstraints && guestSafeRecipes.length ? guestSafeRecipes : recipes),
+    [guestSafeRecipes, hasGuestConstraints, recipes],
+  );
   const dinnerPrepPlan = React.useMemo(
     () => buildDinnerPrepPlan(selectedRecipes, dinnerTime),
     [dinnerTime, selectedRecipes],
   );
   const fillSuggestions = React.useMemo(() => {
     if (!selectedRecipes.length || selectedRecipes.length >= todayMax) return [];
-    return buildMenuFillSuggestions(recipes, selectedRecipes, recentRecipeIds, Math.min(3, todayMax - selectedRecipes.length));
-  }, [recipes, recentRecipeIds, selectedRecipes, todayMax]);
+    return buildMenuFillSuggestions(guestAwareRecipePool, selectedRecipes, recentRecipeIds, Math.min(3, todayMax - selectedRecipes.length));
+  }, [guestAwareRecipePool, recentRecipeIds, selectedRecipes, todayMax]);
   const roleSlotSuggestions = React.useMemo(
-    () => buildRoleSlotSuggestions(recipes, selectedRecipes, recentRecipeIds),
-    [recipes, recentRecipeIds, selectedRecipes],
+    () => buildRoleSlotSuggestions(guestAwareRecipePool, selectedRecipes, recentRecipeIds),
+    [guestAwareRecipePool, recentRecipeIds, selectedRecipes],
   );
   const roleSlotSuggestionIds = React.useMemo(
     () =>
@@ -636,14 +685,27 @@ export function RecipesListClient({
   };
 
   const onShuffleMenu = async () => {
-    const picked = buildMenuWithLockedRecipes(recipes, selectedRecipes, lockedIds, todayMax, planScene, recentRecipeIds);
+    const targetCount = Math.min(
+      todayMax,
+      recipes.length,
+      Math.max(MENU_PLAN_PRESETS[planScene].targetCount, lockedSelectedRecipes.length),
+    );
+    const safeNeeded = Math.max(1, targetCount - lockedSelectedRecipes.length);
+    const useGuestPool = hasGuestConstraints && guestSafeRecipes.length >= safeNeeded;
+    const shufflePool = useGuestPool ? mergeUniqueRecipes(guestSafeRecipes, lockedSelectedRecipes) : recipes;
+    const picked = buildMenuWithLockedRecipes(shufflePool, selectedRecipes, lockedIds, todayMax, planScene, recentRecipeIds);
     if (!picked.length) return;
     await replace(picked.map((recipe) => recipe.id));
     setExportError(null);
+    const guestPrefix = hasGuestConstraints
+      ? useGuestPool
+        ? `已按「${guestConstraintLabels(guestProfile.constraintKeys, 3).join("、")}」避开忌口，`
+        : "客人档案限制较多，已优先匹配可用菜，"
+      : "";
     setMenuTip(
       lockedSelectedCount
-        ? `已保留 ${lockedSelectedCount} 道锁定菜，并按「${MENU_PLAN_PRESETS[planScene].label}」补齐到 ${picked.length} 道。`
-        : `已按「${MENU_PLAN_PRESETS[planScene].label}」${recentRecipeIds.length ? "避开近期重复，" : ""}配好 ${picked.length} 道：${picked.slice(0, 3).map((recipe) => recipe.name).join("、")}${picked.length > 3 ? "等" : ""}`,
+        ? `${guestPrefix}已保留 ${lockedSelectedCount} 道锁定菜，并按「${MENU_PLAN_PRESETS[planScene].label}」补齐到 ${picked.length} 道。`
+        : `${guestPrefix}已按「${MENU_PLAN_PRESETS[planScene].label}」${recentRecipeIds.length ? "避开近期重复，" : ""}配好 ${picked.length} 道：${picked.slice(0, 3).map((recipe) => recipe.name).join("、")}${picked.length > 3 ? "等" : ""}`,
     );
   };
 
@@ -749,6 +811,43 @@ export function RecipesListClient({
     setExportError(null);
   };
 
+  const onChangeGuestName = (name: string) => {
+    setGuestProfile((current) => ({
+      ...current,
+      name: name.slice(0, 18),
+      updatedAt: new Date().toISOString(),
+    }));
+  };
+
+  const onChangeGuestNote = (note: string) => {
+    setGuestProfile((current) => ({
+      ...current,
+      note: note.slice(0, 48),
+      updatedAt: new Date().toISOString(),
+    }));
+  };
+
+  const onToggleGuestConstraint = (key: GuestConstraintKey) => {
+    setGuestProfile((current) => {
+      const nextKeys = current.constraintKeys.includes(key)
+        ? current.constraintKeys.filter((item) => item !== key)
+        : [...current.constraintKeys, key];
+      return {
+        ...current,
+        constraintKeys: nextKeys,
+        updatedAt: new Date().toISOString(),
+      };
+    });
+    setMenuTip(null);
+    setExportError(null);
+  };
+
+  const onClearGuestProfile = () => {
+    setGuestProfile(createGuestProfile());
+    setMenuTip("已清空宴客档案。");
+    setExportError(null);
+  };
+
   const onRecordCooked = async () => {
     if (!selectedRecipes.length) return;
     setRecordBusy(true);
@@ -771,6 +870,9 @@ export function RecipesListClient({
         `${menuInsights.serving.diners}人份 · 菜场路线`,
         `菜场预算：${menuInsights.budget.range} · ${menuInsights.budget.perPerson}`,
         `口味节奏：${menuInsights.palate.label} · ${menuInsights.palate.score}分`,
+        `客人档案：${guestFit.label}${guestFit.activeLabels.length ? ` · ${guestFit.activeLabels.join("、")}` : ""}`,
+        ...(guestProfile.note.trim() ? [`客人备注：${guestProfile.note.trim()}`] : []),
+        ...guestFit.warnings.map((warning) => `提醒：${warning}`),
         ...menuInsights.shoppingGroups.flatMap((group) => [
           `【${group.label}】`,
           ...group.items.map((item) => `□ ${item}`),
@@ -833,10 +935,13 @@ export function RecipesListClient({
     setSwapBusyId(recipe.id);
     setExportError(null);
     try {
-      const nextRecipe = pickSwapCandidate(recipes, selectedRecipes, recipe, recentRecipeIds);
+      let nextRecipe = pickSwapCandidate(guestAwareRecipePool, selectedRecipes, recipe, recentRecipeIds);
       if (!nextRecipe) {
-        setExportError("暂时没有可替换的菜。");
-        return;
+        nextRecipe = pickSwapCandidate(recipes, selectedRecipes, recipe, recentRecipeIds);
+        if (!nextRecipe) {
+          setExportError("暂时没有可替换的菜。");
+          return;
+        }
       }
       const nextIds = [...todayIds];
       nextIds[index] = nextRecipe.id;
@@ -1008,6 +1113,106 @@ export function RecipesListClient({
                 );
               })}
             </div>
+          </div>
+
+          <div className="mt-3 rounded-lg border border-[color:rgba(63,111,85,0.22)] bg-[linear-gradient(180deg,rgba(63,111,85,0.07),rgba(255,253,246,0.55))] p-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-[11px] text-[color:var(--muted-2)]">宴客档案</div>
+                <div className="pk-serif mt-1 text-[18px] leading-tight">
+                  {guestFit.headline}
+                </div>
+                <div className="mt-1 line-clamp-2 text-[11px] leading-5 text-[color:var(--muted)]">
+                  {guestFit.summary}
+                </div>
+              </div>
+              <Badge
+                tone={guestFit.riskRecipes.length ? "warm" : guestProfile.constraintKeys.length ? "accent" : "muted"}
+                className="shrink-0"
+              >
+                {guestFit.score}
+              </Badge>
+            </div>
+
+            <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto] gap-2">
+              <Input
+                value={guestProfile.name}
+                onChange={(event) => onChangeGuestName(event.target.value)}
+                placeholder="这桌客人"
+                className="h-10 text-[13px]"
+                disabled={!guestHydrated}
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-10 px-2.5 text-[12px]"
+                disabled={!guestHydrated || (!guestProfile.name && !guestProfile.constraintKeys.length && !guestProfile.note)}
+                onClick={onClearGuestProfile}
+              >
+                清空
+              </Button>
+            </div>
+            <Input
+              value={guestProfile.note}
+              onChange={(event) => onChangeGuestNote(event.target.value)}
+              placeholder="备注：少盐、孩子一起吃"
+              className="mt-2 h-10 text-[13px]"
+              disabled={!guestHydrated}
+            />
+
+            <div className="mt-3 grid grid-cols-3 gap-1.5">
+              {GUEST_CONSTRAINT_OPTIONS.map((option) => {
+                const active = guestProfile.constraintKeys.includes(option.key);
+                return (
+                  <button
+                    key={option.key}
+                    type="button"
+                    aria-pressed={active}
+                    className={cn(
+                      "min-h-12 rounded-md border px-2 py-2 text-left transition-colors",
+                      active
+                        ? "border-[color:rgba(63,111,85,0.38)] bg-[color:rgba(63,111,85,0.12)] text-[color:var(--accent)]"
+                        : "border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/70 text-[color:var(--muted)]",
+                    )}
+                    title={option.detail}
+                    disabled={!guestHydrated}
+                    onClick={() => onToggleGuestConstraint(option.key)}
+                  >
+                    <span className="block text-[12px] font-medium leading-none">{option.shortLabel}</span>
+                    <span className="mt-1 block truncate text-[10px] opacity-70">{option.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {guestFit.notes.map((note) => (
+                <span
+                  key={note}
+                  className={cn(
+                    "rounded-md border px-2 py-1 text-[11px] leading-none",
+                    guestFit.riskRecipes.length
+                      ? "border-[color:rgba(184,92,56,0.20)] bg-[color:rgba(184,92,56,0.07)] text-[color:var(--warm)]"
+                      : "border-[color:rgba(63,111,85,0.18)] bg-[color:rgba(63,111,85,0.07)] text-[color:var(--accent)]",
+                  )}
+                >
+                  {note}
+                </span>
+              ))}
+            </div>
+
+            {guestFit.warnings.length ? (
+              <div className="mt-3 grid gap-1.5">
+                {guestFit.warnings.map((warning) => (
+                  <div
+                    key={warning}
+                    className="rounded-md border border-[color:rgba(184,92,56,0.22)] bg-[color:rgba(184,92,56,0.07)] px-2.5 py-2 text-[11px] leading-5 text-[color:var(--warm)]"
+                  >
+                    {warning}
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </div>
 
           <div className="mt-3 flex items-center justify-between gap-3 rounded-lg border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/72 px-3 py-2.5">

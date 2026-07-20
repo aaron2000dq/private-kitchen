@@ -7,6 +7,7 @@ import { useRecipes } from "@/lib/recipes/useRecipes";
 import { useTodayCookbook } from "@/lib/today/useTodayCookbook";
 import { buildTodayMenuInsights } from "@/lib/today/menuInsights";
 import { useKitchenPrepProgress } from "@/lib/today/useKitchenPrepProgress";
+import { buildGuestFitPlan, createGuestProfile, readGuestProfile, type GuestProfile } from "@/lib/today/guestProfile";
 
 const DINER_COUNT_KEY = "private-kitchen:diner-count:v1";
 
@@ -41,9 +42,11 @@ export function TodayMenuConcierge() {
   const { ids } = useTodayCookbook();
   const [dinerCount, setDinerCount] = React.useState(2);
   const [copyTip, setCopyTip] = React.useState<string | null>(null);
+  const [guestProfile, setGuestProfile] = React.useState<GuestProfile>(() => createGuestProfile());
 
   React.useEffect(() => {
     setDinerCount(readDinerCount());
+    setGuestProfile(readGuestProfile());
   }, []);
 
   const selectedRecipes = React.useMemo(() => {
@@ -63,12 +66,16 @@ export function TodayMenuConcierge() {
   const shoppingTotal = insights.shoppingList.length;
   const shoppingPercent = shoppingTotal ? Math.round((prepProgress.doneCount / shoppingTotal) * 100) : 0;
   const selectedNames = React.useMemo(() => selectedRecipes.map((recipe) => recipe.name), [selectedRecipes]);
+  const guestFit = React.useMemo(
+    () => buildGuestFitPlan(selectedRecipes, guestProfile),
+    [guestProfile, selectedRecipes],
+  );
 
   const dashboardStats = [
     { label: "人数", value: `${insights.serving.diners} 人`, tone: "warm" as const },
     { label: "预算", value: insights.budget.range, tone: "warm" as const },
     { label: "口味", value: insights.palate.label, tone: "accent" as const },
-    { label: "采购", value: `${prepProgress.doneCount}/${shoppingTotal || 0}`, tone: "muted" as const },
+    { label: "客人", value: guestFit.label, tone: guestFit.riskRecipes.length ? ("warm" as const) : ("muted" as const) },
   ];
 
   const onCopyBrief = async () => {
@@ -82,8 +89,11 @@ export function TodayMenuConcierge() {
           `完成度：${insights.score}/100`,
           `预算：${insights.budget.range} · ${insights.budget.perPerson}`,
           `口味：${insights.palate.label} · ${insights.palate.score}分`,
+          `客人：${guestFit.label}${guestFit.activeLabels.length ? ` · ${guestFit.activeLabels.join("、")}` : ""}`,
+          ...(guestProfile.note.trim() ? [`客人备注：${guestProfile.note.trim()}`] : []),
           `采购：${prepProgress.doneCount}/${shoppingTotal || 0} 项已备`,
           `提示：${insights.palate.notes.slice(0, 2).join("；")}`,
+          ...guestFit.warnings.map((warning) => `忌口提醒：${warning}`),
         ].join("\n"),
       );
       setCopyTip("今日简报已复制。");
@@ -174,6 +184,25 @@ export function TodayMenuConcierge() {
                 <span
                   key={note}
                   className="rounded-md border border-[color:rgba(63,111,85,0.22)] bg-[color:rgba(63,111,85,0.07)] px-2.5 py-1 text-[12px] text-[color:var(--accent)]"
+                >
+                  {note}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div className="text-[12px] text-[color:var(--muted-2)]">宴客提醒</div>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {(guestFit.warnings.length ? guestFit.warnings : guestFit.notes).slice(0, 3).map((note) => (
+                <span
+                  key={note}
+                  className={cn(
+                    "rounded-md border px-2.5 py-1 text-[12px]",
+                    guestFit.warnings.length
+                      ? "border-[color:rgba(184,92,56,0.24)] bg-[color:rgba(184,92,56,0.07)] text-[color:var(--warm)]"
+                      : "border-[color:rgba(63,111,85,0.22)] bg-[color:rgba(63,111,85,0.07)] text-[color:var(--accent)]",
+                  )}
                 >
                   {note}
                 </span>
