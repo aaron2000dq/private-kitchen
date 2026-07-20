@@ -54,6 +54,14 @@ export function useTodayCookbook(max: number = DEFAULT_MAX) {
     [ids, persist],
   );
 
+  const replace = React.useCallback(
+    async (nextIds: string[]) => {
+      const unique = Array.from(new Set(nextIds)).slice(0, max);
+      await persist(unique);
+    },
+    [max, persist],
+  );
+
   const clear = React.useCallback(async () => {
     setValue(null);
     await TodayCookbookRepository.clear();
@@ -66,6 +74,7 @@ export function useTodayCookbook(max: number = DEFAULT_MAX) {
     max,
     add,
     remove,
+    replace,
     clear,
   };
 }

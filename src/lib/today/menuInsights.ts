@@ -39,6 +39,59 @@ function roleOf(recipe: Recipe): MenuRole {
   return "家常";
 }
 
+function weightedRandom<T>(items: T[], weightOf: (item: T) => number): T | null {
+  if (!items.length) return null;
+  const weighted = items.map((item) => ({
+    item,
+    weight: Math.max(1, weightOf(item)),
+  }));
+  const total = weighted.reduce((sum, entry) => sum + entry.weight, 0);
+  let cursor = Math.random() * total;
+  for (const entry of weighted) {
+    cursor -= entry.weight;
+    if (cursor <= 0) return entry.item;
+  }
+  return weighted[weighted.length - 1]?.item ?? null;
+}
+
+function pickFromRole(
+  recipes: Recipe[],
+  role: MenuRole,
+  pickedIds: Set<string>,
+): Recipe | null {
+  const candidates = recipes.filter((recipe) => !pickedIds.has(recipe.id) && roleOf(recipe) === role);
+  return weightedRandom(candidates, (recipe) => recipe.rating + (recipe.images.length ? 2 : 0) + 1);
+}
+
+export function pickBalancedTodayMenu(recipes: Recipe[], max = 10): Recipe[] {
+  const targetCount = Math.min(max, recipes.length, 6);
+  const picked: Recipe[] = [];
+  const pickedIds = new Set<string>();
+  const requiredRoles: MenuRole[] = ["主菜", "蔬菜", "汤羹", "主食"];
+
+  for (const role of requiredRoles) {
+    if (picked.length >= targetCount) break;
+    const recipe = pickFromRole(recipes, role, pickedIds);
+    if (!recipe) continue;
+    picked.push(recipe);
+    pickedIds.add(recipe.id);
+  }
+
+  while (picked.length < targetCount) {
+    const remaining = recipes.filter((recipe) => !pickedIds.has(recipe.id));
+    const recipe = weightedRandom(remaining, (item) => {
+      const roleBonus = picked.some((pickedRecipe) => roleOf(pickedRecipe) === roleOf(item)) ? 1 : 3;
+      const categoryBonus = picked.some((pickedRecipe) => pickedRecipe.category === item.category) ? 1 : 2;
+      return item.rating + roleBonus + categoryBonus + (item.images.length ? 1 : 0);
+    });
+    if (!recipe) break;
+    picked.push(recipe);
+    pickedIds.add(recipe.id);
+  }
+
+  return picked;
+}
+
 function cookingWeight(recipe: Recipe): number {
   const text = recipeText(recipe);
   if (/(炖|煲|汤|粥|牛腩|排骨|鸡汤|砂锅)/.test(text)) return 3;

@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { RecipeCard } from "@/components/recipes/RecipeCard";
 import { VisuallyLosslessThumb } from "@/components/recipes/VisuallyLosslessThumb";
-import { buildTodayMenuInsights } from "@/lib/today/menuInsights";
+import { buildTodayMenuInsights, pickBalancedTodayMenu } from "@/lib/today/menuInsights";
 
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
@@ -31,6 +31,7 @@ export function RecipesListClient({
     has: isTodaySelected,
     add: addToToday,
     remove: removeFromToday,
+    replace,
     clear,
     max: todayMax,
   } = useTodayCookbook();
@@ -38,6 +39,7 @@ export function RecipesListClient({
   const [activeCategory, setActiveCategory] = React.useState("全部");
   const [busy, setBusy] = React.useState(false);
   const [exportError, setExportError] = React.useState<string | null>(null);
+  const [menuTip, setMenuTip] = React.useState<string | null>(null);
 
   const categories = React.useMemo(() => {
     const counts = new Map<string, number>();
@@ -84,6 +86,15 @@ export function RecipesListClient({
     const ok = window.confirm("确认清空今日菜单？");
     if (!ok) return;
     await clear();
+    setMenuTip(null);
+  };
+
+  const onShuffleMenu = async () => {
+    const picked = pickBalancedTodayMenu(recipes, todayMax);
+    if (!picked.length) return;
+    await replace(picked.map((recipe) => recipe.id));
+    setExportError(null);
+    setMenuTip(`已按结构配好 ${picked.length} 道：${picked.slice(0, 3).map((recipe) => recipe.name).join("、")}${picked.length > 3 ? "等" : ""}`);
   };
 
   const onExport = async () => {
@@ -116,14 +127,22 @@ export function RecipesListClient({
 
       {showTodayShelf ? (
         <section className="pk-panel p-3 pb-5 sm:p-4 sm:pb-5">
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0 space-y-1">
               <Badge tone="warm">今日菜单</Badge>
               <div className="text-[13px] leading-6 text-[color:var(--muted)]">
                 {todayHydrated ? `${selectedRecipes.length}/${todayMax} 道` : "读取中"}
               </div>
             </div>
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="grid grid-cols-3 gap-2 sm:flex sm:shrink-0 sm:items-center">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={onShuffleMenu}
+                disabled={!todayHydrated || !hydrated || recipes.length === 0 || busy}
+              >
+                随机配桌
+              </Button>
               <Button
                 size="sm"
                 variant="outline"
@@ -145,6 +164,12 @@ export function RecipesListClient({
           {exportError ? (
             <div className="mt-3 rounded-lg border border-[color:rgba(184,92,56,0.35)] bg-[color:rgba(184,92,56,0.10)] px-3 py-2 text-[12px] text-[color:var(--warm)]">
               {exportError}
+            </div>
+          ) : null}
+
+          {menuTip ? (
+            <div className="mt-3 rounded-lg border border-[color:rgba(63,111,85,0.24)] bg-[color:rgba(63,111,85,0.08)] px-3 py-2 text-[12px] leading-5 text-[color:var(--accent)]">
+              {menuTip}
             </div>
           ) : null}
 
