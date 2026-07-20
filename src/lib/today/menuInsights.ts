@@ -99,6 +99,19 @@ export type TodayMenuInsights = {
       tone: "warm" | "accent" | "muted";
     }>;
   };
+  crew: {
+    headline: string;
+    summary: string;
+    assignments: Array<{
+      key: "buyer" | "prep" | "chef" | "host";
+      label: string;
+      badge: string;
+      title: string;
+      detail: string;
+      tasks: string[];
+      tone: "warm" | "accent" | "muted";
+    }>;
+  };
   roleLabels: string[];
   missing: string[];
   shoppingList: string[];
@@ -505,6 +518,105 @@ function buildBudgetPlan(recipes: Recipe[], dinersInput: number): TodayMenuInsig
   };
 }
 
+function compactNames(names: string[], fallback: string, max = 3): string {
+  const visible = names.filter(Boolean).slice(0, max);
+  if (!visible.length) return fallback;
+  return `${visible.join("、")}${names.length > max ? "等" : ""}`;
+}
+
+function buildKitchenCrewPlan(
+  recipes: Recipe[],
+  dinersInput: number,
+  shoppingGroups: ShoppingGroup[],
+): TodayMenuInsights["crew"] {
+  const diners = clampDiners(dinersInput);
+
+  if (recipes.length === 0) {
+    return {
+      headline: "定好菜单后自动拆分厨房分工",
+      summary: `${diners} 人份会按采购、备菜、掌勺和摆台拆成可转发任务。`,
+      assignments: [
+        {
+          key: "buyer",
+          label: "采购",
+          badge: "待菜单",
+          title: "先把菜选出来",
+          detail: "菜场路线会在菜单确定后生成。",
+          tasks: ["先配一桌菜", "再看菜场路线", "最后复制给负责买菜的人"],
+          tone: "muted",
+        },
+      ],
+    };
+  }
+
+  const slowNames = recipes.filter((recipe) => cookingWeight(recipe) >= 3).map((recipe) => recipe.name);
+  const mediumNames = recipes.filter((recipe) => cookingWeight(recipe) === 2).map((recipe) => recipe.name);
+  const quickNames = recipes.filter((recipe) => cookingWeight(recipe) === 1).map((recipe) => recipe.name);
+  const vegetableNames = recipes.filter((recipe) => roleOf(recipe) === "蔬菜").map((recipe) => recipe.name);
+  const stapleNames = recipes.filter((recipe) => roleOf(recipe) === "主食").map((recipe) => recipe.name);
+  const soupNames = recipes.filter((recipe) => roleOf(recipe) === "汤羹").map((recipe) => recipe.name);
+  const shoppingTaskLines = shoppingGroups.slice(0, 3).map((group) => {
+    const preview = group.items.slice(0, 3).join("、");
+    return `${group.label}：${preview}${group.items.length > 3 ? "等" : ""}`;
+  });
+  const crewCountLabel = diners >= 5 || recipes.length >= 6 ? "4 人" : "2-3 人";
+
+  return {
+    headline: `${diners} 人桌建议 ${crewCountLabel}协作`,
+    summary: "把采购、备菜、掌勺和摆台拆开，家宴会从容很多。",
+    assignments: [
+      {
+        key: "buyer",
+        label: "采购手",
+        badge: shoppingGroups.length ? `${shoppingGroups.length} 区` : "待采购",
+        title: "按菜场路线买齐",
+        detail: shoppingGroups.length ? "先耐放主料，蔬菜最后挑新鲜。" : "这桌菜还没有整理出食材。",
+        tasks: shoppingTaskLines.length ? shoppingTaskLines : ["检查菜谱食材", "出门前确认调料和主料", "买回后按冷藏/常温分开"],
+        tone: "warm",
+      },
+      {
+        key: "prep",
+        label: "备菜手",
+        badge: vegetableNames.length ? `${vegetableNames.length} 蔬` : "切配",
+        title: "洗切分盘，调料先备好",
+        detail: "把快炒菜和葱姜蒜提前分好，掌勺时不慌。",
+        tasks: [
+          `清洗处理：${compactNames(vegetableNames, "青菜和配菜")}`,
+          `主食/辅料：${compactNames(stapleNames, "米面豆制品")}`,
+          "葱姜蒜、酱汁和装盘器皿提前放到手边",
+        ],
+        tone: "accent",
+      },
+      {
+        key: "chef",
+        label: "掌勺",
+        badge: slowNames.length ? "先慢菜" : "快手桌",
+        title: slowNames.length ? "慢菜先上炉，快菜最后出" : "先备热源，最后集中快炒",
+        detail: "按烹饪耗时排队，保证热菜口感。",
+        tasks: [
+          `先做：${compactNames(slowNames, soupNames.length ? soupNames.join("、") : "汤底或主菜", 2)}`,
+          `中段：${compactNames(mediumNames, "需要焖、蒸、煎的菜", 2)}`,
+          `最后：${compactNames(quickNames, "快炒菜和收汁菜", 3)}`,
+        ],
+        tone: "warm",
+      },
+      {
+        key: "host",
+        label: "摆台",
+        badge: `${recipes.length} 道`,
+        title: "桌面节奏和分享小票",
+        detail: "汤羹、主菜、主食位置先定，出锅后直接落位。",
+        tasks: [
+          `先摆：${compactNames(soupNames, "汤碗、饭碗和公筷", 2)}`,
+          `${diners} 人餐具、饮品和纸巾提前上桌`,
+          "菜单定稿后导出小票，开饭前发群里",
+        ],
+        tone: "muted",
+      },
+    ],
+  };
+}
+
 function buildServingPlan(recipes: Recipe[], dinersInput: number, roles: Set<MenuRole>): TodayMenuInsights["serving"] {
   const diners = clampDiners(dinersInput);
   const count = recipes.length;
@@ -721,6 +833,7 @@ export function buildTodayMenuInsights(recipes: Recipe[], dinersInput = 2): Toda
   const mainNames = recipes.slice(0, 3).map((recipe) => recipe.name);
   const serving = buildServingPlan(recipes, dinersInput, roles);
   const budget = buildBudgetPlan(recipes, dinersInput);
+  const crew = buildKitchenCrewPlan(recipes, dinersInput, shoppingGroups);
 
   return {
     count: recipes.length,
@@ -731,6 +844,7 @@ export function buildTodayMenuInsights(recipes: Recipe[], dinersInput = 2): Toda
       : "选好几道菜后，这里会自动给出结构评分、采购清单和备菜节奏。",
     serving,
     budget,
+    crew,
     roleLabels,
     missing,
     shoppingList,

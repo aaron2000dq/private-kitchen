@@ -28,7 +28,7 @@ function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
-type KitchenGuideMode = "shopping" | "prep";
+type KitchenGuideMode = "shopping" | "prep" | "crew";
 type TableMealRole = Exclude<MealRole, "home">;
 
 const FILL_ROLE_PRIORITY: MealRole[] = ["main", "vegetable", "soup", "staple", "small"];
@@ -588,6 +588,19 @@ export function RecipesListClient({
   const shoppingTotal = menuInsights.shoppingList.length;
   const shoppingPercent = shoppingTotal ? Math.round((prepProgress.doneCount / shoppingTotal) * 100) : 0;
   const shoppingGroupCount = menuInsights.shoppingGroups.length;
+  const guideProgressPercent =
+    guideMode === "shopping"
+      ? shoppingPercent
+      : guideMode === "prep"
+        ? Math.min(100, dinnerPrepPlan.steps.length * 20)
+        : Math.min(100, menuInsights.crew.assignments.length * 25);
+  const guideMetric =
+    guideMode === "shopping"
+      ? `${prepProgress.doneCount}/${shoppingTotal || 0}`
+      : guideMode === "prep"
+        ? dinnerPrepPlan.startTime
+        : `${menuInsights.crew.assignments.length}组`;
+  const guideMetricLabel = guideMode === "shopping" ? "已备" : guideMode === "prep" ? "开工" : "分工";
 
   const filtered = React.useMemo(() => {
     const query = q.trim().toLowerCase();
@@ -760,6 +773,25 @@ export function RecipesListClient({
       setMenuTip("分区采购清单已复制，可以直接发给家里人一起买。");
     } catch {
       setExportError("复制失败，可以直接截图这份采购清单。");
+    }
+  };
+
+  const onCopyCrewPlan = async () => {
+    if (!menuInsights.crew.assignments.length) return;
+    setExportError(null);
+    try {
+      const lines = [
+        `${menuInsights.serving.diners}人份 · 厨房分工`,
+        menuInsights.crew.summary,
+        ...menuInsights.crew.assignments.flatMap((assignment, index) => [
+          `【${String(index + 1).padStart(2, "0")} ${assignment.label}】${assignment.title}`,
+          ...assignment.tasks.map((task) => `□ ${task}`),
+        ]),
+      ];
+      await navigator.clipboard.writeText(lines.join("\n"));
+      setMenuTip("厨房分工已复制，可以直接发给家里人认领。");
+    } catch {
+      setExportError("复制失败，可以直接截图这份分工。");
     }
   };
 
@@ -1423,15 +1455,15 @@ export function RecipesListClient({
                 <div className="min-w-0">
                   <div className="text-[11px] text-[color:var(--muted-2)]">今晚执行台</div>
                   <div className="pk-serif mt-1 text-[18px] leading-tight">
-                    {guideMode === "shopping" ? "采购清单" : "备菜节奏"}
+                    {guideMode === "shopping" ? "采购清单" : guideMode === "prep" ? "备菜节奏" : "厨房分工"}
                   </div>
                 </div>
                 <div className="shrink-0 text-right">
                   <div className="text-[13px] font-medium text-[color:var(--accent)]">
-                    {guideMode === "shopping" ? `${prepProgress.doneCount}/${shoppingTotal || 0}` : dinnerPrepPlan.startTime}
+                    {guideMetric}
                   </div>
                   <div className="mt-0.5 text-[11px] text-[color:var(--muted-2)]">
-                    {guideMode === "shopping" ? "已备" : "开工"}
+                    {guideMetricLabel}
                   </div>
                 </div>
               </div>
@@ -1439,14 +1471,15 @@ export function RecipesListClient({
               <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[color:rgba(24,33,29,0.08)]">
                 <div
                   className="h-full rounded-full bg-[color:var(--accent)] transition-[width]"
-                  style={{ width: `${shoppingPercent}%` }}
+                  style={{ width: `${guideProgressPercent}%` }}
                 />
               </div>
 
-              <div className="mt-3 grid grid-cols-2 gap-2">
+              <div className="mt-3 grid grid-cols-3 gap-2">
                 {([
                   ["shopping", "采购", `${shoppingTotal || 0}项`],
                   ["prep", "备菜", `${dinnerPrepPlan.steps.length}步`],
+                  ["crew", "分工", `${menuInsights.crew.assignments.length}组`],
                 ] as const).map(([mode, label, meta]) => {
                   const active = guideMode === mode;
                   return (
@@ -1585,7 +1618,7 @@ export function RecipesListClient({
                     </div>
                   )}
                 </div>
-              ) : (
+              ) : guideMode === "prep" ? (
                 <div className="mt-3 space-y-3">
                   <div className="rounded-lg border border-[color:rgba(185,148,75,0.24)] bg-[color:rgba(185,148,75,0.06)] p-3">
                     <div className="flex items-start justify-between gap-3">
@@ -1654,6 +1687,89 @@ export function RecipesListClient({
                       </li>
                     ))}
                   </ol>
+                </div>
+              ) : (
+                <div className="mt-3 space-y-3">
+                  <div className="rounded-lg border border-[color:rgba(63,111,85,0.22)] bg-[linear-gradient(180deg,rgba(63,111,85,0.08),rgba(185,148,75,0.05))] p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="text-[11px] text-[color:var(--muted-2)]">厨房分工</div>
+                        <div className="pk-serif mt-1 text-[18px] leading-tight">
+                          {menuInsights.crew.headline}
+                        </div>
+                        <div className="mt-1 line-clamp-2 text-[11px] leading-5 text-[color:var(--muted)]">
+                          {menuInsights.crew.summary}
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 shrink-0 px-2.5 text-[12px]"
+                        disabled={!menuInsights.crew.assignments.length}
+                        onClick={onCopyCrewPlan}
+                      >
+                        复制分工
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    {menuInsights.crew.assignments.map((assignment, index) => (
+                      <div
+                        key={assignment.key}
+                        className="rounded-lg border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/74 p-3"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <span
+                                className={cn(
+                                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-md border text-[10px] font-medium",
+                                  assignment.tone === "warm" &&
+                                    "border-[color:rgba(184,92,56,0.24)] bg-[color:rgba(184,92,56,0.08)] text-[color:var(--warm)]",
+                                  assignment.tone === "accent" &&
+                                    "border-[color:rgba(63,111,85,0.24)] bg-[color:rgba(63,111,85,0.08)] text-[color:var(--accent)]",
+                                  assignment.tone === "muted" &&
+                                    "border-[color:rgba(185,148,75,0.30)] bg-[color:var(--paper-strong)]/70 text-[color:var(--muted)]",
+                                )}
+                              >
+                                {String(index + 1).padStart(2, "0")}
+                              </span>
+                              <div className="min-w-0">
+                                <div className="pk-serif truncate text-[15px] leading-tight">
+                                  {assignment.label}
+                                </div>
+                                <div className="mt-0.5 truncate text-[10px] text-[color:var(--muted-2)]">
+                                  {assignment.title}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <Badge tone={assignment.tone} className="shrink-0 px-1.5 py-0.5 text-[10px]">
+                            {assignment.badge}
+                          </Badge>
+                        </div>
+
+                        <div className="mt-2 rounded-md border border-[color:rgba(24,33,29,0.08)] bg-[color:var(--paper-strong)]/54 px-2.5 py-2 text-[11px] leading-5 text-[color:var(--muted)]">
+                          {assignment.detail}
+                        </div>
+
+                        <div className="mt-2 space-y-1.5">
+                          {assignment.tasks.map((task) => (
+                            <div
+                              key={task}
+                              className="grid grid-cols-[1rem_minmax(0,1fr)] gap-2 rounded-md border border-[color:var(--line)] bg-[color:var(--paper-strong)]/56 px-2.5 py-2"
+                            >
+                              <span className="mt-1 h-2 w-2 rounded-sm border border-[color:var(--menu-line)]" />
+                              <span className="min-w-0 text-[12px] leading-5 text-[color:var(--foreground)]">
+                                {task}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
