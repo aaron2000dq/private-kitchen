@@ -30,6 +30,37 @@ function cn(...parts: Array<string | false | null | undefined>) {
 type KitchenGuideMode = "shopping" | "prep";
 
 const FILL_ROLE_PRIORITY: MealRole[] = ["main", "vegetable", "soup", "staple", "small"];
+const LOCKED_MENU_KEY = "private-kitchen:locked-today-menu:v1";
+
+function readLockedMenuIds(): string[] {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const raw = window.localStorage.getItem(LOCKED_MENU_KEY);
+    const parsed: unknown = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+function persistLockedMenuIds(ids: string[]) {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.localStorage.setItem(LOCKED_MENU_KEY, JSON.stringify(ids));
+  } catch {
+    // Locking is a convenience feature; menu actions should still work if storage is unavailable.
+  }
+}
+
+function sameStringSet(a: Set<string>, b: Set<string>): boolean {
+  if (a.size !== b.size) return false;
+  for (const item of a) {
+    if (!b.has(item)) return false;
+  }
+  return true;
+}
 
 function formatCookedDate(iso: string): string {
   const date = new Date(iso);
@@ -139,6 +170,33 @@ function pickSwapCandidate(
   return pool[Math.floor(Math.random() * pool.length)]?.recipe ?? null;
 }
 
+function buildMenuWithLockedRecipes(
+  recipes: Recipe[],
+  selectedRecipes: Recipe[],
+  lockedIds: Set<string>,
+  max: number,
+  scene: MenuPlanScene,
+  recentRecipeIds: string[],
+): Recipe[] {
+  const lockedRecipes = selectedRecipes.filter((recipe) => lockedIds.has(recipe.id));
+  const targetCount = Math.min(
+    max,
+    recipes.length,
+    Math.max(MENU_PLAN_PRESETS[scene].targetCount, lockedRecipes.length),
+  );
+  const kept = lockedRecipes.slice(0, targetCount);
+  const keptIds = new Set(kept.map((recipe) => recipe.id));
+  const remaining = recipes.filter((recipe) => !keptIds.has(recipe.id));
+  const fillCount = Math.max(0, targetCount - kept.length);
+  const picked = fillCount
+    ? pickBalancedTodayMenu(remaining, fillCount, scene, {
+        recentRecipeIds: recentRecipeIds.filter((id) => !keptIds.has(id)),
+      })
+    : [];
+
+  return [...kept, ...picked].slice(0, max);
+}
+
 export function RecipesListClient({
   showHeader = false,
   showTodayShelf = true,
@@ -170,10 +228,22 @@ export function RecipesListClient({
   const [recordBusy, setRecordBusy] = React.useState(false);
   const [fillBusyId, setFillBusyId] = React.useState<string | null>(null);
   const [swapBusyId, setSwapBusyId] = React.useState<string | null>(null);
+  const [lockedIds, setLockedIds] = React.useState<Set<string>>(() => new Set());
+  const [locksHydrated, setLocksHydrated] = React.useState(false);
   const [exportError, setExportError] = React.useState<string | null>(null);
   const [menuTip, setMenuTip] = React.useState<string | null>(null);
   const [planScene, setPlanScene] = React.useState<MenuPlanScene>("balanced");
   const [guideMode, setGuideMode] = React.useState<KitchenGuideMode>("shopping");
+
+  React.useEffect(() => {
+    setLockedIds(new Set(readLockedMenuIds()));
+    setLocksHydrated(true);
+  }, []);
+
+  React.useEffect(() => {
+    if (!locksHydrated) return;
+    persistLockedMenuIds(Array.from(lockedIds));
+  }, [lockedIds, locksHydrated]);
 
   const planScenes = React.useMemo(
     () =>
@@ -207,6 +277,21 @@ export function RecipesListClient({
       .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0))
       .slice(0, todayMax);
   }, [recipes, todayIds, todayMax]);
+  const lockedSelectedRecipes = React.useMemo(
+    () => selectedRecipes.filter((recipe) => lockedIds.has(recipe.id)),
+    [lockedIds, selectedRecipes],
+  );
+  const lockedSelectedCount = lockedSelectedRecipes.length;
+
+  React.useEffect(() => {
+    if (!locksHydrated) return;
+    setLockedIds((current) => {
+      if (!current.size) return current;
+      const valid = new Set(todayIds);
+      const next = new Set(Array.from(current).filter((id) => valid.has(id)));
+      return sameStringSet(current, next) ? current : next;
+    });
+  }, [locksHydrated, todayIds]);
 
   const menuInsights = React.useMemo(
     () => buildTodayMenuInsights(selectedRecipes),
@@ -248,16 +333,46 @@ export function RecipesListClient({
   const onClear = async () => {
     const ok = window.confirm("确认清空今日菜单？");
     if (!ok) return;
+    setLockedIds(new Set());
     await clear();
     setMenuTip(null);
   };
 
   const onShuffleMenu = async () => {
-    const picked = pickBalancedTodayMenu(recipes, todayMax, planScene, { recentRecipeIds });
+    const picked = buildMenuWithLockedRecipes(recipes, selectedRecipes, lockedIds, todayMax, planScene, recentRecipeIds);
     if (!picked.length) return;
     await replace(picked.map((recipe) => recipe.id));
     setExportError(null);
-    setMenuTip(`已按「${MENU_PLAN_PRESETS[planScene].label}」${recentRecipeIds.length ? "避开近期重复，" : ""}配好 ${picked.length} 道：${picked.slice(0, 3).map((recipe) => recipe.name).join("、")}${picked.length > 3 ? "等" : ""}`);
+    setMenuTip(
+      lockedSelectedCount
+        ? `已保留 ${lockedSelectedCount} 道锁定菜，并按「${MENU_PLAN_PRESETS[planScene].label}」补齐到 ${picked.length} 道。`
+        : `已按「${MENU_PLAN_PRESETS[planScene].label}」${recentRecipeIds.length ? "避开近期重复，" : ""}配好 ${picked.length} 道：${picked.slice(0, 3).map((recipe) => recipe.name).join("、")}${picked.length > 3 ? "等" : ""}`,
+    );
+  };
+
+  const onToggleLockRecipe = (recipe: Recipe) => {
+    setLockedIds((current) => {
+      const next = new Set(current);
+      if (next.has(recipe.id)) {
+        next.delete(recipe.id);
+        setMenuTip(`已取消锁定「${recipe.name}」。`);
+      } else {
+        next.add(recipe.id);
+        setMenuTip(`已锁定「${recipe.name}」，重配时会保留它。`);
+      }
+      return next;
+    });
+    setExportError(null);
+  };
+
+  const onRemoveSelectedRecipe = async (recipe: Recipe) => {
+    setLockedIds((current) => {
+      if (!current.has(recipe.id)) return current;
+      const next = new Set(current);
+      next.delete(recipe.id);
+      return next;
+    });
+    await removeFromToday(recipe.id);
   };
 
   const onRecordCooked = async () => {
@@ -305,6 +420,11 @@ export function RecipesListClient({
   };
 
   const onSwapRecipe = async (recipe: Recipe) => {
+    if (lockedIds.has(recipe.id)) {
+      setMenuTip(`「${recipe.name}」已锁定，先取消锁定再换一道。`);
+      return;
+    }
+
     const index = todayIds.indexOf(recipe.id);
     if (index < 0) return;
 
@@ -361,7 +481,9 @@ export function RecipesListClient({
             <div className="min-w-0 space-y-1">
               <Badge tone="warm">今日菜单</Badge>
               <div className="text-[13px] leading-6 text-[color:var(--muted)]">
-                {todayHydrated ? `${selectedRecipes.length}/${todayMax} 道` : "读取中"}
+                {todayHydrated
+                  ? `${selectedRecipes.length}/${todayMax} 道${lockedSelectedCount ? ` · 已锁 ${lockedSelectedCount}` : ""}`
+                  : "读取中"}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0 sm:items-center">
@@ -369,9 +491,9 @@ export function RecipesListClient({
                 size="sm"
                 variant="outline"
                 onClick={onShuffleMenu}
-                disabled={!todayHydrated || !hydrated || recipes.length === 0 || actionBusy}
+                disabled={!todayHydrated || !hydrated || !locksHydrated || recipes.length === 0 || actionBusy}
               >
-                配一桌
+                {lockedSelectedCount ? "保留重配" : "配一桌"}
               </Button>
               <Button
                 size="sm"
@@ -721,27 +843,43 @@ export function RecipesListClient({
                     key={recipe.id}
                     className="w-36 shrink-0 overflow-hidden rounded-lg border border-[color:var(--line)] bg-[color:var(--paper-strong)] shadow-[0_1px_0_rgba(24,33,29,0.04)]"
                   >
-                    <Link
-                      href={recipeDetailHref(recipe.id)}
-                      className="relative block aspect-[4/3] bg-[color:var(--wash)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]"
-                      aria-label={`打开菜谱：${recipe.name}`}
-                    >
-                      <span className="absolute left-2 top-2 z-10 rounded-md border border-[color:rgba(255,253,246,0.64)] bg-[color:var(--paper)]/88 px-1.5 py-0.5 text-[10px] leading-none text-[color:var(--foreground)] shadow-[0_6px_14px_rgba(24,33,29,0.10)] backdrop-blur">
-                        {MEAL_ROLE_META[role].label}
-                      </span>
-                      {image ? (
-                        <VisuallyLosslessThumb
-                          src={recipeImageThumbUrl(image)}
-                          fallbackSrc={recipeImageUrl(image)}
-                          alt={recipe.name}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center text-[12px] text-[color:var(--muted-2)]">
-                          无图
-                        </div>
-                      )}
-                    </Link>
+                    <div className="relative aspect-[4/3] bg-[color:var(--wash)]">
+                      <Link
+                        href={recipeDetailHref(recipe.id)}
+                        className="absolute inset-0 block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]"
+                        aria-label={`打开菜谱：${recipe.name}`}
+                      >
+                        <span className="absolute left-2 top-2 z-10 rounded-md border border-[color:rgba(255,253,246,0.64)] bg-[color:var(--paper)]/88 px-1.5 py-0.5 text-[10px] leading-none text-[color:var(--foreground)] shadow-[0_6px_14px_rgba(24,33,29,0.10)] backdrop-blur">
+                          {MEAL_ROLE_META[role].label}
+                        </span>
+                        {image ? (
+                          <VisuallyLosslessThumb
+                            src={recipeImageThumbUrl(image)}
+                            fallbackSrc={recipeImageUrl(image)}
+                            alt={recipe.name}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-[12px] text-[color:var(--muted-2)]">
+                            无图
+                          </div>
+                        )}
+                      </Link>
+                      <button
+                        type="button"
+                        aria-pressed={lockedIds.has(recipe.id)}
+                        className={cn(
+                          "absolute right-2 top-2 z-20 rounded-md border px-1.5 py-0.5 text-[10px] leading-none shadow-[0_6px_14px_rgba(24,33,29,0.10)] backdrop-blur transition-colors",
+                          lockedIds.has(recipe.id)
+                            ? "border-[color:var(--foreground)] bg-[color:var(--foreground)] text-[color:var(--background)]"
+                            : "border-[color:rgba(255,253,246,0.64)] bg-[color:var(--paper)]/88 text-[color:var(--foreground)]",
+                        )}
+                        disabled={!locksHydrated || actionBusy}
+                        onClick={() => onToggleLockRecipe(recipe)}
+                      >
+                        {lockedIds.has(recipe.id) ? "已锁" : "锁定"}
+                      </button>
+                    </div>
                     <div className="space-y-2 p-2.5">
                       <Link
                         href={recipeDetailHref(recipe.id)}
@@ -754,7 +892,7 @@ export function RecipesListClient({
                           size="sm"
                           variant="outline"
                           className="h-8 whitespace-nowrap px-1.5 text-[12px] leading-none"
-                          disabled={actionBusy || !hydrated || recipes.length <= selectedRecipes.length}
+                          disabled={actionBusy || lockedIds.has(recipe.id) || !hydrated || recipes.length <= selectedRecipes.length}
                           onClick={() => void onSwapRecipe(recipe)}
                         >
                           {swapBusyId === recipe.id ? "换中" : "换一道"}
@@ -764,7 +902,7 @@ export function RecipesListClient({
                           variant="outline"
                           className="h-8 whitespace-nowrap px-1.5 text-[12px] leading-none"
                           disabled={actionBusy}
-                          onClick={() => void removeFromToday(recipe.id)}
+                          onClick={() => void onRemoveSelectedRecipe(recipe)}
                         >
                           移除
                         </Button>
