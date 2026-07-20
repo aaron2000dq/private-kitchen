@@ -36,8 +36,10 @@ const TABLE_ROLE_ORDER: TableMealRole[] = ["main", "vegetable", "soup", "staple"
 const LOCKED_MENU_KEY = "private-kitchen:locked-today-menu:v1";
 const MENU_TEMPLATES_KEY = "private-kitchen:menu-templates:v1";
 const DINNER_TIME_KEY = "private-kitchen:dinner-time:v1";
+const DINER_COUNT_KEY = "private-kitchen:diner-count:v1";
 const MENU_TEMPLATE_LIMIT = 6;
 const DINNER_TIME_OPTIONS = ["18:30", "19:00", "19:30", "20:00"];
+const DINER_COUNT_OPTIONS = [2, 3, 4, 6, 8];
 
 const MENU_TABLE_SLOTS: Array<{
   key: TableMealRole;
@@ -163,6 +165,32 @@ function persistDinnerTime(time: string) {
     window.localStorage.setItem(DINNER_TIME_KEY, time);
   } catch {
     // Dinner time is only used for local planning; the menu remains usable without storage.
+  }
+}
+
+function normalizeDinerCount(value: number): number {
+  if (!Number.isFinite(value)) return 2;
+  return Math.min(10, Math.max(1, Math.round(value)));
+}
+
+function readDinerCount(): number {
+  if (typeof window === "undefined") return 2;
+
+  try {
+    const raw = window.localStorage.getItem(DINER_COUNT_KEY);
+    return normalizeDinerCount(raw ? Number(raw) : 2);
+  } catch {
+    return 2;
+  }
+}
+
+function persistDinerCount(count: number) {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.localStorage.setItem(DINER_COUNT_KEY, String(normalizeDinerCount(count)));
+  } catch {
+    // Diner count is a planning preference; menus can still work without storage.
   }
 }
 
@@ -400,6 +428,8 @@ export function RecipesListClient({
   const [guideMode, setGuideMode] = React.useState<KitchenGuideMode>("shopping");
   const [dinnerTime, setDinnerTime] = React.useState("19:00");
   const [dinnerTimeHydrated, setDinnerTimeHydrated] = React.useState(false);
+  const [dinerCount, setDinerCount] = React.useState(2);
+  const [dinerCountHydrated, setDinerCountHydrated] = React.useState(false);
 
   React.useEffect(() => {
     setLockedIds(new Set(readLockedMenuIds()));
@@ -417,6 +447,11 @@ export function RecipesListClient({
   }, []);
 
   React.useEffect(() => {
+    setDinerCount(readDinerCount());
+    setDinerCountHydrated(true);
+  }, []);
+
+  React.useEffect(() => {
     if (!locksHydrated) return;
     persistLockedMenuIds(Array.from(lockedIds));
   }, [lockedIds, locksHydrated]);
@@ -430,6 +465,11 @@ export function RecipesListClient({
     if (!dinnerTimeHydrated) return;
     persistDinnerTime(dinnerTime);
   }, [dinnerTime, dinnerTimeHydrated]);
+
+  React.useEffect(() => {
+    if (!dinerCountHydrated) return;
+    persistDinerCount(dinerCount);
+  }, [dinerCount, dinerCountHydrated]);
 
   const planScenes = React.useMemo(
     () =>
@@ -495,8 +535,8 @@ export function RecipesListClient({
   }, [locksHydrated, todayIds]);
 
   const menuInsights = React.useMemo(
-    () => buildTodayMenuInsights(selectedRecipes),
-    [selectedRecipes],
+    () => buildTodayMenuInsights(selectedRecipes, dinerCount),
+    [dinerCount, selectedRecipes],
   );
   const dinnerPrepPlan = React.useMemo(
     () => buildDinnerPrepPlan(selectedRecipes, dinnerTime),
@@ -677,6 +717,13 @@ export function RecipesListClient({
     setExportError(null);
   };
 
+  const onChangeDinerCount = (nextCount: number) => {
+    const normalized = normalizeDinerCount(nextCount);
+    setDinerCount(normalized);
+    setMenuTip(`已按 ${normalized} 人份更新菜量和采购提示。`);
+    setExportError(null);
+  };
+
   const onRecordCooked = async () => {
     if (!selectedRecipes.length) return;
     setRecordBusy(true);
@@ -695,10 +742,13 @@ export function RecipesListClient({
     if (!menuInsights.shoppingList.length) return;
     setExportError(null);
     try {
-      const lines = menuInsights.shoppingGroups.flatMap((group) => [
-        `【${group.label}】`,
-        ...group.items.map((item) => `□ ${item}`),
-      ]);
+      const lines = [
+        `${menuInsights.serving.diners}人份 · 菜场路线`,
+        ...menuInsights.shoppingGroups.flatMap((group) => [
+          `【${group.label}】`,
+          ...group.items.map((item) => `□ ${item}`),
+        ]),
+      ];
       await navigator.clipboard.writeText(lines.join("\n"));
       setMenuTip("分区采购清单已复制，可以直接发给家里人一起买。");
     } catch {
@@ -854,6 +904,66 @@ export function RecipesListClient({
             })}
           </div>
 
+          <div className="mt-3 rounded-lg border border-[color:rgba(185,148,75,0.24)] bg-[color:var(--paper)]/72 p-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-[11px] text-[color:var(--muted-2)]">宴客人数</div>
+                <div className="pk-serif mt-1 text-[22px] leading-none">
+                  {menuInsights.serving.diners} 人份
+                </div>
+                <div className="mt-1 line-clamp-1 text-[11px] text-[color:var(--muted)]">
+                  {menuInsights.serving.summary}
+                </div>
+              </div>
+              <div className="grid shrink-0 grid-cols-[2.25rem_2.7rem_2.25rem] overflow-hidden rounded-lg border border-[color:var(--menu-line-soft)] bg-[color:var(--paper-strong)]/78">
+                <button
+                  type="button"
+                  className="h-9 border-r border-[color:var(--menu-line-soft)] text-[17px] leading-none text-[color:var(--muted)] disabled:opacity-35"
+                  aria-label="减少用餐人数"
+                  disabled={!dinerCountHydrated || menuInsights.serving.diners <= 1}
+                  onClick={() => onChangeDinerCount(menuInsights.serving.diners - 1)}
+                >
+                  -
+                </button>
+                <div className="grid h-9 place-items-center text-[13px] font-medium text-[color:var(--foreground)]">
+                  {menuInsights.serving.diners}
+                </div>
+                <button
+                  type="button"
+                  className="h-9 border-l border-[color:var(--menu-line-soft)] text-[17px] leading-none text-[color:var(--muted)] disabled:opacity-35"
+                  aria-label="增加用餐人数"
+                  disabled={!dinerCountHydrated || menuInsights.serving.diners >= 10}
+                  onClick={() => onChangeDinerCount(menuInsights.serving.diners + 1)}
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-3 grid grid-cols-5 gap-1.5">
+              {DINER_COUNT_OPTIONS.map((count) => {
+                const active = menuInsights.serving.diners === count;
+                return (
+                  <button
+                    key={count}
+                    type="button"
+                    aria-pressed={active}
+                    className={cn(
+                      "h-8 rounded-md border text-[12px] transition-colors",
+                      active
+                        ? "border-[color:var(--foreground)] bg-[color:var(--foreground)] text-[color:var(--background)]"
+                        : "border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/76 text-[color:var(--muted)]",
+                    )}
+                    disabled={!dinerCountHydrated}
+                    onClick={() => onChangeDinerCount(count)}
+                  >
+                    {count}人
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="mt-3 flex items-center justify-between gap-3 rounded-lg border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/72 px-3 py-2.5">
             <div className="min-w-0">
               <div className="text-[11px] text-[color:var(--muted-2)]">最近吃过</div>
@@ -996,6 +1106,50 @@ export function RecipesListClient({
                   ? menuInsights.shoppingList.slice(0, 5).join("、")
                   : "选菜后自动整理"}
               </div>
+            </div>
+          </div>
+
+          <div className="mt-3 rounded-lg border border-[color:rgba(63,111,85,0.20)] bg-[linear-gradient(180deg,rgba(63,111,85,0.07),rgba(255,253,246,0.52))] p-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-[11px] text-[color:var(--muted-2)]">份量小台</div>
+                <div className="pk-serif mt-1 text-[18px] leading-tight">
+                  {menuInsights.serving.scaleLabel}
+                </div>
+              </div>
+              <Badge tone={menuInsights.serving.status === "很稳" ? "accent" : menuInsights.serving.status === "略紧" ? "warm" : "muted"} className="shrink-0">
+                {menuInsights.serving.status}
+              </Badge>
+            </div>
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              {menuInsights.serving.stats.map((stat) => (
+                <div
+                  key={stat.label}
+                  className="rounded-md border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/72 px-2 py-2 text-center"
+                >
+                  <div className="text-[10px] text-[color:var(--muted-2)]">{stat.label}</div>
+                  <div
+                    className={cn(
+                      "mt-1 truncate text-[12px] font-medium",
+                      stat.tone === "accent" && "text-[color:var(--accent)]",
+                      stat.tone === "warm" && "text-[color:var(--warm)]",
+                      stat.tone === "muted" && "text-[color:var(--muted)]",
+                    )}
+                  >
+                    {stat.value}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {menuInsights.serving.notes.map((note) => (
+                <span
+                  key={note}
+                  className="rounded-md border border-[color:rgba(63,111,85,0.18)] bg-[color:rgba(63,111,85,0.07)] px-2 py-1 text-[11px] leading-none text-[color:var(--accent)]"
+                >
+                  {note}
+                </span>
+              ))}
             </div>
           </div>
 
@@ -1267,7 +1421,7 @@ export function RecipesListClient({
                           <div className="min-w-0">
                             <div className="text-[11px] text-[color:var(--muted-2)]">菜场路线</div>
                             <div className="mt-0.5 truncate text-[12px] text-[color:var(--muted)]">
-                              {shoppingGroupCount} 区 · {shoppingTotal} 项，按买菜动线整理
+                              {menuInsights.serving.diners} 人份 · {shoppingGroupCount} 区 · {shoppingTotal} 项
                             </div>
                           </div>
                           <Badge tone="accent" className="shrink-0">

@@ -71,6 +71,18 @@ export type TodayMenuInsights = {
   score: number;
   headline: string;
   summary: string;
+  serving: {
+    diners: number;
+    status: string;
+    scaleLabel: string;
+    summary: string;
+    notes: string[];
+    stats: Array<{
+      label: string;
+      value: string;
+      tone: "warm" | "accent" | "muted";
+    }>;
+  };
   roleLabels: string[];
   missing: string[];
   shoppingList: string[];
@@ -258,6 +270,9 @@ function shoppingItemName(item: string): string {
 
 function shoppingGroupKeyOf(item: string): ShoppingGroupKey {
   const name = shoppingItemName(item);
+  if (/(油|盐|糖|酱|醋|料酒|生抽|老抽|蚝油|淀粉|胡椒|花椒|八角|桂皮|香叶|孜然|辣椒粉|豆瓣|火锅底料|芝麻|香油|蜂蜜|鸡精|味精)/.test(name)) {
+    return "seasoning";
+  }
   if (/(鸡|鸭|鱼|虾|蟹|牛|羊|猪|肉|排骨|鸡翅|牛蛙|蛋|小肠|五花|牛腩|猪蹄|腊肠|腊肉|肥牛)/.test(name)) {
     return "protein";
   }
@@ -266,9 +281,6 @@ function shoppingGroupKeyOf(item: string): ShoppingGroupKey {
   }
   if (/(米|饭|面|粉|河粉|米粉|粉丝|饼|豆腐|豆皮|腐竹|年糕|馒头|面包|土司)/.test(name)) {
     return "staple";
-  }
-  if (/(油|盐|糖|酱|醋|料酒|生抽|老抽|蚝油|淀粉|胡椒|花椒|八角|桂皮|香叶|孜然|辣椒粉|豆瓣|火锅底料|芝麻|香油|蜂蜜)/.test(name)) {
-    return "seasoning";
   }
   return "other";
 }
@@ -296,6 +308,82 @@ function scoreMenu(count: number, roles: Set<MenuRole>, totalWeight: number): nu
     (roles.has("主食") ? 8 : 0);
   const effortScore = totalWeight <= 6 ? 14 : totalWeight <= 9 ? 10 : 6;
   return Math.min(98, Math.round(countScore + structureScore + effortScore));
+}
+
+function clampDiners(diners: number): number {
+  if (!Number.isFinite(diners)) return 2;
+  return Math.min(10, Math.max(1, Math.round(diners)));
+}
+
+function servingScaleLabel(diners: number): string {
+  if (diners <= 2) return "基础份量";
+  if (diners <= 4) return "适中加量";
+  if (diners <= 6) return "主菜加量";
+  return "家宴大份";
+}
+
+function buildServingPlan(recipes: Recipe[], dinersInput: number, roles: Set<MenuRole>): TodayMenuInsights["serving"] {
+  const diners = clampDiners(dinersInput);
+  const count = recipes.length;
+  const mainCount = recipes.filter((recipe) => roleOf(recipe) === "主菜").length;
+  const vegetableCount = recipes.filter((recipe) => roleOf(recipe) === "蔬菜").length;
+  const soupCount = recipes.filter((recipe) => roleOf(recipe) === "汤羹").length;
+  const targetDishCount = diners <= 2 ? 3 : diners <= 4 ? 5 : diners <= 6 ? 7 : 8;
+  const targetMainCount = diners <= 3 ? 1 : diners <= 6 ? 2 : 3;
+  const perPerson = count ? count / diners : 0;
+  const notes: string[] = [];
+
+  if (!count) {
+    notes.push(`先按 ${diners} 人挑菜`);
+    notes.push("主菜、时蔬、汤羹先配齐");
+  } else {
+    if (count < targetDishCount) {
+      notes.push(`再补 ${targetDishCount - count} 道更从容`);
+    } else {
+      notes.push("菜量够摆一桌");
+    }
+
+    if (mainCount < targetMainCount) {
+      notes.push(`主菜建议到 ${targetMainCount} 道`);
+    } else {
+      notes.push("主菜压得住席面");
+    }
+
+    if (!vegetableCount && diners >= 3) {
+      notes.push("加一道青菜解腻");
+    } else if (!soupCount && diners >= 4) {
+      notes.push("配一碗汤更完整");
+    }
+  }
+
+  const status =
+    !count
+      ? "待配桌"
+      : count < targetDishCount
+        ? "略紧"
+        : mainCount < targetMainCount
+          ? "需硬菜"
+          : roles.has("蔬菜") && (roles.has("汤羹") || diners <= 3)
+            ? "很稳"
+            : "可优化";
+
+  const summary =
+    count === 0
+      ? `${diners} 人份菜单会同步影响采购和备菜提示。`
+      : `${diners} 人吃，当前约 ${perPerson.toFixed(1)} 道/人，${servingScaleLabel(diners)}。`;
+
+  return {
+    diners,
+    status,
+    scaleLabel: servingScaleLabel(diners),
+    summary,
+    notes: notes.slice(0, 3),
+    stats: [
+      { label: "人数", value: `${diners} 人`, tone: "warm" },
+      { label: "菜量", value: count ? `${count}/${targetDishCount} 道` : `目标 ${targetDishCount} 道`, tone: count >= targetDishCount ? "accent" : "muted" },
+      { label: "硬菜", value: `${mainCount}/${targetMainCount} 道`, tone: mainCount >= targetMainCount ? "accent" : "warm" },
+    ],
+  };
 }
 
 function missingRoles(roles: Set<MenuRole>, count: number): string[] {
@@ -439,7 +527,7 @@ export function buildDinnerPrepPlan(recipes: Recipe[], serveTime = "19:00"): Din
   };
 }
 
-export function buildTodayMenuInsights(recipes: Recipe[]): TodayMenuInsights {
+export function buildTodayMenuInsights(recipes: Recipe[], dinersInput = 2): TodayMenuInsights {
   const roles = new Set(recipes.map(roleOf));
   const roleLabels = Array.from(roles);
   const totalWeight = recipes.reduce((sum, recipe) => sum + cookingWeight(recipe), 0);
@@ -448,14 +536,16 @@ export function buildTodayMenuInsights(recipes: Recipe[]): TodayMenuInsights {
   const shoppingList = buildShoppingList(recipes);
   const shoppingGroups = buildShoppingGroups(shoppingList);
   const mainNames = recipes.slice(0, 3).map((recipe) => recipe.name);
+  const serving = buildServingPlan(recipes, dinersInput, roles);
 
   return {
     count: recipes.length,
     score,
     headline: recipes.length ? "这桌菜已经有样子了" : "先搭一桌像样的家宴",
     summary: recipes.length
-      ? `${mainNames.join("、")} ${recipes.length > 3 ? "等" : ""}已进入今日菜单，当前结构评分 ${score}/100。`
+      ? `${mainNames.join("、")} ${recipes.length > 3 ? "等" : ""}已进入今日菜单，当前结构评分 ${score}/100，${serving.diners} 人份。`
       : "选好几道菜后，这里会自动给出结构评分、采购清单和备菜节奏。",
+    serving,
     roleLabels,
     missing,
     shoppingList,
