@@ -8,6 +8,8 @@ import { useTodayCookbook } from "@/lib/today/useTodayCookbook";
 import { buildTodayMenuInsights } from "@/lib/today/menuInsights";
 import { useKitchenPrepProgress } from "@/lib/today/useKitchenPrepProgress";
 import { buildGuestFitPlan, createGuestProfile, readGuestProfile, type GuestProfile } from "@/lib/today/guestProfile";
+import { buildPantryCoverage } from "@/lib/today/pantry";
+import { usePantry } from "@/lib/today/usePantry";
 
 const DINER_COUNT_KEY = "private-kitchen:diner-count:v1";
 
@@ -40,6 +42,7 @@ function formatNames(names: string[], fallback: string, max = 4): string {
 export function TodayMenuConcierge() {
   const { recipes } = useRecipes();
   const { ids } = useTodayCookbook();
+  const pantry = usePantry();
   const [dinerCount, setDinerCount] = React.useState(2);
   const [copyTip, setCopyTip] = React.useState<string | null>(null);
   const [guestProfile, setGuestProfile] = React.useState<GuestProfile>(() => createGuestProfile());
@@ -70,6 +73,10 @@ export function TodayMenuConcierge() {
     () => buildGuestFitPlan(selectedRecipes, guestProfile),
     [guestProfile, selectedRecipes],
   );
+  const pantryCoverage = React.useMemo(
+    () => buildPantryCoverage(insights.shoppingList, pantry.items),
+    [insights.shoppingList, pantry.items],
+  );
 
   const dashboardStats = [
     { label: "人数", value: `${insights.serving.diners} 人`, tone: "warm" as const },
@@ -91,6 +98,7 @@ export function TodayMenuConcierge() {
           `口味：${insights.palate.label} · ${insights.palate.score}分`,
           `客人：${guestFit.label}${guestFit.activeLabels.length ? ` · ${guestFit.activeLabels.join("、")}` : ""}`,
           ...(guestProfile.note.trim() ? [`客人备注：${guestProfile.note.trim()}`] : []),
+          `冰箱：已有 ${pantryCoverage.inStock.length} 项 · 还买 ${pantryCoverage.missing.length} 项`,
           `采购：${prepProgress.doneCount}/${shoppingTotal || 0} 项已备`,
           `提示：${insights.palate.notes.slice(0, 2).join("；")}`,
           ...guestFit.warnings.map((warning) => `忌口提醒：${warning}`),
@@ -150,10 +158,14 @@ export function TodayMenuConcierge() {
               <div className="min-w-0">
                 <div className="text-[11px] text-[color:var(--muted-2)]">执行进度</div>
                 <div className="mt-1 truncate text-[12px] text-[color:var(--muted)]">
-                  {shoppingTotal ? `采购已备 ${shoppingPercent}%` : "定好菜单后开始执行"}
+                  {shoppingTotal
+                    ? `采购已备 ${shoppingPercent}% · 冰箱已有 ${pantryCoverage.inStock.length}`
+                    : "定好菜单后开始执行"}
                 </div>
               </div>
-              <Badge tone={shoppingPercent >= 80 ? "accent" : "muted"}>{shoppingPercent}%</Badge>
+              <Badge tone={pantryCoverage.missing.length ? "warm" : shoppingPercent >= 80 ? "accent" : "muted"}>
+                缺 {pantryCoverage.missing.length}
+              </Badge>
             </div>
             <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[color:rgba(24,33,29,0.08)]">
               <div
@@ -161,6 +173,18 @@ export function TodayMenuConcierge() {
                 style={{ width: `${shoppingPercent}%` }}
               />
             </div>
+            {pantryCoverage.total ? (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {pantryCoverage.inStock.slice(0, 3).map((item) => (
+                  <span
+                    key={item}
+                    className="rounded-md border border-[color:rgba(63,111,85,0.18)] bg-[color:var(--paper)]/62 px-2 py-1 text-[11px] text-[color:var(--accent)]"
+                  >
+                    家里有 {item}
+                  </span>
+                ))}
+              </div>
+            ) : null}
           </div>
 
           <div>

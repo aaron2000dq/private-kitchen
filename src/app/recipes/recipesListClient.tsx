@@ -34,6 +34,8 @@ import {
   type GuestConstraintKey,
   type GuestProfile,
 } from "@/lib/today/guestProfile";
+import { buildPantryCoverage } from "@/lib/today/pantry";
+import { usePantry } from "@/lib/today/usePantry";
 
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
@@ -447,6 +449,7 @@ export function RecipesListClient({
     recentWindowDays,
     record: recordCooked,
   } = useCookHistory();
+  const pantry = usePantry();
   const [q, setQ] = React.useState("");
   const [activeCategory, setActiveCategory] = React.useState("全部");
   const [busy, setBusy] = React.useState(false);
@@ -638,6 +641,10 @@ export function RecipesListClient({
     [selectedRecipes],
   );
   const prepProgress = useKitchenPrepProgress(menuKey, menuInsights.shoppingList);
+  const pantryCoverage = React.useMemo(
+    () => buildPantryCoverage(menuInsights.shoppingList, pantry.items),
+    [menuInsights.shoppingList, pantry.items],
+  );
   const latestHistory = historyEntries[0];
   const actionBusy = busy || recordBusy || fillBusyId != null || swapBusyId != null || templateBusyId != null;
   const shoppingTotal = menuInsights.shoppingList.length;
@@ -651,11 +658,11 @@ export function RecipesListClient({
         : Math.min(100, menuInsights.crew.assignments.length * 25);
   const guideMetric =
     guideMode === "shopping"
-      ? `${prepProgress.doneCount}/${shoppingTotal || 0}`
+      ? `缺${pantryCoverage.missing.length}`
       : guideMode === "prep"
         ? dinnerPrepPlan.startTime
         : `${menuInsights.crew.assignments.length}组`;
-  const guideMetricLabel = guideMode === "shopping" ? "已备" : guideMode === "prep" ? "开工" : "分工";
+  const guideMetricLabel = guideMode === "shopping" ? "待买" : guideMode === "prep" ? "开工" : "分工";
 
   const filtered = React.useMemo(() => {
     const query = q.trim().toLowerCase();
@@ -873,11 +880,13 @@ export function RecipesListClient({
         `客人档案：${guestFit.label}${guestFit.activeLabels.length ? ` · ${guestFit.activeLabels.join("、")}` : ""}`,
         ...(guestProfile.note.trim() ? [`客人备注：${guestProfile.note.trim()}`] : []),
         ...guestFit.warnings.map((warning) => `提醒：${warning}`),
+        pantryCoverage.inStock.length ? `家里已有：${pantryCoverage.inStock.join("、")}` : "",
+        pantryCoverage.missing.length ? `还要采购：${pantryCoverage.missing.join("、")}` : "",
         ...menuInsights.shoppingGroups.flatMap((group) => [
           `【${group.label}】`,
           ...group.items.map((item) => `□ ${item}`),
         ]),
-      ];
+      ].filter(Boolean);
       await navigator.clipboard.writeText(lines.join("\n"));
       setMenuTip("分区采购清单已复制，可以直接发给家里人一起买。");
     } catch {
@@ -1812,6 +1821,46 @@ export function RecipesListClient({
                       复制
                     </Button>
                   </div>
+
+                  {shoppingTotal ? (
+                    <div className="rounded-lg border border-[color:rgba(63,111,85,0.20)] bg-[color:rgba(63,111,85,0.06)] p-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="text-[11px] text-[color:var(--muted-2)]">冰箱核对</div>
+                          <div className="pk-serif mt-1 text-[17px] leading-tight">
+                            已有 {pantryCoverage.inStock.length} 项，还买 {pantryCoverage.missing.length} 项
+                          </div>
+                        </div>
+                        <ButtonLink href="/pantry" size="sm" variant="outline" className="h-8 shrink-0 px-2.5 text-[12px]">
+                          管理
+                        </ButtonLink>
+                      </div>
+                      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[color:rgba(24,33,29,0.08)]">
+                        <div
+                          className="h-full rounded-full bg-[color:var(--accent)] transition-[width]"
+                          style={{ width: `${pantryCoverage.ratio}%` }}
+                        />
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {pantryCoverage.inStock.slice(0, 5).map((item) => (
+                          <span
+                            key={item}
+                            className="rounded-md border border-[color:rgba(63,111,85,0.18)] bg-[color:var(--paper)]/70 px-2 py-1 text-[11px] text-[color:var(--accent)]"
+                          >
+                            有 {item}
+                          </span>
+                        ))}
+                        {pantryCoverage.missing.slice(0, 5).map((item) => (
+                          <span
+                            key={item}
+                            className="rounded-md border border-[color:rgba(184,92,56,0.18)] bg-[color:var(--paper)]/70 px-2 py-1 text-[11px] text-[color:var(--warm)]"
+                          >
+                            买 {item}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
 
                   {menuInsights.shoppingList.length ? (
                     <div className="space-y-2.5">
