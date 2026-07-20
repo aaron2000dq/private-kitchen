@@ -67,7 +67,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-full grain" style={shellStyle}>
-      <header className="sticky top-0 z-30 border-b border-[color:var(--line)] bg-[color:var(--background)]/88 backdrop-blur supports-[backdrop-filter]:bg-[color:var(--background)]/72">
+      <header className="sticky top-0 z-30 border-b border-[color:var(--line)] bg-[color:var(--background)]/98 shadow-[0_1px_18px_rgba(24,33,29,0.06)] backdrop-blur-xl supports-[backdrop-filter]:bg-[color:var(--background)]/96">
         <div className="mx-auto w-full max-w-6xl px-[var(--app-gutter)] sm:px-5">
           <div className="flex h-16 items-center justify-between gap-4 md:h-16">
             <Link
@@ -113,7 +113,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </footer>
 
-      <nav className="fixed inset-x-[var(--app-gutter-tight)] bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-40 rounded-lg border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/96 shadow-[0_-2px_28px_rgba(24,33,29,0.14)] backdrop-blur md:hidden">
+      <nav className="fixed inset-x-[var(--app-gutter-tight)] bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-40 rounded-lg border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/98 shadow-[0_-6px_30px_rgba(24,33,29,0.16)] backdrop-blur-xl md:hidden">
         <div className="mx-auto grid h-[4.25rem] max-w-6xl grid-cols-4 items-center gap-1.5 px-2.5">
           {nav.map((item) => {
             const active = isNavActive(item.href, pathname);
