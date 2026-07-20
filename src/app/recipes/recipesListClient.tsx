@@ -4,6 +4,7 @@ import * as React from "react";
 import { AppLink as Link } from "@/components/ui/AppLink";
 import { useRecipes } from "@/lib/recipes/useRecipes";
 import { useCookHistory } from "@/lib/today/useCookHistory";
+import { useKitchenPrepProgress } from "@/lib/today/useKitchenPrepProgress";
 import { useTodayCookbook } from "@/lib/today/useTodayCookbook";
 import { exportTodayCookbookToPng } from "@/lib/today/exportTodayCookbookToImage";
 import { recipeImageThumbUrl, recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
@@ -22,6 +23,8 @@ import {
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
+
+type KitchenGuideMode = "shopping" | "prep";
 
 function formatCookedDate(iso: string): string {
   const date = new Date(iso);
@@ -61,6 +64,7 @@ export function RecipesListClient({
   const [exportError, setExportError] = React.useState<string | null>(null);
   const [menuTip, setMenuTip] = React.useState<string | null>(null);
   const [planScene, setPlanScene] = React.useState<MenuPlanScene>("balanced");
+  const [guideMode, setGuideMode] = React.useState<KitchenGuideMode>("shopping");
 
   const planScenes = React.useMemo(
     () =>
@@ -99,8 +103,15 @@ export function RecipesListClient({
     () => buildTodayMenuInsights(selectedRecipes),
     [selectedRecipes],
   );
+  const menuKey = React.useMemo(
+    () => selectedRecipes.map((recipe) => recipe.id).join("|"),
+    [selectedRecipes],
+  );
+  const prepProgress = useKitchenPrepProgress(menuKey, menuInsights.shoppingList);
   const latestHistory = historyEntries[0];
   const actionBusy = busy || recordBusy;
+  const shoppingTotal = menuInsights.shoppingList.length;
+  const shoppingPercent = shoppingTotal ? Math.round((prepProgress.doneCount / shoppingTotal) * 100) : 0;
 
   const filtered = React.useMemo(() => {
     const query = q.trim().toLowerCase();
@@ -147,6 +158,17 @@ export function RecipesListClient({
       setExportError(e instanceof Error ? e.message : "记录失败");
     } finally {
       setRecordBusy(false);
+    }
+  };
+
+  const onCopyShoppingList = async () => {
+    if (!menuInsights.shoppingList.length) return;
+    setExportError(null);
+    try {
+      await navigator.clipboard.writeText(menuInsights.shoppingList.map((item) => `□ ${item}`).join("\n"));
+      setMenuTip("采购清单已复制，可以直接发给家里人一起买。");
+    } catch {
+      setExportError("复制失败，可以直接截图这份采购清单。");
     }
   };
 
@@ -312,6 +334,154 @@ export function RecipesListClient({
               </div>
             </div>
           </div>
+
+          {selectedRecipes.length ? (
+            <div className="mt-3 rounded-lg border border-[color:var(--line)] bg-[color:var(--paper-strong)]/76 p-3 shadow-[0_1px_0_rgba(24,33,29,0.04)]">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-[11px] text-[color:var(--muted-2)]">今晚执行台</div>
+                  <div className="pk-serif mt-1 text-[18px] leading-tight">
+                    {guideMode === "shopping" ? "采购清单" : "备菜节奏"}
+                  </div>
+                </div>
+                <div className="shrink-0 text-right">
+                  <div className="text-[13px] font-medium text-[color:var(--accent)]">
+                    {prepProgress.doneCount}/{shoppingTotal || 0}
+                  </div>
+                  <div className="mt-0.5 text-[11px] text-[color:var(--muted-2)]">已备</div>
+                </div>
+              </div>
+
+              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[color:rgba(24,33,29,0.08)]">
+                <div
+                  className="h-full rounded-full bg-[color:var(--accent)] transition-[width]"
+                  style={{ width: `${shoppingPercent}%` }}
+                />
+              </div>
+
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {([
+                  ["shopping", "采购", `${shoppingTotal || 0}项`],
+                  ["prep", "备菜", `${menuInsights.timeline.length}步`],
+                ] as const).map(([mode, label, meta]) => {
+                  const active = guideMode === mode;
+                  return (
+                    <button
+                      key={mode}
+                      type="button"
+                      aria-pressed={active}
+                      className={cn(
+                        "rounded-lg border px-3 py-2.5 text-left transition-colors",
+                        active
+                          ? "border-[color:rgba(63,111,85,0.34)] bg-[color:rgba(63,111,85,0.10)] text-[color:var(--accent)]"
+                          : "border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/72 text-[color:var(--muted)]",
+                      )}
+                      onClick={() => setGuideMode(mode)}
+                    >
+                      <span className="block text-[13px] font-medium leading-none">{label}</span>
+                      <span className="mt-1 block text-[11px] opacity-70">{meta}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {guideMode === "shopping" ? (
+                <div className="mt-3 space-y-3">
+                  <div className="grid grid-cols-3 gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="px-2 text-[12px]"
+                      disabled={!shoppingTotal}
+                      onClick={prepProgress.completeAll}
+                    >
+                      全备好
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="px-2 text-[12px]"
+                      disabled={!shoppingTotal || prepProgress.doneCount === 0}
+                      onClick={prepProgress.reset}
+                    >
+                      重置
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="px-2 text-[12px]"
+                      disabled={!shoppingTotal}
+                      onClick={onCopyShoppingList}
+                    >
+                      复制
+                    </Button>
+                  </div>
+
+                  {menuInsights.shoppingList.length ? (
+                    <div className="grid grid-cols-2 gap-2">
+                      {menuInsights.shoppingList.map((item) => {
+                        const checked = prepProgress.checkedItems.has(item);
+                        return (
+                          <button
+                            key={item}
+                            type="button"
+                            aria-label={`${checked ? "取消勾选" : "勾选"}${item}`}
+                            aria-pressed={checked}
+                            className={cn(
+                              "flex min-h-12 items-center gap-2 rounded-lg border px-2.5 py-2 text-left transition-colors",
+                              checked
+                                ? "border-[color:rgba(63,111,85,0.30)] bg-[color:rgba(63,111,85,0.10)] text-[color:var(--accent)]"
+                                : "border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/72 text-[color:var(--foreground)]",
+                            )}
+                            onClick={() => prepProgress.toggle(item)}
+                          >
+                            <span
+                              className={cn(
+                                "flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[10px] leading-none",
+                                checked
+                                  ? "border-[color:var(--accent)] bg-[color:var(--accent)] text-[color:var(--background)]"
+                                  : "border-[color:var(--menu-line)] text-transparent",
+                              )}
+                            >
+                              {checked ? "✓" : ""}
+                            </span>
+                            <span className="line-clamp-2 min-w-0 text-[12px] leading-5">
+                              {item}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="rounded-lg border border-dashed border-[color:var(--menu-line)] px-3 py-4 text-[12px] leading-5 text-[color:var(--muted)]">
+                      这几道菜还没有整理出食材，编辑菜谱后会自动补进来。
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <ol className="mt-3 space-y-2">
+                  {menuInsights.timeline.map((step) => (
+                    <li
+                      key={step.label}
+                      className="grid grid-cols-[2.25rem_1fr] gap-2 rounded-lg border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/72 px-3 py-3"
+                    >
+                      <span className="flex h-8 w-8 items-center justify-center rounded-full border border-[color:rgba(185,148,75,0.42)] text-[11px] text-[color:var(--muted)]">
+                        {step.label}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-[13px] font-medium leading-5">
+                          {step.title}
+                        </span>
+                        <span className="mt-0.5 block text-[12px] leading-5 text-[color:var(--muted)]">
+                          {step.detail}
+                        </span>
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
+          ) : null}
 
           {selectedRecipes.length ? (
             <div className="pk-scrollbar mt-3 flex gap-3 overflow-x-auto pb-1">
