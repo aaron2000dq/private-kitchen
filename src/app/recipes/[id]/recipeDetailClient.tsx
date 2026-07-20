@@ -1,12 +1,17 @@
 "use client";
 
 import * as React from "react";
+import { AppLink as Link } from "@/components/ui/AppLink";
 import { RecipeRepository } from "@/lib/recipes/repository";
 import type { Recipe, RecipeIngredient, RecipeStep } from "@/lib/recipes/types";
+import { MEAL_ROLE_META, mealRoleOf, type MealRole } from "@/lib/recipes/mealRole";
+import { recipeDetailHref } from "@/lib/recipes/recipeRoutes";
+import { useRecipes } from "@/lib/recipes/useRecipes";
+import { useTodayCookbook } from "@/lib/today/useTodayCookbook";
 import { recipeImageThumbUrl, recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
 import { Badge } from "@/components/ui/Badge";
 import { StarRating } from "@/components/ui/StarRating";
-import { ButtonLink } from "@/components/ui/Button";
+import { Button, ButtonLink } from "@/components/ui/Button";
 import { VisuallyLosslessThumb } from "@/components/recipes/VisuallyLosslessThumb";
 import { RecipeCookingMode } from "@/components/recipes/RecipeCookingMode";
 
@@ -36,6 +41,70 @@ function ingredientAmount(item: RecipeIngredient): string {
 
 function sortedSteps(recipe: Recipe): RecipeStep[] {
   return [...(recipe.steps ?? [])].sort((a, b) => a.order - b.order);
+}
+
+const PAIRING_TARGETS: Record<MealRole, MealRole[]> = {
+  main: ["vegetable", "soup", "staple", "small"],
+  vegetable: ["main", "soup", "staple"],
+  soup: ["main", "vegetable", "staple"],
+  staple: ["main", "vegetable", "soup"],
+  small: ["main", "vegetable", "soup"],
+  home: ["main", "vegetable", "soup"],
+};
+
+function sharedTagCount(a: Recipe, b: Recipe): number {
+  const tags = new Set(a.tags ?? []);
+  return (b.tags ?? []).filter((tag) => tags.has(tag)).length;
+}
+
+function pairingScore(recipe: Recipe, candidate: Recipe): number {
+  const recipeRole = mealRoleOf(recipe);
+  const candidateRole = mealRoleOf(candidate);
+  const desired = PAIRING_TARGETS[recipeRole];
+  const desiredIndex = desired.indexOf(candidateRole);
+  const roleScore = desiredIndex >= 0 ? 80 - desiredIndex * 10 : candidateRole === recipeRole ? 4 : 18;
+  const diversityScore = candidate.category === recipe.category ? 1 : 5;
+  const imageScore = candidate.images?.length ? 4 : 0;
+  const ratingScore = (candidate.rating ?? 0) * 2.5;
+
+  return roleScore + diversityScore + imageScore + ratingScore + sharedTagCount(recipe, candidate) * 1.5;
+}
+
+function pairingReason(recipe: Recipe, candidate: Recipe): string {
+  const candidateRole = mealRoleOf(candidate);
+  const recipeRole = mealRoleOf(recipe);
+
+  if (candidateRole === "vegetable") return recipeRole === "main" ? "给主菜留一口清爽" : "让这餐更轻盈";
+  if (candidateRole === "soup") return "收住烟火气，吃起来更完整";
+  if (candidateRole === "staple") return "把这餐压稳，适合一起上桌";
+  if (candidateRole === "main") return recipeRole === "vegetable" ? "补一道撑场面的主菜" : "让席面更有主心骨";
+  if (candidateRole === "small") return "添一点开胃的小兴致";
+  return "和这道菜放在一桌很顺口";
+}
+
+function buildPairings(recipe: Recipe, recipes: Recipe[]): Recipe[] {
+  const candidates = recipes.filter((candidate) => candidate.id !== recipe.id);
+  const scored = candidates
+    .map((candidate) => ({ candidate, score: pairingScore(recipe, candidate) }))
+    .sort((a, b) => b.score - a.score || a.candidate.name.localeCompare(b.candidate.name, "zh-CN"));
+
+  const picked: Recipe[] = [];
+  const pickedIds = new Set<string>();
+  for (const role of PAIRING_TARGETS[mealRoleOf(recipe)]) {
+    const best = scored.find((entry) => !pickedIds.has(entry.candidate.id) && mealRoleOf(entry.candidate) === role);
+    if (!best) continue;
+    picked.push(best.candidate);
+    pickedIds.add(best.candidate.id);
+  }
+
+  for (const entry of scored) {
+    if (picked.length >= 4) break;
+    if (pickedIds.has(entry.candidate.id)) continue;
+    picked.push(entry.candidate);
+    pickedIds.add(entry.candidate.id);
+  }
+
+  return picked.slice(0, 4);
 }
 
 function RecipePhotoBook({ recipe }: { recipe: Recipe }) {
@@ -187,6 +256,99 @@ function StepsScoreboard({ steps }: { steps: RecipeStep[] }) {
   );
 }
 
+function PairingShelf({ recipe }: { recipe: Recipe }) {
+  const { recipes, hydrated } = useRecipes();
+  const { hydrated: todayHydrated, ids, has, add, max } = useTodayCookbook();
+  const [pendingId, setPendingId] = React.useState<string | null>(null);
+  const pairings = React.useMemo(
+    () => (hydrated ? buildPairings(recipe, recipes) : []),
+    [hydrated, recipe, recipes],
+  );
+  const currentRole = MEAL_ROLE_META[mealRoleOf(recipe)].label;
+
+  const onAdd = async (recipeId: string) => {
+    setPendingId(recipeId);
+    try {
+      await add(recipeId);
+    } finally {
+      setPendingId(null);
+    }
+  };
+
+  if (!hydrated || pairings.length === 0) return null;
+
+  return (
+    <section className="pk-panel-plain overflow-hidden">
+      <div className="border-b border-[color:var(--line)] px-4 py-4 sm:px-5">
+        <div className="pk-section-label">菜单管家</div>
+        <div className="mt-2 flex items-end justify-between gap-3">
+          <div>
+            <h2 className="pk-serif text-[27px] leading-tight">顺手搭配</h2>
+            <p className="mt-2 text-[12px] leading-5 text-[color:var(--muted)]">
+              当前是{currentRole}，优先补齐一桌菜需要的口味和结构。
+            </p>
+          </div>
+          <span className="shrink-0 text-[12px] text-[color:var(--muted-2)]">{pairings.length} 道</span>
+        </div>
+      </div>
+
+      <div className="grid gap-3 p-3 sm:grid-cols-2 lg:grid-cols-4">
+        {pairings.map((candidate, index) => {
+          const selected = has(candidate.id);
+          const full = ids.length >= max && !selected;
+          const role = MEAL_ROLE_META[mealRoleOf(candidate)].label;
+          const image = candidate.images?.[0];
+          return (
+            <article
+              key={candidate.id}
+              className="flex min-w-0 flex-col rounded-lg border border-[color:var(--line)] bg-[color:var(--paper-strong)]/72 p-2.5 shadow-[0_1px_0_rgba(24,33,29,0.04)]"
+            >
+              <Link
+                href={recipeDetailHref(candidate.id)}
+                className="grid min-w-0 grid-cols-[76px_minmax(0,1fr)] gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]"
+              >
+                <div className="h-[76px] w-[76px] overflow-hidden rounded-lg border border-[color:var(--line)] bg-[color:var(--wash)]">
+                  {image ? (
+                    <VisuallyLosslessThumb
+                      src={recipeImageThumbUrl(image)}
+                      fallbackSrc={recipeImageUrl(image)}
+                      alt={candidate.name}
+                      loading={index === 0 ? "eager" : "lazy"}
+                      fetchPriority={index === 0 ? "high" : "auto"}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-[11px] text-[color:var(--muted-2)]">
+                      无图
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0 py-0.5">
+                  <Badge tone={mealRoleOf(candidate) === "vegetable" ? "accent" : "muted"}>{role}</Badge>
+                  <div className="pk-serif mt-2 line-clamp-2 text-[17px] leading-tight">{candidate.name}</div>
+                  <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-[color:var(--muted)]">
+                    {pairingReason(recipe, candidate)}
+                  </p>
+                </div>
+              </Link>
+
+              <Button
+                size="sm"
+                variant={selected ? "outline" : "primary"}
+                className="mt-3 w-full"
+                disabled={!todayHydrated || selected || full || pendingId === candidate.id}
+                onClick={() => void onAdd(candidate.id)}
+              >
+                {selected ? "已在菜单" : full ? "今日已满" : pendingId === candidate.id ? "加入中" : "加入今日"}
+              </Button>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export function RecipeDetailClient({ id }: { id: string }) {
   const [recipe, setRecipe] = React.useState<Recipe | null>(null);
   const [hydrated, setHydrated] = React.useState(false);
@@ -281,6 +443,8 @@ export function RecipeDetailClient({ id }: { id: string }) {
           <span className="opacity-70">创建于 {formatDate(recipe.createdAt)}</span>
         </div>
       </section>
+
+      <PairingShelf recipe={recipe} />
 
       <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
         <section className="pk-panel-plain overflow-hidden">

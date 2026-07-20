@@ -1,4 +1,5 @@
 import type { Recipe } from "@/lib/recipes/types";
+import { mealRoleOf, recipeSearchText } from "@/lib/recipes/mealRole";
 
 type MenuRole = "主菜" | "蔬菜" | "汤羹" | "主食" | "小食" | "家常";
 export type MenuPlanScene = "balanced" | "quick" | "banquet" | "light";
@@ -64,7 +65,7 @@ export type TodayMenuInsights = {
 };
 
 function recipeText(recipe: Recipe): string {
-  return `${recipe.name} ${recipe.category} ${recipe.description} ${(recipe.tags ?? []).join(" ")}`;
+  return recipeSearchText(recipe);
 }
 
 function sceneWeight(recipe: Recipe, preset: MenuPlanPreset, recentIds: Set<string>): number {
@@ -77,16 +78,12 @@ function sceneWeight(recipe: Recipe, preset: MenuPlanPreset, recentIds: Set<stri
 }
 
 function roleOf(recipe: Recipe): MenuRole {
-  const text = recipeText(recipe);
-  if (/(汤|羹|粥|煲|炖)/.test(text)) return "汤羹";
-  if (/(饭|面|粉|米粉|河粉|炒饭|拌面|烩饭)/.test(text)) return "主食";
-  if (/(青菜|白菜|菠菜|生菜|油麦菜|空心菜|丝瓜|豆角|西兰花|包菜|茄子|苦瓜|莴笋)/.test(text)) {
-    return "蔬菜";
-  }
-  if (/(鸡|鸭|鱼|虾|蟹|牛|羊|猪|肉|排骨|鸡翅|牛蛙|蛋|豆腐)/.test(text)) {
-    return "主菜";
-  }
-  if (/(炸|烤|卤|拼盘|点心|小食|烧烤)/.test(text)) return "小食";
+  const role = mealRoleOf(recipe);
+  if (role === "main") return "主菜";
+  if (role === "vegetable") return "蔬菜";
+  if (role === "soup") return "汤羹";
+  if (role === "staple") return "主食";
+  if (role === "small") return "小食";
   return "家常";
 }
 

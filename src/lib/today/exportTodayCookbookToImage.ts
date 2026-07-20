@@ -1,6 +1,7 @@
 "use client";
 
 import type { Recipe } from "@/lib/recipes/types";
+import { MEAL_ROLE_META, mealRoleOf, type MealRole } from "@/lib/recipes/mealRole";
 
 type ReceiptRow = {
   lines: string[];
@@ -16,7 +17,7 @@ type ReceiptSection = {
   height: number;
 };
 
-type ReceiptRole = "main" | "vegetable" | "soup" | "staple" | "small";
+type ReceiptRole = Exclude<MealRole, "home">;
 
 const RECEIPT_SERIF =
   '"Source Han Serif SC", "Source Han Serif CN", "Noto Serif CJK SC", "Noto Serif SC", "Songti SC", STSong, SimSun, serif';
@@ -118,41 +119,17 @@ function wrapTextLines(ctx: CanvasRenderingContext2D, text: string, maxWidth: nu
   return lines.length ? lines : [text];
 }
 
-function recipeText(recipe: Recipe): string {
-  return `${recipe.name} ${recipe.category} ${recipe.description} ${(recipe.tags ?? []).join(" ")}`;
-}
-
 function receiptRole(recipe: Recipe): ReceiptRole {
-  const name = recipe.name;
-  const tags = (recipe.tags ?? []).join(" ");
-  const mainIngredients = (recipe.mainIngredients ?? []).map((item) => item.name).join(" ");
-  const primaryText = `${name} ${recipe.category} ${tags} ${mainIngredients}`;
-  const vegetablePattern = /(青菜|白菜|菠菜|生菜|油麦菜|空心菜|丝瓜|豆角|西兰花|包菜|茄子|苦瓜|莴笋|蒲菜|菜苔|蔬|素菜)/;
-  const animalProteinPattern = /(鸡|鸭|鱼|虾|蟹|牛|羊|猪|肉|排骨|鸡翅|牛蛙|蛋|小肠|五花|牛腩|猪蹄|腊肠|腊肉)/;
-
-  if (/(汤|羹|粥)/.test(name) || /(炖汤|家常汤|暖汤)/.test(tags)) return "soup";
-  if (/(饭|面|米粉|河粉|炒饭|拌面|烩饭|煲仔饭|螺蛳粉|粉(?!丝)|饼|点心)/.test(name) || /(主食|点心)/.test(tags)) {
-    return "staple";
-  }
-  if (vegetablePattern.test(name) && !animalProteinPattern.test(primaryText)) {
-    return "vegetable";
-  }
-  if (/(鸡|鸭|鱼|虾|蟹|牛|羊|猪|肉|排骨|鸡翅|牛蛙|蛋|豆腐|肥牛|小肠|五花|牛腩|猪蹄|腊肠|腊肉)/.test(primaryText)) {
-    return "main";
-  }
-  if (vegetablePattern.test(primaryText)) {
-    return "vegetable";
-  }
-  if (/(汤|羹|粥)/.test(recipeText(recipe))) return "soup";
-  return "small";
+  const role = mealRoleOf(recipe);
+  return role === "home" ? "small" : role;
 }
 
 const RECEIPT_SECTION_META: Record<ReceiptRole, { label: string; shortLabel: string; note: string; order: number }> = {
-  main: { label: "热菜主菜", shortLabel: "主菜", note: "撑起席面", order: 1 },
-  vegetable: { label: "时令蔬菜", shortLabel: "蔬菜", note: "清爽解腻", order: 2 },
-  soup: { label: "汤羹暖碗", shortLabel: "汤羹", note: "收住烟火", order: 3 },
-  staple: { label: "主食点心", shortLabel: "点心", note: "压稳一餐", order: 4 },
-  small: { label: "家常小食", shortLabel: "小食", note: "添一点兴致", order: 5 },
+  main: { ...MEAL_ROLE_META.main, label: MEAL_ROLE_META.main.receiptLabel },
+  vegetable: { ...MEAL_ROLE_META.vegetable, label: MEAL_ROLE_META.vegetable.receiptLabel },
+  soup: { ...MEAL_ROLE_META.soup, label: MEAL_ROLE_META.soup.receiptLabel },
+  staple: { ...MEAL_ROLE_META.staple, label: MEAL_ROLE_META.staple.receiptLabel },
+  small: { ...MEAL_ROLE_META.small, label: MEAL_ROLE_META.small.receiptLabel },
 };
 
 function buildReceiptSections(
