@@ -13,8 +13,8 @@ export default function Home() {
       <div className="mx-auto max-w-3xl space-y-6 md:space-y-8">
         <ClientOnly>
           <HomeDateHeader />
-          <TodayRecommendationClient />
           <TodayMenuConcierge />
+          <TodayRecommendationClient />
           <HomeInspirationSection />
         </ClientOnly>
 
