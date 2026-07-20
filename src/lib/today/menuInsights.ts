@@ -1,6 +1,44 @@
 import type { Recipe } from "@/lib/recipes/types";
 
 type MenuRole = "主菜" | "蔬菜" | "汤羹" | "主食" | "小食" | "家常";
+export type MenuPlanScene = "balanced" | "quick" | "banquet" | "light";
+
+type MenuPlanPreset = {
+  label: string;
+  targetCount: number;
+  requiredRoles: MenuRole[];
+  prefer: RegExp;
+  avoid?: RegExp;
+};
+
+export const MENU_PLAN_PRESETS: Record<MenuPlanScene, MenuPlanPreset> = {
+  balanced: {
+    label: "家常一桌",
+    targetCount: 6,
+    requiredRoles: ["主菜", "蔬菜", "汤羹", "主食"],
+    prefer: /(家常|炒|炖|汤|饭|面|粉|豆腐|鸡|肉|青菜)/,
+  },
+  quick: {
+    label: "快手晚餐",
+    targetCount: 4,
+    requiredRoles: ["主菜", "蔬菜", "主食"],
+    prefer: /(快手|炒|拌|煎|清炒|面|粉|饭|蛋|豆腐)/,
+    avoid: /(牛腩|排骨|鸡汤|砂锅|煲|炖|卤|烤)/,
+  },
+  banquet: {
+    label: "私房家宴",
+    targetCount: 8,
+    requiredRoles: ["主菜", "蔬菜", "汤羹", "主食", "小食"],
+    prefer: /(排骨|牛|鸡|鱼|虾|蟹|汤|煲|蒸|红烧|砂锅|香|宴)/,
+  },
+  light: {
+    label: "清爽少油",
+    targetCount: 5,
+    requiredRoles: ["蔬菜", "汤羹", "主食", "主菜"],
+    prefer: /(清|蒸|汤|粥|蔬|豆腐|丝瓜|冬瓜|白菜|凉拌|番茄|菌菇)/,
+    avoid: /(炸|烤|红烧|肥|腊|小肠|五花|油炸)/,
+  },
+};
 
 export type TodayMenuInsights = {
   count: number;
@@ -23,6 +61,14 @@ export type TodayMenuInsights = {
 
 function recipeText(recipe: Recipe): string {
   return `${recipe.name} ${recipe.category} ${recipe.description} ${(recipe.tags ?? []).join(" ")}`;
+}
+
+function sceneWeight(recipe: Recipe, preset: MenuPlanPreset): number {
+  const text = recipeText(recipe);
+  const base = recipe.rating + (recipe.images.length ? 2 : 0) + 1;
+  const preferBonus = preset.prefer.test(text) ? 5 : 0;
+  const avoidPenalty = preset.avoid?.test(text) ? -4 : 0;
+  return base + preferBonus + avoidPenalty;
 }
 
 function roleOf(recipe: Recipe): MenuRole {
@@ -58,20 +104,25 @@ function pickFromRole(
   recipes: Recipe[],
   role: MenuRole,
   pickedIds: Set<string>,
+  preset: MenuPlanPreset,
 ): Recipe | null {
   const candidates = recipes.filter((recipe) => !pickedIds.has(recipe.id) && roleOf(recipe) === role);
-  return weightedRandom(candidates, (recipe) => recipe.rating + (recipe.images.length ? 2 : 0) + 1);
+  return weightedRandom(candidates, (recipe) => sceneWeight(recipe, preset));
 }
 
-export function pickBalancedTodayMenu(recipes: Recipe[], max = 10): Recipe[] {
-  const targetCount = Math.min(max, recipes.length, 6);
+export function pickBalancedTodayMenu(
+  recipes: Recipe[],
+  max = 10,
+  scene: MenuPlanScene = "balanced",
+): Recipe[] {
+  const preset = MENU_PLAN_PRESETS[scene];
+  const targetCount = Math.min(max, recipes.length, preset.targetCount);
   const picked: Recipe[] = [];
   const pickedIds = new Set<string>();
-  const requiredRoles: MenuRole[] = ["主菜", "蔬菜", "汤羹", "主食"];
 
-  for (const role of requiredRoles) {
+  for (const role of preset.requiredRoles) {
     if (picked.length >= targetCount) break;
-    const recipe = pickFromRole(recipes, role, pickedIds);
+    const recipe = pickFromRole(recipes, role, pickedIds, preset);
     if (!recipe) continue;
     picked.push(recipe);
     pickedIds.add(recipe.id);
@@ -82,7 +133,7 @@ export function pickBalancedTodayMenu(recipes: Recipe[], max = 10): Recipe[] {
     const recipe = weightedRandom(remaining, (item) => {
       const roleBonus = picked.some((pickedRecipe) => roleOf(pickedRecipe) === roleOf(item)) ? 1 : 3;
       const categoryBonus = picked.some((pickedRecipe) => pickedRecipe.category === item.category) ? 1 : 2;
-      return item.rating + roleBonus + categoryBonus + (item.images.length ? 1 : 0);
+      return sceneWeight(item, preset) + roleBonus + categoryBonus;
     });
     if (!recipe) break;
     picked.push(recipe);

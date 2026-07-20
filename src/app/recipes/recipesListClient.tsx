@@ -11,7 +11,12 @@ import { Badge } from "@/components/ui/Badge";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { RecipeCard } from "@/components/recipes/RecipeCard";
 import { VisuallyLosslessThumb } from "@/components/recipes/VisuallyLosslessThumb";
-import { buildTodayMenuInsights, pickBalancedTodayMenu } from "@/lib/today/menuInsights";
+import {
+  MENU_PLAN_PRESETS,
+  MenuPlanScene,
+  buildTodayMenuInsights,
+  pickBalancedTodayMenu,
+} from "@/lib/today/menuInsights";
 
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
@@ -40,6 +45,23 @@ export function RecipesListClient({
   const [busy, setBusy] = React.useState(false);
   const [exportError, setExportError] = React.useState<string | null>(null);
   const [menuTip, setMenuTip] = React.useState<string | null>(null);
+  const [planScene, setPlanScene] = React.useState<MenuPlanScene>("balanced");
+
+  const planScenes = React.useMemo(
+    () =>
+      ([
+        ["balanced", "家常", "6道"],
+        ["quick", "快手", "4道"],
+        ["banquet", "家宴", "8道"],
+        ["light", "清爽", "5道"],
+      ] as const).map(([key, shortLabel, count]) => ({
+        key,
+        shortLabel,
+        count,
+        label: MENU_PLAN_PRESETS[key].label,
+      })),
+    [],
+  );
 
   const categories = React.useMemo(() => {
     const counts = new Map<string, number>();
@@ -90,11 +112,11 @@ export function RecipesListClient({
   };
 
   const onShuffleMenu = async () => {
-    const picked = pickBalancedTodayMenu(recipes, todayMax);
+    const picked = pickBalancedTodayMenu(recipes, todayMax, planScene);
     if (!picked.length) return;
     await replace(picked.map((recipe) => recipe.id));
     setExportError(null);
-    setMenuTip(`已按结构配好 ${picked.length} 道：${picked.slice(0, 3).map((recipe) => recipe.name).join("、")}${picked.length > 3 ? "等" : ""}`);
+    setMenuTip(`已按「${MENU_PLAN_PRESETS[planScene].label}」配好 ${picked.length} 道：${picked.slice(0, 3).map((recipe) => recipe.name).join("、")}${picked.length > 3 ? "等" : ""}`);
   };
 
   const onExport = async () => {
@@ -141,7 +163,7 @@ export function RecipesListClient({
                 onClick={onShuffleMenu}
                 disabled={!todayHydrated || !hydrated || recipes.length === 0 || busy}
               >
-                随机配桌
+                配一桌
               </Button>
               <Button
                 size="sm"
@@ -159,6 +181,33 @@ export function RecipesListClient({
                 {busy ? "生成中" : "分享小票"}
               </Button>
             </div>
+          </div>
+
+          <div className="mt-3 grid grid-cols-4 gap-2">
+            {planScenes.map((scene) => {
+              const active = planScene === scene.key;
+              return (
+                <button
+                  key={scene.key}
+                  type="button"
+                  aria-pressed={active}
+                  className={cn(
+                    "rounded-lg border px-2 py-2.5 text-left transition-[background-color,border-color,color,box-shadow]",
+                    active
+                      ? "border-[color:var(--foreground)] bg-[color:var(--foreground)] text-[color:var(--background)] shadow-[var(--shadow-soft)]"
+                      : "border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/72 text-[color:var(--muted)]",
+                  )}
+                  title={scene.label}
+                  onClick={() => {
+                    setPlanScene(scene.key);
+                    setMenuTip(null);
+                  }}
+                >
+                  <span className="block text-[13px] font-medium leading-none">{scene.shortLabel}</span>
+                  <span className="mt-1 block text-[11px] opacity-70">{scene.count}</span>
+                </button>
+              );
+            })}
           </div>
 
           {exportError ? (
