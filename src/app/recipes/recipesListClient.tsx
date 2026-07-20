@@ -541,6 +541,7 @@ export function RecipesListClient({
   const actionBusy = busy || recordBusy || fillBusyId != null || swapBusyId != null || templateBusyId != null;
   const shoppingTotal = menuInsights.shoppingList.length;
   const shoppingPercent = shoppingTotal ? Math.round((prepProgress.doneCount / shoppingTotal) * 100) : 0;
+  const shoppingGroupCount = menuInsights.shoppingGroups.length;
 
   const filtered = React.useMemo(() => {
     const query = q.trim().toLowerCase();
@@ -694,8 +695,12 @@ export function RecipesListClient({
     if (!menuInsights.shoppingList.length) return;
     setExportError(null);
     try {
-      await navigator.clipboard.writeText(menuInsights.shoppingList.map((item) => `□ ${item}`).join("\n"));
-      setMenuTip("采购清单已复制，可以直接发给家里人一起买。");
+      const lines = menuInsights.shoppingGroups.flatMap((group) => [
+        `【${group.label}】`,
+        ...group.items.map((item) => `□ ${item}`),
+      ]);
+      await navigator.clipboard.writeText(lines.join("\n"));
+      setMenuTip("分区采购清单已复制，可以直接发给家里人一起买。");
     } catch {
       setExportError("复制失败，可以直接截图这份采购清单。");
     }
@@ -1256,37 +1261,80 @@ export function RecipesListClient({
                   </div>
 
                   {menuInsights.shoppingList.length ? (
-                    <div className="grid grid-cols-2 gap-2">
-                      {menuInsights.shoppingList.map((item) => {
-                        const checked = prepProgress.checkedItems.has(item);
+                    <div className="space-y-2.5">
+                      <div className="rounded-lg border border-[color:rgba(185,148,75,0.24)] bg-[color:rgba(185,148,75,0.06)] px-3 py-2.5">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="text-[11px] text-[color:var(--muted-2)]">菜场路线</div>
+                            <div className="mt-0.5 truncate text-[12px] text-[color:var(--muted)]">
+                              {shoppingGroupCount} 区 · {shoppingTotal} 项，按买菜动线整理
+                            </div>
+                          </div>
+                          <Badge tone="accent" className="shrink-0">
+                            {shoppingPercent}%
+                          </Badge>
+                        </div>
+                      </div>
+
+                      {menuInsights.shoppingGroups.map((group, groupIndex) => {
+                        const done = group.items.filter((item) => prepProgress.checkedItems.has(item)).length;
                         return (
-                          <button
-                            key={item}
-                            type="button"
-                            aria-label={`${checked ? "取消勾选" : "勾选"}${item}`}
-                            aria-pressed={checked}
-                            className={cn(
-                              "flex min-h-12 items-center gap-2 rounded-lg border px-2.5 py-2 text-left transition-colors",
-                              checked
-                                ? "border-[color:rgba(63,111,85,0.30)] bg-[color:rgba(63,111,85,0.10)] text-[color:var(--accent)]"
-                                : "border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/72 text-[color:var(--foreground)]",
-                            )}
-                            onClick={() => prepProgress.toggle(item)}
+                          <div
+                            key={group.key}
+                            className="rounded-lg border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/72 p-2.5"
                           >
-                            <span
-                              className={cn(
-                                "flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[10px] leading-none",
-                                checked
-                                  ? "border-[color:var(--accent)] bg-[color:var(--accent)] text-[color:var(--background)]"
-                                  : "border-[color:var(--menu-line)] text-transparent",
-                              )}
-                            >
-                              {checked ? "✓" : ""}
-                            </span>
-                            <span className="line-clamp-2 min-w-0 text-[12px] leading-5">
-                              {item}
-                            </span>
-                          </button>
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-[color:rgba(185,148,75,0.28)] bg-[color:var(--paper-strong)]/70 text-[10px] text-[color:var(--muted)]">
+                                    {String(groupIndex + 1).padStart(2, "0")}
+                                  </span>
+                                  <span className="pk-serif truncate text-[15px] leading-tight">{group.label}</span>
+                                </div>
+                                <div className="mt-1 truncate text-[11px] text-[color:var(--muted-2)]">
+                                  {group.hint}
+                                </div>
+                              </div>
+                              <Badge tone={done === group.items.length ? "accent" : "muted"} className="shrink-0 px-1.5 py-0.5 text-[10px]">
+                                {done}/{group.items.length}
+                              </Badge>
+                            </div>
+
+                            <div className="mt-2 grid grid-cols-2 gap-1.5">
+                              {group.items.map((item) => {
+                                const checked = prepProgress.checkedItems.has(item);
+                                return (
+                                  <button
+                                    key={item}
+                                    type="button"
+                                    aria-label={`${checked ? "取消勾选" : "勾选"}${item}`}
+                                    aria-pressed={checked}
+                                    className={cn(
+                                      "flex min-h-11 items-center gap-2 rounded-md border px-2 py-1.5 text-left transition-colors",
+                                      checked
+                                        ? "border-[color:rgba(63,111,85,0.30)] bg-[color:rgba(63,111,85,0.10)] text-[color:var(--accent)]"
+                                        : "border-[color:var(--line)] bg-[color:var(--paper-strong)]/58 text-[color:var(--foreground)]",
+                                    )}
+                                    onClick={() => prepProgress.toggle(item)}
+                                  >
+                                    <span
+                                      className={cn(
+                                        "flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[10px] leading-none",
+                                        checked
+                                          ? "border-[color:var(--accent)] bg-[color:var(--accent)] text-[color:var(--background)]"
+                                          : "border-[color:var(--menu-line)] text-transparent",
+                                      )}
+                                    >
+                                      {checked ? "✓" : ""}
+                                    </span>
+                                    <span className="line-clamp-2 min-w-0 text-[12px] leading-5">
+                                      {item}
+                                    </span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
                         );
                       })}
                     </div>

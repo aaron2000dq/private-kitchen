@@ -16,6 +16,27 @@ type MenuPlanOptions = {
   recentRecipeIds?: Iterable<string>;
 };
 
+type ShoppingGroupKey = "protein" | "produce" | "staple" | "seasoning" | "other";
+
+export type ShoppingGroup = {
+  key: ShoppingGroupKey;
+  label: string;
+  hint: string;
+  items: string[];
+};
+
+const SHOPPING_GROUP_META: Array<{
+  key: ShoppingGroupKey;
+  label: string;
+  hint: string;
+}> = [
+  { key: "protein", label: "肉蛋水产", hint: "先买耐放主料" },
+  { key: "produce", label: "时蔬菌菇", hint: "蔬菜最后挑新鲜" },
+  { key: "staple", label: "主食豆制", hint: "面饭豆腐别漏" },
+  { key: "seasoning", label: "调味干货", hint: "回家前补齐小料" },
+  { key: "other", label: "其他", hint: "顺手确认" },
+];
+
 export const MENU_PLAN_PRESETS: Record<MenuPlanScene, MenuPlanPreset> = {
   balanced: {
     label: "家常一桌",
@@ -53,6 +74,7 @@ export type TodayMenuInsights = {
   roleLabels: string[];
   missing: string[];
   shoppingList: string[];
+  shoppingGroups: ShoppingGroup[];
   timeline: Array<{
     label: string;
     title: string;
@@ -230,6 +252,40 @@ function buildShoppingList(recipes: Recipe[]): string[] {
     .slice(0, 12);
 }
 
+function shoppingItemName(item: string): string {
+  return item.replace(/\s+x\d+$/i, "").trim();
+}
+
+function shoppingGroupKeyOf(item: string): ShoppingGroupKey {
+  const name = shoppingItemName(item);
+  if (/(鸡|鸭|鱼|虾|蟹|牛|羊|猪|肉|排骨|鸡翅|牛蛙|蛋|小肠|五花|牛腩|猪蹄|腊肠|腊肉|肥牛)/.test(name)) {
+    return "protein";
+  }
+  if (/(青菜|白菜|菠菜|生菜|油麦菜|空心菜|丝瓜|豆角|西兰花|包菜|茄子|苦瓜|莴笋|蒲菜|菜苔|萝卜|芹菜|莴苣|冬瓜|南瓜|土豆|番茄|西红柿|蘑菇|香菇|菌|葱|姜|蒜|青椒|辣椒|蔬)/.test(name)) {
+    return "produce";
+  }
+  if (/(米|饭|面|粉|河粉|米粉|粉丝|饼|豆腐|豆皮|腐竹|年糕|馒头|面包|土司)/.test(name)) {
+    return "staple";
+  }
+  if (/(油|盐|糖|酱|醋|料酒|生抽|老抽|蚝油|淀粉|胡椒|花椒|八角|桂皮|香叶|孜然|辣椒粉|豆瓣|火锅底料|芝麻|香油|蜂蜜)/.test(name)) {
+    return "seasoning";
+  }
+  return "other";
+}
+
+function buildShoppingGroups(items: string[]): ShoppingGroup[] {
+  const grouped = new Map<ShoppingGroupKey, string[]>();
+  for (const item of items) {
+    const key = shoppingGroupKeyOf(item);
+    grouped.set(key, [...(grouped.get(key) ?? []), item]);
+  }
+
+  return SHOPPING_GROUP_META.map((meta) => ({
+    ...meta,
+    items: grouped.get(meta.key) ?? [],
+  })).filter((group) => group.items.length > 0);
+}
+
 function scoreMenu(count: number, roles: Set<MenuRole>, totalWeight: number): number {
   if (count === 0) return 0;
   const countScore = Math.min(34, count * 8.5);
@@ -390,6 +446,7 @@ export function buildTodayMenuInsights(recipes: Recipe[]): TodayMenuInsights {
   const score = scoreMenu(recipes.length, roles, totalWeight);
   const missing = missingRoles(roles, recipes.length);
   const shoppingList = buildShoppingList(recipes);
+  const shoppingGroups = buildShoppingGroups(shoppingList);
   const mainNames = recipes.slice(0, 3).map((recipe) => recipe.name);
 
   return {
@@ -402,6 +459,7 @@ export function buildTodayMenuInsights(recipes: Recipe[]): TodayMenuInsights {
     roleLabels,
     missing,
     shoppingList,
+    shoppingGroups,
     timeline: buildTimeline(recipes),
     stats: [
       { label: "菜量", value: recipes.length ? `${recipes.length} 道` : "待定" },
