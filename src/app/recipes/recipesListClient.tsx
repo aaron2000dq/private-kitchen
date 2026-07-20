@@ -2,12 +2,15 @@
 
 import * as React from "react";
 import { AppLink as Link } from "@/components/ui/AppLink";
+import type { Recipe } from "@/lib/recipes/types";
 import { useRecipes } from "@/lib/recipes/useRecipes";
 import { useCookHistory } from "@/lib/today/useCookHistory";
 import { useKitchenPrepProgress } from "@/lib/today/useKitchenPrepProgress";
 import { useTodayCookbook } from "@/lib/today/useTodayCookbook";
 import { exportTodayCookbookToPng } from "@/lib/today/exportTodayCookbookToImage";
 import { recipeImageThumbUrl, recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
+import { MEAL_ROLE_META, mealRoleOf, type MealRole } from "@/lib/recipes/mealRole";
+import { recipeDetailHref } from "@/lib/recipes/recipeRoutes";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
 import { Button, ButtonLink } from "@/components/ui/Button";
@@ -26,10 +29,72 @@ function cn(...parts: Array<string | false | null | undefined>) {
 
 type KitchenGuideMode = "shopping" | "prep";
 
+const FILL_ROLE_PRIORITY: MealRole[] = ["main", "vegetable", "soup", "staple", "small"];
+
 function formatCookedDate(iso: string): string {
   const date = new Date(iso);
   if (!Number.isFinite(date.getTime())) return "最近";
   return `${date.getMonth() + 1}月${date.getDate()}日`;
+}
+
+function fillSuggestionReason(role: MealRole): string {
+  if (role === "main") return "补一道撑场面的主菜";
+  if (role === "vegetable") return "给这桌留一口清爽";
+  if (role === "soup") return "收住烟火气";
+  if (role === "staple") return "把这一餐压稳";
+  if (role === "small") return "添一点开胃小食";
+  return "让菜单更完整";
+}
+
+function menuFillScore(
+  candidate: Recipe,
+  wantedRole: MealRole,
+  selectedRecipes: Recipe[],
+  recentIds: Set<string>,
+): number {
+  const role = mealRoleOf(candidate);
+  const roleScore = role === wantedRole ? 90 : role === "home" ? 8 : 18;
+  const imageScore = candidate.images?.length ? 5 : 0;
+  const ratingScore = (candidate.rating ?? 0) * 2.5;
+  const categoryScore = selectedRecipes.some((recipe) => recipe.category === candidate.category) ? 1 : 5;
+  const recentPenalty = recentIds.has(candidate.id) ? -22 : 0;
+  return roleScore + imageScore + ratingScore + categoryScore + recentPenalty;
+}
+
+function buildMenuFillSuggestions(
+  recipes: Recipe[],
+  selectedRecipes: Recipe[],
+  recentRecipeIds: string[],
+  max = 3,
+): Recipe[] {
+  const selectedIds = new Set(selectedRecipes.map((recipe) => recipe.id));
+  const selectedRoles = new Set(selectedRecipes.map(mealRoleOf));
+  const recentIds = new Set(recentRecipeIds);
+  const missingRoles = FILL_ROLE_PRIORITY.filter((role) => !selectedRoles.has(role));
+  const picked: Recipe[] = [];
+  const pickedIds = new Set<string>();
+
+  for (const role of missingRoles) {
+    if (picked.length >= max) break;
+    const best = recipes
+      .filter((recipe) => !selectedIds.has(recipe.id) && !pickedIds.has(recipe.id) && mealRoleOf(recipe) === role)
+      .sort((a, b) => menuFillScore(b, role, selectedRecipes, recentIds) - menuFillScore(a, role, selectedRecipes, recentIds))[0];
+    if (!best) continue;
+    picked.push(best);
+    pickedIds.add(best.id);
+  }
+
+  for (const role of FILL_ROLE_PRIORITY) {
+    if (picked.length >= max) break;
+    const best = recipes
+      .filter((recipe) => !selectedIds.has(recipe.id) && !pickedIds.has(recipe.id))
+      .sort((a, b) => menuFillScore(b, role, selectedRecipes, recentIds) - menuFillScore(a, role, selectedRecipes, recentIds))[0];
+    if (!best) continue;
+    picked.push(best);
+    pickedIds.add(best.id);
+  }
+
+  return picked.slice(0, max);
 }
 
 export function RecipesListClient({
@@ -61,6 +126,7 @@ export function RecipesListClient({
   const [activeCategory, setActiveCategory] = React.useState("全部");
   const [busy, setBusy] = React.useState(false);
   const [recordBusy, setRecordBusy] = React.useState(false);
+  const [fillBusyId, setFillBusyId] = React.useState<string | null>(null);
   const [exportError, setExportError] = React.useState<string | null>(null);
   const [menuTip, setMenuTip] = React.useState<string | null>(null);
   const [planScene, setPlanScene] = React.useState<MenuPlanScene>("balanced");
@@ -103,13 +169,17 @@ export function RecipesListClient({
     () => buildTodayMenuInsights(selectedRecipes),
     [selectedRecipes],
   );
+  const fillSuggestions = React.useMemo(() => {
+    if (!selectedRecipes.length || selectedRecipes.length >= todayMax) return [];
+    return buildMenuFillSuggestions(recipes, selectedRecipes, recentRecipeIds, Math.min(3, todayMax - selectedRecipes.length));
+  }, [recipes, recentRecipeIds, selectedRecipes, todayMax]);
   const menuKey = React.useMemo(
     () => selectedRecipes.map((recipe) => recipe.id).join("|"),
     [selectedRecipes],
   );
   const prepProgress = useKitchenPrepProgress(menuKey, menuInsights.shoppingList);
   const latestHistory = historyEntries[0];
-  const actionBusy = busy || recordBusy;
+  const actionBusy = busy || recordBusy || fillBusyId != null;
   const shoppingTotal = menuInsights.shoppingList.length;
   const shoppingPercent = shoppingTotal ? Math.round((prepProgress.doneCount / shoppingTotal) * 100) : 0;
 
@@ -169,6 +239,25 @@ export function RecipesListClient({
       setMenuTip("采购清单已复制，可以直接发给家里人一起买。");
     } catch {
       setExportError("复制失败，可以直接截图这份采购清单。");
+    }
+  };
+
+  const onAddFillSuggestion = async (recipe: Recipe) => {
+    setFillBusyId(recipe.id);
+    setExportError(null);
+    try {
+      const result = await addToToday(recipe.id);
+      if (result.added) {
+        setMenuTip(`已补上「${recipe.name}」：${fillSuggestionReason(mealRoleOf(recipe))}。`);
+      } else if (result.ok) {
+        setMenuTip(`「${recipe.name}」已经在今日菜单里。`);
+      } else {
+        setExportError("今日菜单已满，可以先移除一道再补。");
+      }
+    } catch (e) {
+      setExportError(e instanceof Error ? e.message : "加入失败");
+    } finally {
+      setFillBusyId(null);
     }
   };
 
@@ -334,6 +423,79 @@ export function RecipesListClient({
               </div>
             </div>
           </div>
+
+          {fillSuggestions.length ? (
+            <div className="mt-3 rounded-lg border border-[color:rgba(63,111,85,0.20)] bg-[color:rgba(63,111,85,0.06)] p-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-[11px] text-[color:var(--muted-2)]">补齐建议</div>
+                  <div className="pk-serif mt-1 text-[18px] leading-tight">让这桌更完整</div>
+                </div>
+                <Badge tone="accent">可补 {fillSuggestions.length}</Badge>
+              </div>
+
+              <div className="mt-3 grid gap-2">
+                {fillSuggestions.map((recipe, index) => {
+                  const image = recipe.images?.[0];
+                  const role = mealRoleOf(recipe);
+                  return (
+                    <div
+                      key={recipe.id}
+                      className="grid grid-cols-[54px_minmax(0,1fr)_auto] items-center gap-2 rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)]/76 p-2"
+                    >
+                      <Link
+                        href={recipeDetailHref(recipe.id)}
+                        className="h-[54px] w-[54px] overflow-hidden rounded-lg border border-[color:var(--line)] bg-[color:var(--wash)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]"
+                        aria-label={`打开菜谱：${recipe.name}`}
+                      >
+                        {image ? (
+                          <VisuallyLosslessThumb
+                            src={recipeImageThumbUrl(image)}
+                            fallbackSrc={recipeImageUrl(image)}
+                            alt={recipe.name}
+                            loading={index === 0 ? "eager" : "lazy"}
+                            fetchPriority={index === 0 ? "high" : "auto"}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-[10px] text-[color:var(--muted-2)]">
+                            无图
+                          </div>
+                        )}
+                      </Link>
+
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <Badge tone={role === "vegetable" ? "accent" : "muted"} className="px-1.5 py-0.5 text-[10px]">
+                            {MEAL_ROLE_META[role].label}
+                          </Badge>
+                          <span className="truncate text-[11px] text-[color:var(--muted-2)]">
+                            {fillSuggestionReason(role)}
+                          </span>
+                        </div>
+                        <Link
+                          href={recipeDetailHref(recipe.id)}
+                          className="pk-serif mt-1 block truncate text-[15px] leading-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]"
+                        >
+                          {recipe.name}
+                        </Link>
+                      </div>
+
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 px-2.5 text-[12px]"
+                        disabled={!todayHydrated || actionBusy}
+                        onClick={() => void onAddFillSuggestion(recipe)}
+                      >
+                        {fillBusyId === recipe.id ? "加入中" : "补上"}
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
 
           {selectedRecipes.length ? (
             <div className="mt-3 rounded-lg border border-[color:var(--line)] bg-[color:var(--paper-strong)]/76 p-3 shadow-[0_1px_0_rgba(24,33,29,0.04)]">
