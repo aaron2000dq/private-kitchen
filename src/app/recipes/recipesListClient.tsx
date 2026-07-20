@@ -31,6 +31,31 @@ type KitchenGuideMode = "shopping" | "prep";
 
 const FILL_ROLE_PRIORITY: MealRole[] = ["main", "vegetable", "soup", "staple", "small"];
 const LOCKED_MENU_KEY = "private-kitchen:locked-today-menu:v1";
+const MENU_TEMPLATES_KEY = "private-kitchen:menu-templates:v1";
+const MENU_TEMPLATE_LIMIT = 6;
+
+type MenuTemplate = {
+  id: string;
+  name: string;
+  recipeIds: string[];
+  recipeNames: string[];
+  scene: MenuPlanScene;
+  score: number;
+  createdAt: string;
+  updatedAt: string;
+  usedAt?: string;
+  useCount: number;
+};
+
+type MenuTemplateView = {
+  template: MenuTemplate;
+  validIds: string[];
+  names: string[];
+};
+
+function templateSortValue(template: MenuTemplate) {
+  return template.usedAt ?? template.updatedAt ?? template.createdAt;
+}
 
 function readLockedMenuIds(): string[] {
   if (typeof window === "undefined") return [];
@@ -54,12 +79,79 @@ function persistLockedMenuIds(ids: string[]) {
   }
 }
 
+function isMenuTemplate(value: unknown): value is MenuTemplate {
+  if (!value || typeof value !== "object") return false;
+  const item = value as Partial<MenuTemplate>;
+  return (
+    typeof item.id === "string" &&
+    typeof item.name === "string" &&
+    Array.isArray(item.recipeIds) &&
+    item.recipeIds.every((id) => typeof id === "string") &&
+    Array.isArray(item.recipeNames) &&
+    item.recipeNames.every((name) => typeof name === "string") &&
+    typeof item.createdAt === "string" &&
+    typeof item.updatedAt === "string"
+  );
+}
+
+function readMenuTemplates(): MenuTemplate[] {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const raw = window.localStorage.getItem(MENU_TEMPLATES_KEY);
+    const parsed: unknown = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter(isMenuTemplate)
+      .map((template) => ({
+        ...template,
+        scene: template.scene in MENU_PLAN_PRESETS ? template.scene : "balanced",
+        useCount: Number.isFinite(template.useCount) ? template.useCount : 0,
+        score: Number.isFinite(template.score) ? template.score : 0,
+      }))
+      .sort((a, b) => templateSortValue(b).localeCompare(templateSortValue(a)))
+      .slice(0, MENU_TEMPLATE_LIMIT);
+  } catch {
+    return [];
+  }
+}
+
+function persistMenuTemplates(templates: MenuTemplate[]) {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.localStorage.setItem(MENU_TEMPLATES_KEY, JSON.stringify(templates.slice(0, MENU_TEMPLATE_LIMIT)));
+  } catch {
+    // Templates are local convenience data; the live menu should keep working if storage is unavailable.
+  }
+}
+
 function sameStringSet(a: Set<string>, b: Set<string>): boolean {
   if (a.size !== b.size) return false;
   for (const item of a) {
     if (!b.has(item)) return false;
   }
   return true;
+}
+
+function sameOrderedIds(a: string[], b: string[]): boolean {
+  return a.length === b.length && a.every((id, index) => id === b[index]);
+}
+
+function makeTemplateId() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `template_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function templateName(recipes: Recipe[], date = new Date()) {
+  const first = recipes[0]?.name ?? "私房家宴";
+  return `${date.getMonth() + 1}月${date.getDate()}日 · ${first}一桌`;
+}
+
+function formatMenuTemplateScore(score: number) {
+  return score > 0 ? `${score}分` : "未评分";
 }
 
 function formatCookedDate(iso: string): string {
@@ -228,8 +320,11 @@ export function RecipesListClient({
   const [recordBusy, setRecordBusy] = React.useState(false);
   const [fillBusyId, setFillBusyId] = React.useState<string | null>(null);
   const [swapBusyId, setSwapBusyId] = React.useState<string | null>(null);
+  const [templateBusyId, setTemplateBusyId] = React.useState<string | null>(null);
   const [lockedIds, setLockedIds] = React.useState<Set<string>>(() => new Set());
   const [locksHydrated, setLocksHydrated] = React.useState(false);
+  const [menuTemplates, setMenuTemplates] = React.useState<MenuTemplate[]>([]);
+  const [templatesHydrated, setTemplatesHydrated] = React.useState(false);
   const [exportError, setExportError] = React.useState<string | null>(null);
   const [menuTip, setMenuTip] = React.useState<string | null>(null);
   const [planScene, setPlanScene] = React.useState<MenuPlanScene>("balanced");
@@ -241,9 +336,19 @@ export function RecipesListClient({
   }, []);
 
   React.useEffect(() => {
+    setMenuTemplates(readMenuTemplates());
+    setTemplatesHydrated(true);
+  }, []);
+
+  React.useEffect(() => {
     if (!locksHydrated) return;
     persistLockedMenuIds(Array.from(lockedIds));
   }, [lockedIds, locksHydrated]);
+
+  React.useEffect(() => {
+    if (!templatesHydrated) return;
+    persistMenuTemplates(menuTemplates);
+  }, [menuTemplates, templatesHydrated]);
 
   const planScenes = React.useMemo(
     () =>
@@ -277,11 +382,26 @@ export function RecipesListClient({
       .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0))
       .slice(0, todayMax);
   }, [recipes, todayIds, todayMax]);
+  const recipeById = React.useMemo(
+    () => new Map(recipes.map((recipe) => [recipe.id, recipe])),
+    [recipes],
+  );
   const lockedSelectedRecipes = React.useMemo(
     () => selectedRecipes.filter((recipe) => lockedIds.has(recipe.id)),
     [lockedIds, selectedRecipes],
   );
   const lockedSelectedCount = lockedSelectedRecipes.length;
+  const menuTemplateViews = React.useMemo<MenuTemplateView[]>(
+    () =>
+      menuTemplates
+        .map((template) => {
+          const validIds = template.recipeIds.filter((id) => recipeById.has(id));
+          const names = validIds.map((id) => recipeById.get(id)?.name ?? "").filter(Boolean);
+          return { template, validIds, names };
+        })
+        .filter((view) => view.validIds.length > 0),
+    [menuTemplates, recipeById],
+  );
 
   React.useEffect(() => {
     if (!locksHydrated) return;
@@ -307,7 +427,7 @@ export function RecipesListClient({
   );
   const prepProgress = useKitchenPrepProgress(menuKey, menuInsights.shoppingList);
   const latestHistory = historyEntries[0];
-  const actionBusy = busy || recordBusy || fillBusyId != null || swapBusyId != null;
+  const actionBusy = busy || recordBusy || fillBusyId != null || swapBusyId != null || templateBusyId != null;
   const shoppingTotal = menuInsights.shoppingList.length;
   const shoppingPercent = shoppingTotal ? Math.round((prepProgress.doneCount / shoppingTotal) * 100) : 0;
 
@@ -373,6 +493,76 @@ export function RecipesListClient({
       return next;
     });
     await removeFromToday(recipe.id);
+  };
+
+  const onSaveMenuTemplate = () => {
+    if (!selectedRecipes.length || !templatesHydrated) return;
+
+    const ids = selectedRecipes.map((recipe) => recipe.id);
+    const names = selectedRecipes.map((recipe) => recipe.name);
+    const now = new Date().toISOString();
+    const existing = menuTemplates.find((template) => sameOrderedIds(template.recipeIds, ids));
+    const name = existing?.name ?? templateName(selectedRecipes);
+    const nextTemplate: MenuTemplate = {
+      id: existing?.id ?? makeTemplateId(),
+      name,
+      recipeIds: ids,
+      recipeNames: names,
+      scene: planScene,
+      score: menuInsights.score,
+      createdAt: existing?.createdAt ?? now,
+      updatedAt: now,
+      usedAt: existing?.usedAt,
+      useCount: existing?.useCount ?? 0,
+    };
+    const next = [nextTemplate, ...menuTemplates.filter((template) => template.id !== nextTemplate.id)]
+      .sort((a, b) => templateSortValue(b).localeCompare(templateSortValue(a)))
+      .slice(0, MENU_TEMPLATE_LIMIT);
+
+    setMenuTemplates(next);
+    setExportError(null);
+    setMenuTip(existing ? `已更新模板「${name}」。` : `已保存为模板「${name}」，以后可以一键复用。`);
+  };
+
+  const onApplyMenuTemplate = async (view: MenuTemplateView) => {
+    const ids = view.validIds.slice(0, todayMax);
+    if (!ids.length) {
+      setExportError("这个模板里的菜谱暂时不可用。");
+      return;
+    }
+
+    setTemplateBusyId(view.template.id);
+    setExportError(null);
+    try {
+      await replace(ids);
+      setLockedIds(new Set());
+      const now = new Date().toISOString();
+      setMenuTemplates((current) =>
+        current
+          .map((template) =>
+            template.id === view.template.id
+              ? {
+                  ...template,
+                  usedAt: now,
+                  useCount: (template.useCount ?? 0) + 1,
+                }
+              : template,
+          )
+          .sort((a, b) => templateSortValue(b).localeCompare(templateSortValue(a)))
+          .slice(0, MENU_TEMPLATE_LIMIT),
+      );
+      setMenuTip(`已复用「${view.template.name}」：${view.names.slice(0, 3).join("、")}${view.names.length > 3 ? "等" : ""}。`);
+    } catch (e) {
+      setExportError(e instanceof Error ? e.message : "复用模板失败");
+    } finally {
+      setTemplateBusyId(null);
+    }
+  };
+
+  const onDeleteMenuTemplate = (template: MenuTemplate) => {
+    setMenuTemplates((current) => current.filter((item) => item.id !== template.id));
+    setMenuTip(`已删除模板「${template.name}」。`);
+    setExportError(null);
   };
 
   const onRecordCooked = async () => {
@@ -561,6 +751,87 @@ export function RecipesListClient({
               {recentWindowDays}天避重 {recentRecipeIds.length}
             </Badge>
           </div>
+
+          {templatesHydrated && (selectedRecipes.length || menuTemplateViews.length) ? (
+            <div className="mt-3 rounded-lg border border-[color:rgba(185,148,75,0.24)] bg-[color:rgba(185,148,75,0.06)] p-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-[11px] text-[color:var(--muted-2)]">家宴模板</div>
+                  <div className="pk-serif mt-1 text-[18px] leading-tight">
+                    {menuTemplateViews.length ? "常用桌面" : "保存满意搭配"}
+                  </div>
+                  <div className="mt-1 line-clamp-1 text-[11px] text-[color:var(--muted)]">
+                    {menuTemplateViews.length
+                      ? `已存 ${menuTemplateViews.length} 套，可直接复用整桌菜单。`
+                      : "把今天这桌留下来，下次不用重新搭。"}
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 shrink-0 px-2.5 text-[12px]"
+                  disabled={!selectedRecipes.length || actionBusy}
+                  onClick={onSaveMenuTemplate}
+                >
+                  存为模板
+                </Button>
+              </div>
+
+              {menuTemplateViews.length ? (
+                <div className="mt-3 grid gap-2">
+                  {menuTemplateViews.slice(0, 3).map((view) => (
+                    <div
+                      key={view.template.id}
+                      className="rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)]/78 p-2.5 sm:grid sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-2"
+                    >
+                      <div className="min-w-0">
+                        <div className="flex min-w-0 items-center gap-1.5">
+                          <div className="pk-serif truncate text-[15px] leading-tight">
+                            {view.template.name}
+                          </div>
+                          <Badge tone="muted" className="shrink-0 px-1.5 py-0.5 text-[10px]">
+                            {view.validIds.length}道
+                          </Badge>
+                        </div>
+                        <div className="mt-1 line-clamp-1 text-[11px] text-[color:var(--muted)]">
+                          {view.names.slice(0, 4).join("、")}
+                          {view.names.length > 4 ? "等" : ""}
+                        </div>
+                        <div className="mt-1 text-[10px] text-[color:var(--muted-2)]">
+                          {MENU_PLAN_PRESETS[view.template.scene].label} · {formatMenuTemplateScore(view.template.score)}
+                          {view.template.useCount ? ` · 复用 ${view.template.useCount} 次` : ""}
+                        </div>
+                      </div>
+                      <div className="mt-2 grid grid-cols-2 gap-1.5 sm:mt-0 sm:flex sm:shrink-0 sm:items-center">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 px-2 text-[12px]"
+                          disabled={actionBusy}
+                          onClick={() => void onApplyMenuTemplate(view)}
+                        >
+                          {templateBusyId === view.template.id ? "复用中" : "复用"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 px-2 text-[12px]"
+                          disabled={actionBusy}
+                          onClick={() => onDeleteMenuTemplate(view.template)}
+                        >
+                          删除
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="mt-3 rounded-lg border border-dashed border-[color:rgba(185,148,75,0.36)] bg-[color:var(--paper)]/54 px-3 py-3 text-[12px] leading-5 text-[color:var(--muted)]">
+                  选好一桌菜后点“存为模板”，它会保存在本机浏览器里。
+                </div>
+              )}
+            </div>
+          ) : null}
 
           {exportError ? (
             <div className="mt-3 rounded-lg border border-[color:rgba(184,92,56,0.35)] bg-[color:rgba(184,92,56,0.10)] px-3 py-2 text-[12px] text-[color:var(--warm)]">
