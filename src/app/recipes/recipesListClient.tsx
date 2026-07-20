@@ -715,6 +715,7 @@ export function RecipesListClient({
             <div className="pk-scrollbar mt-3 flex gap-3 overflow-x-auto pb-1">
               {selectedRecipes.map((recipe) => {
                 const image = recipe.images?.[0];
+                const role = mealRoleOf(recipe);
                 return (
                   <div
                     key={recipe.id}
@@ -722,9 +723,12 @@ export function RecipesListClient({
                   >
                     <Link
                       href={recipeDetailHref(recipe.id)}
-                      className="block aspect-[4/3] bg-[color:var(--wash)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]"
+                      className="relative block aspect-[4/3] bg-[color:var(--wash)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]"
                       aria-label={`打开菜谱：${recipe.name}`}
                     >
+                      <span className="absolute left-2 top-2 z-10 rounded-md border border-[color:rgba(255,253,246,0.64)] bg-[color:var(--paper)]/88 px-1.5 py-0.5 text-[10px] leading-none text-[color:var(--foreground)] shadow-[0_6px_14px_rgba(24,33,29,0.10)] backdrop-blur">
+                        {MEAL_ROLE_META[role].label}
+                      </span>
                       {image ? (
                         <VisuallyLosslessThumb
                           src={recipeImageThumbUrl(image)}
