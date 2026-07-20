@@ -11,8 +11,9 @@ import { Button } from "@/components/ui/Button";
 import { useTodayCookbook } from "@/lib/today/useTodayCookbook";
 
 const STACK_DEPTH = 4;
-const SWIPE_THRESHOLD = 56;
+const SWIPE_THRESHOLD = 92;
 const WHEEL_ACCUM_THRESHOLD = 48;
+const EXIT_X = 440;
 
 function CardFace({
   r,
@@ -31,7 +32,7 @@ function CardFace({
   const ingPreview = formatRecipeIngredientsPreview(r, 2, 2);
   return (
     <div className="flex h-full flex-col">
-      <div className="h-36 w-full shrink-0 border-b border-[color:var(--line)] bg-[color:var(--wash)] sm:h-40">
+      <div className="relative h-48 w-full shrink-0 border-b border-[color:var(--line)] bg-[color:var(--wash)] sm:h-52">
         {r.images?.[0] ? (
           <VisuallyLosslessThumb
             src={recipeImageThumbUrl(r.images[0])}
@@ -45,21 +46,25 @@ function CardFace({
             无图
           </div>
         )}
+        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/55 to-transparent" />
+        <div className="absolute bottom-3 left-3 rounded-md border border-white/35 bg-black/28 px-2 py-1 text-[11px] text-white backdrop-blur">
+          {r.category}
+        </div>
       </div>
-      <div className="min-h-0 flex-1 space-y-1.5 overflow-hidden px-4 py-3">
-        <div className="pk-serif line-clamp-2 text-[17px] leading-snug">
+      <div className="min-h-0 flex-1 space-y-2 overflow-hidden px-4 py-4">
+        <div className="pk-serif line-clamp-2 text-[20px] leading-snug">
           {r.name}
         </div>
         <div className="flex flex-wrap items-center gap-2 text-[12px] text-[color:var(--muted-2)]">
-          <span>{r.category}</span>
           <span>评分：{r.rating > 0 ? `${r.rating}/5` : "未评分"}</span>
+          <span>本地灵感</span>
         </div>
         {tags.length > 0 ? (
           <div className="flex max-h-[3.15rem] flex-wrap gap-1.5 overflow-hidden">
             {tags.map((t, i) => (
               <span
                 key={`${t}-${i}`}
-                className="rounded-md border border-[color:var(--line)] bg-[color:var(--paper-strong)]/80 px-2 py-0.5 text-[11px] leading-tight text-[color:var(--muted)]"
+                className="rounded-md border border-[color:var(--line)] bg-[color:var(--paper-strong)]/80 px-2 py-1 text-[11px] leading-tight text-[color:var(--muted)]"
               >
                 {t}
               </span>
@@ -69,7 +74,7 @@ function CardFace({
           <div className="text-[11px] text-[color:var(--muted-2)]">标签：无</div>
         )}
         {ingPreview ? (
-          <div className="line-clamp-2 text-[11px] leading-4 text-[color:var(--muted-2)]">
+          <div className="line-clamp-2 text-[12px] leading-5 text-[color:var(--muted-2)]">
             用料：{ingPreview}
           </div>
         ) : null}
@@ -129,33 +134,49 @@ export function InspirationStack({ recipes }: { recipes: Recipe[] }) {
   } = useTodayCookbook();
 
   const [index, setIndex] = React.useState(0);
-  const [dragX, setDragX] = React.useState(0);
+  const [drag, setDrag] = React.useState({ x: 0, y: 0 });
   const [dragging, setDragging] = React.useState(false);
-  const dragRef = React.useRef<{ startX: number } | null>(null);
+  const [leaving, setLeaving] = React.useState<"left" | "right" | null>(null);
+  const dragRef = React.useRef<{ startX: number; startY: number } | null>(null);
+  const movedRef = React.useRef(false);
   const wheelRootRef = React.useRef<HTMLDivElement>(null);
   const wheelAccum = React.useRef(0);
   const wheelClearRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const [pointerDrag, setPointerDrag] = React.useState(true);
-  React.useEffect(() => {
-    const mq = window.matchMedia("(pointer: coarse)");
-    const sync = () => setPointerDrag(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
-
   const goNext = React.useCallback(() => {
     if (n <= 1) return;
     setIndex((i) => (i + 1) % n);
-    setDragX(0);
+    setDrag({ x: 0, y: 0 });
   }, [n]);
 
   const goPrev = React.useCallback(() => {
     if (n <= 1) return;
     setIndex((i) => (i - 1 + n) % n);
-    setDragX(0);
+    setDrag({ x: 0, y: 0 });
   }, [n]);
+
+  const settleSwipe = React.useCallback(
+    (direction: "left" | "right", recipe?: Recipe, canAdd?: boolean, selected?: boolean) => {
+      if (n <= 0 || leaving) return;
+      setLeaving(direction);
+      setDragging(false);
+      setDrag((d) => ({
+        x: direction === "right" ? EXIT_X : -EXIT_X,
+        y: d.y || -18,
+      }));
+
+      window.setTimeout(() => {
+        if (direction === "right" && recipe && canAdd && !selected) {
+          void addToToday(recipe.id);
+        }
+        setIndex((i) => (i + 1) % n);
+        setLeaving(null);
+        setDrag({ x: 0, y: 0 });
+        movedRef.current = false;
+      }, 230);
+    },
+    [addToToday, leaving, n],
+  );
 
   React.useEffect(() => {
     const el = wheelRootRef.current;
@@ -205,21 +226,24 @@ export function InspirationStack({ recipes }: { recipes: Recipe[] }) {
 
   const onPointerDown = (e: React.PointerEvent) => {
     e.currentTarget.setPointerCapture(e.pointerId);
-    dragRef.current = { startX: e.clientX };
+    dragRef.current = { startX: e.clientX, startY: e.clientY };
+    movedRef.current = false;
     setDragging(true);
-    setDragX(0);
+    setDrag({ x: 0, y: 0 });
   };
 
   const onPointerMove = (e: React.PointerEvent) => {
     const d = dragRef.current;
     if (!d) return;
     const dx = e.clientX - d.startX;
-    setDragX(dx);
+    const dy = e.clientY - d.startY;
+    if (Math.abs(dx) > 6) movedRef.current = true;
+    setDrag({ x: dx, y: Math.max(-42, Math.min(42, dy)) });
   };
 
-  const endDrag = (e: React.PointerEvent) => {
+  const endDrag = (e: React.PointerEvent, recipe?: Recipe, canAdd?: boolean, selected?: boolean) => {
     const d = dragRef.current;
-    const dx = d ? e.clientX - d.startX : dragX;
+    const dx = d ? e.clientX - d.startX : drag.x;
     dragRef.current = null;
     setDragging(false);
     try {
@@ -228,11 +252,11 @@ export function InspirationStack({ recipes }: { recipes: Recipe[] }) {
       /* ignore */
     }
     if (d && dx < -SWIPE_THRESHOLD) {
-      goNext();
+      settleSwipe("left", recipe, canAdd, selected);
     } else if (d && dx > SWIPE_THRESHOLD) {
-      goPrev();
+      settleSwipe("right", recipe, canAdd, selected);
     } else {
-      setDragX(0);
+      setDrag({ x: 0, y: 0 });
     }
   };
 
@@ -245,10 +269,13 @@ export function InspirationStack({ recipes }: { recipes: Recipe[] }) {
   }
 
   return (
-    <div ref={wheelRootRef} className="relative pt-9 outline-none">
+    <div ref={wheelRootRef} className="relative pb-4 pt-9 outline-none sm:pb-0">
       <div className="pointer-events-none absolute right-1 top-0 z-20 flex items-center gap-1.5 text-[12px] font-medium text-[color:var(--accent)]">
         <GridIcon className="opacity-90" />
         <span>{n} 道菜</span>
+      </div>
+      <div className="pointer-events-none absolute left-1 top-0 z-20 text-[12px] text-[color:var(--muted-2)]">
+        左滑换菜 · 右滑加入
       </div>
 
       <button
@@ -270,22 +297,26 @@ export function InspirationStack({ recipes }: { recipes: Recipe[] }) {
         ›
       </button>
 
-      <div className="relative mx-auto h-[440px] w-full max-w-[320px] select-none sm:h-[470px] sm:max-w-[340px] md:h-[430px] md:max-w-[300px]">
+      <div className="relative mx-auto h-[500px] w-full max-w-[335px] select-none sm:h-[520px] sm:max-w-[360px] md:h-[480px] md:max-w-[330px]">
         <div className="relative h-full w-full">
           {Array.from({ length: Math.min(STACK_DEPTH, n) }, (_, depth) => {
             const backToFront = STACK_DEPTH - 1 - depth;
             const recipeIndex = (index + backToFront) % n;
             const r = recipes[recipeIndex]!;
             const isFront = backToFront === 0;
-            const offsetX = backToFront * 11;
-            const offsetY = backToFront * 3;
-            const scale = isFront ? 1.04 : 1 - backToFront * 0.024;
+            const offsetX = backToFront * 8;
+            const offsetY = backToFront * 9;
+            const scale = isFront ? 1 : 1 - backToFront * 0.035;
             const opacity = 1 - backToFront * 0.07;
 
-            const tx = isFront ? dragX : 0;
-            const base = `translateX(${offsetX + tx}px) translateY(${offsetY}px) scale(${scale})`;
+            const tx = isFront ? drag.x : 0;
+            const ty = isFront ? drag.y : 0;
+            const rotate = isFront ? Math.max(-13, Math.min(13, drag.x / 14)) : backToFront * -1.5;
+            const base = `translateX(${offsetX + tx}px) translateY(${offsetY + ty}px) rotate(${rotate}deg) scale(${scale})`;
+            const likeOpacity = isFront ? Math.max(0, Math.min(1, drag.x / SWIPE_THRESHOLD)) : 0;
+            const skipOpacity = isFront ? Math.max(0, Math.min(1, -drag.x / SWIPE_THRESHOLD)) : 0;
 
-            const usePointer = isFront && pointerDrag;
+            const usePointer = isFront;
             const todaySelected = isTodaySelected(r.id);
             const todayCanAdd = !todaySelected && todayIds.length < todayMax;
 
@@ -304,13 +335,13 @@ export function InspirationStack({ recipes }: { recipes: Recipe[] }) {
                 }}
               >
                 <div
-                  className={`h-full overflow-hidden rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] shadow-[var(--shadow-soft)] ${
+                  className={`relative h-full overflow-hidden rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] shadow-[var(--shadow-soft)] ${
                     usePointer ? "cursor-grab touch-pan-y active:cursor-grabbing" : ""
                   } ${!usePointer && isFront ? "cursor-default" : ""} ${!isFront ? "pointer-events-none" : ""}`}
                   onPointerDown={usePointer ? onPointerDown : undefined}
                   onPointerMove={usePointer ? onPointerMove : undefined}
-                  onPointerUp={usePointer ? endDrag : undefined}
-                  onPointerCancel={usePointer ? endDrag : undefined}
+                  onPointerUp={usePointer ? (e) => endDrag(e, r, todayCanAdd, todaySelected) : undefined}
+                  onPointerCancel={usePointer ? (e) => endDrag(e, r, todayCanAdd, todaySelected) : undefined}
                   style={{
                     boxShadow:
                       backToFront > 0
@@ -319,12 +350,31 @@ export function InspirationStack({ recipes }: { recipes: Recipe[] }) {
                   }}
                 >
                   {isFront ? (
+                    <>
+                      <div
+                        className="pointer-events-none absolute left-4 top-4 z-20 rotate-[-10deg] rounded-md border-2 border-[color:var(--warm)] bg-[color:var(--paper)]/80 px-3 py-1 text-[18px] font-semibold text-[color:var(--warm)] shadow-[var(--shadow-soft)] backdrop-blur"
+                        style={{ opacity: skipOpacity }}
+                      >
+                        换一张
+                      </div>
+                      <div
+                        className="pointer-events-none absolute right-4 top-4 z-20 rotate-[10deg] rounded-md border-2 border-[color:var(--accent)] bg-[color:var(--paper)]/80 px-3 py-1 text-[18px] font-semibold text-[color:var(--accent)] shadow-[var(--shadow-soft)] backdrop-blur"
+                        style={{ opacity: likeOpacity }}
+                      >
+                        想吃
+                      </div>
+                    </>
+                  ) : null}
+                  {isFront ? (
                     <div
                       className="block h-full"
                       role="link"
                       tabIndex={0}
                       onClick={() => {
-                        if (dragging) return;
+                        if (dragging || movedRef.current) {
+                          movedRef.current = false;
+                          return;
+                        }
                         router.push(recipeDetailHref(r.id));
                       }}
                       onKeyDown={(e) => {
@@ -345,14 +395,40 @@ export function InspirationStack({ recipes }: { recipes: Recipe[] }) {
                   ) : (
                     <div
                       aria-hidden="true"
-                      className="h-full bg-[linear-gradient(135deg,rgba(255,255,255,0.10),rgba(255,255,255,0.02))] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))]"
-                    />
+                      className="h-full opacity-75"
+                    >
+                      <CardFace r={r} />
+                    </div>
                   )}
                 </div>
               </div>
             );
           })}
         </div>
+      </div>
+
+      <div className="mx-auto mt-5 grid max-w-[335px] grid-cols-[1fr_1.2fr] gap-3 sm:max-w-[360px]">
+        <Button
+          variant="outline"
+          className="h-11"
+          disabled={n <= 1 || !!leaving}
+          onClick={() => settleSwipe("left")}
+        >
+          换一张
+        </Button>
+        <Button
+          className="h-11"
+          disabled={n <= 0 || !!leaving}
+          onClick={() => {
+            const r = recipes[index];
+            if (!r) return;
+            const selected = isTodaySelected(r.id);
+            const canAdd = !selected && todayIds.length < todayMax;
+            settleSwipe("right", r, canAdd, selected);
+          }}
+        >
+          今天吃这个
+        </Button>
       </div>
     </div>
   );

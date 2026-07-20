@@ -18,6 +18,9 @@
   --menu-line: rgba(185, 148, 75, 0.42);
   --menu-line-soft: rgba(185, 148, 75, 0.20);
   --seal: #aa4333;
+  --app-gutter: clamp(19px, 5.4vw, 28px);
+  --app-gutter-tight: clamp(14px, 4vw, 22px);
+  --bottom-bar-space: calc(5.75rem + env(safe-area-inset-bottom));
 }
 
 @theme inline {
@@ -33,10 +36,12 @@
   --color-accent-2: var(--accent-2);
   --color-warm: var(--warm);
   --color-seal: var(--seal);
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "PingFang SC",
-    "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
-  --font-noto-serif-sc: "Source Han Serif SC", "Source Han Serif CN",
-    "Noto Serif CJK SC", "Noto Serif SC", "Songti SC", STSong, SimSun, serif;
+  --font-sans: "Noto Serif SC Variable", "Source Han Serif SC",
+    "Source Han Serif CN", "Noto Serif CJK SC", "Noto Serif SC", "Songti SC",
+    STSong, SimSun, serif;
+  --font-noto-serif-sc: "Noto Serif SC Variable", "Source Han Serif SC",
+    "Source Han Serif CN", "Noto Serif CJK SC", "Noto Serif SC", "Songti SC",
+    STSong, SimSun, serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     "Liberation Mono", "Courier New", monospace;
 }
@@ -66,6 +71,9 @@
 body {
   background: var(--background);
   color: var(--foreground);
+  font-family: var(--font-noto-serif-sc);
+  font-weight: 430;
+  text-rendering: geometricPrecision;
 }
 
 ::selection {
@@ -113,6 +121,11 @@ html {
     linear-gradient(180deg, rgba(255, 253, 246, 0.94), rgba(255, 250, 240, 0.90)),
     var(--paper);
   box-shadow: var(--shadow-soft);
+}
+
+.pk-mobile-surface {
+  margin-inline: auto;
+  width: min(100%, 430px);
 }
 
 .pk-panel::before {

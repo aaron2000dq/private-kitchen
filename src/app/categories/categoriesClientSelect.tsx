@@ -315,7 +315,7 @@ function MobileCategoryShelf({
 }) {
   return (
     <div className="md:hidden">
-      <section className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] top-14 z-20 flex flex-col overflow-hidden border-y border-[color:var(--line)] bg-[color:var(--paper)] shadow-[var(--shadow-soft)]">
+      <section className="fixed inset-x-[var(--app-gutter-tight)] bottom-[var(--bottom-bar-space)] top-16 z-20 flex flex-col overflow-hidden rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] shadow-[var(--shadow-soft)]">
         <div className="shrink-0 space-y-4 p-4">
           <div className="flex items-start gap-3">
             <div className="pk-serif grid h-14 w-14 shrink-0 place-items-center rounded-lg border border-[color:var(--menu-line)] bg-[linear-gradient(135deg,rgba(63,111,85,0.10),rgba(185,148,75,0.16))] text-[16px] text-[color:var(--accent)] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.45)]">
@@ -494,13 +494,13 @@ function MobileCategoryShelf({
         </div>
       </section>
 
-      <div className="fixed inset-x-3 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-30 md:hidden">
-        <div className="mx-auto flex max-w-lg items-center gap-2 rounded-lg border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/96 p-2 shadow-[0_12px_28px_rgba(24,33,29,0.16)] backdrop-blur">
+      <div className="fixed inset-x-[var(--app-gutter)] bottom-[calc(var(--bottom-bar-space)+0.45rem)] z-30 md:hidden">
+        <div className="mx-auto flex max-w-lg items-center gap-2 rounded-lg border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/96 p-1.5 shadow-[0_12px_28px_rgba(24,33,29,0.15)] backdrop-blur">
           <Link
             href="/"
-            className="flex h-11 min-w-0 flex-1 items-center gap-2 rounded-lg px-3 text-left text-[13px] text-[color:var(--foreground)]"
+            className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-lg px-2.5 text-left text-[13px] text-[color:var(--foreground)]"
           >
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[color:rgba(63,111,85,0.12)] text-[color:var(--accent)]">
+            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[color:rgba(63,111,85,0.12)] text-[color:var(--accent)]">
               菜
             </span>
             <span className="min-w-0">
@@ -512,7 +512,7 @@ function MobileCategoryShelf({
           </Link>
           <button
             type="button"
-            className="h-10 shrink-0 rounded-lg border border-[color:rgba(63,111,85,0.32)] px-3 text-[13px] font-medium text-[color:var(--accent)] disabled:opacity-45"
+            className="h-9 shrink-0 rounded-lg border border-[color:rgba(63,111,85,0.32)] px-3 text-[13px] font-medium text-[color:var(--accent)] disabled:opacity-45"
             disabled={!canRandomPick || busy}
             onClick={onRandomPick}
           >
@@ -520,7 +520,7 @@ function MobileCategoryShelf({
           </button>
           <Link
             href="/"
-            className="inline-flex h-10 shrink-0 items-center justify-center rounded-lg bg-[color:var(--foreground)] px-4 text-[13px] font-medium text-[color:var(--background)]"
+            className="inline-flex h-9 shrink-0 items-center justify-center rounded-lg bg-[color:var(--foreground)] px-3.5 text-[13px] font-medium text-[color:var(--background)]"
           >
             查看
           </Link>
