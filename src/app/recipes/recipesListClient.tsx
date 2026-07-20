@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { RecipeCard } from "@/components/recipes/RecipeCard";
 import { VisuallyLosslessThumb } from "@/components/recipes/VisuallyLosslessThumb";
+import { buildTodayMenuInsights } from "@/lib/today/menuInsights";
 
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
@@ -54,6 +55,11 @@ export function RecipesListClient({
       .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0))
       .slice(0, todayMax);
   }, [recipes, todayIds, todayMax]);
+
+  const menuInsights = React.useMemo(
+    () => buildTodayMenuInsights(selectedRecipes),
+    [selectedRecipes],
+  );
 
   const filtered = React.useMemo(() => {
     const query = q.trim().toLowerCase();
@@ -141,6 +147,44 @@ export function RecipesListClient({
               {exportError}
             </div>
           ) : null}
+
+          <div className="mt-3 grid gap-2 sm:grid-cols-[0.8fr_1.2fr]">
+            <div className="rounded-lg border border-[color:var(--line)] bg-[color:var(--paper-strong)]/72 p-3">
+              <div className="flex items-end justify-between gap-3">
+                <div>
+                  <div className="text-[11px] text-[color:var(--muted-2)]">菜单完成度</div>
+                  <div className="pk-serif mt-1 text-[28px] leading-none text-[color:var(--accent)]">
+                    {menuInsights.score}
+                  </div>
+                </div>
+                <div className="text-right text-[12px] leading-5 text-[color:var(--muted)]">
+                  {menuInsights.stats.map((stat) => (
+                    <div key={stat.label}>
+                      {stat.label} · {stat.value}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="rounded-lg border border-[color:var(--line)] bg-[color:var(--paper-strong)]/72 p-3">
+              <div className="flex flex-wrap gap-1.5">
+                {menuInsights.missing.map((item) => (
+                  <span
+                    key={item}
+                    className="rounded-md border border-[color:rgba(184,92,56,0.22)] bg-[color:rgba(184,92,56,0.07)] px-2 py-1 text-[11px] text-[color:var(--warm)]"
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+              <div className="mt-2 line-clamp-1 text-[11px] text-[color:var(--muted-2)]">
+                采购预览：
+                {menuInsights.shoppingList.length
+                  ? menuInsights.shoppingList.slice(0, 5).join("、")
+                  : "选菜后自动整理"}
+              </div>
+            </div>
+          </div>
 
           {selectedRecipes.length ? (
             <div className="pk-scrollbar mt-3 flex gap-3 overflow-x-auto pb-1">

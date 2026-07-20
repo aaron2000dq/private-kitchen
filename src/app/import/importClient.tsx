@@ -5,12 +5,21 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Textarea } from "@/components/ui/Textarea";
 import { Input } from "@/components/ui/Input";
-import { RecipeInput } from "@/lib/recipes/types";
+import { useRecipes } from "@/lib/recipes/useRecipes";
+import { Recipe, RecipeInput } from "@/lib/recipes/types";
 import { RecipeRepository } from "@/lib/recipes/repository";
 
 type ImportDraft = {
   recipe: RecipeInput;
   issues: string[];
+};
+
+type RecipeBackup = {
+  app: "private-kitchen";
+  version: 1;
+  exportedAt: string;
+  recipeCount: number;
+  recipes: Recipe[];
 };
 
 async function fileToDataUrl(file: File): Promise<string> {
@@ -118,7 +127,58 @@ function normalizeDraft(raw: Record<string, unknown>): ImportDraft {
   return { recipe, issues };
 }
 
+function formatDateSlug(date = new Date()) {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function downloadTextFile(filename: string, content: string, type = "application/json") {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function buildBackup(recipes: Recipe[]): RecipeBackup {
+  return {
+    app: "private-kitchen",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    recipeCount: recipes.length,
+    recipes,
+  };
+}
+
+async function shareOrDownloadBackup(payload: RecipeBackup): Promise<"shared" | "downloaded"> {
+  const filename = `private-kitchen-backup-${formatDateSlug()}.json`;
+  const content = JSON.stringify(payload, null, 2);
+  const blob = new Blob([content], { type: "application/json" });
+
+  if (typeof File !== "undefined" && navigator.canShare && navigator.share) {
+    const file = new File([blob], filename, { type: "application/json" });
+    if (navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        title: "私人厨房菜谱备份",
+        text: `${payload.recipeCount} 道私房菜谱备份`,
+        files: [file],
+      });
+      return "shared";
+    }
+  }
+
+  downloadTextFile(filename, content);
+  return "downloaded";
+}
+
 export function ImportClient() {
+  const { recipes, hydrated, refresh } = useRecipes();
   const [jsonText, setJsonText] = React.useState<string>(
     `{\n  "recipes": [\n    {\n      "name": "番茄炒蛋",\n      "category": "家常菜",\n      "rating": 5,\n      "tags": ["快手"],\n      "description": "酸甜开胃，下饭。",\n      "mainIngredients": [{ "name": "鸡蛋", "amount": "2个" }, { "name": "番茄", "amount": "2个" }],\n      "auxiliaryIngredients": [{ "name": "盐", "amount": "少许" }, { "name": "糖", "amount": "少许" }],\n      "steps": [{ "content": "鸡蛋打散炒熟盛出。" }, { "content": "番茄炒出汁，回锅鸡蛋翻匀。" }],\n      "images": ["image-1.jpg"]\n    }\n  ]\n}\n`,
   );
@@ -129,6 +189,7 @@ export function ImportClient() {
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [doneMsg, setDoneMsg] = React.useState<string | null>(null);
+  const [backupMsg, setBackupMsg] = React.useState<string | null>(null);
 
   const MAX_FILES = 500;
 
@@ -154,6 +215,7 @@ export function ImportClient() {
   const parse = () => {
     setError(null);
     setDoneMsg(null);
+    setBackupMsg(null);
 
     const parsed = safeJsonParse(jsonText);
     if (!parsed || !isObject(parsed)) {
@@ -184,6 +246,7 @@ export function ImportClient() {
   const apply = async () => {
     setError(null);
     setDoneMsg(null);
+    setBackupMsg(null);
     if (drafts.length === 0) {
       setError("请先解析 JSON。");
       return;
@@ -199,9 +262,34 @@ export function ImportClient() {
     try {
       const inputs = drafts.map((d) => d.recipe);
       await RecipeRepository.upsertMany(inputs);
+      await refresh();
       setDoneMsg(`已导入 ${inputs.length} 道菜谱。`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "导入失败，请重试。");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const exportBackup = async () => {
+    setError(null);
+    setDoneMsg(null);
+    setBackupMsg(null);
+    setBusy(true);
+    try {
+      const allRecipes = await RecipeRepository.exportAll();
+      const result = await shareOrDownloadBackup(buildBackup(allRecipes));
+      setBackupMsg(
+        result === "shared"
+          ? `已唤起系统分享，正在交接 ${allRecipes.length} 道菜谱备份。`
+          : `已导出 ${allRecipes.length} 道菜谱，文件可用于换机或长期备份。`,
+      );
+    } catch (e) {
+      if (e instanceof DOMException && e.name === "AbortError") {
+        setBackupMsg("已取消分享，菜谱数据没有离开这台设备。");
+      } else {
+        setError(e instanceof Error ? e.message : "导出失败，请重试。");
+      }
     } finally {
       setBusy(false);
     }
@@ -229,6 +317,63 @@ export function ImportClient() {
           {doneMsg}
         </div>
       ) : null}
+      {backupMsg ? (
+        <div className="rounded-lg border border-[color:rgba(107,142,107,0.35)] bg-[color:rgba(107,142,107,0.10)] px-4 py-3 text-[13px]">
+          {backupMsg}
+        </div>
+      ) : null}
+
+      <section className="pk-panel overflow-hidden p-5 sm:p-6">
+        <div className="grid gap-5 md:grid-cols-[1.1fr_0.9fr] md:items-end">
+          <div className="space-y-4">
+            <Badge tone="accent">本地备份</Badge>
+            <div>
+              <h2 className="pk-serif text-[24px] tracking-wide">
+                数据管家
+              </h2>
+              <p className="mt-2 max-w-[34rem] text-[13px] leading-6 text-[color:var(--muted)]">
+                生成一份完整 JSON 备份，包含菜名、分类、评分、食材、步骤与图片引用。数据只在这台设备上读取和下载。
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                ["菜谱", hydrated ? recipes.length : "-"],
+                ["格式", "JSON"],
+                ["位置", "本机"],
+              ].map(([label, value]) => (
+                <div
+                  key={label}
+                  className="rounded-lg border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/68 px-3 py-3"
+                >
+                  <div className="text-[11px] text-[color:var(--muted-2)]">{label}</div>
+                  <div className="pk-serif mt-1 text-[18px] tracking-wide">{value}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-lg border border-[color:var(--menu-line-soft)] bg-[color:var(--paper-strong)]/72 p-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.38)]">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="text-[12px] text-[color:var(--muted-2)]">建议频率</div>
+                <div className="mt-1 text-[15px] font-medium">每次大批量更新后导出一次</div>
+              </div>
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-[color:var(--menu-line)] text-[18px]">
+                ↓
+              </div>
+            </div>
+            <Button
+              className="mt-4 w-full"
+              onClick={exportBackup}
+              disabled={busy || !hydrated}
+            >
+              导出整库备份
+            </Button>
+            <p className="mt-3 text-[12px] leading-5 text-[color:var(--muted-2)]">
+              这份文件可以放进 iCloud、网盘或电脑文件夹里，后续迁移到小程序时也能作为基础数据源。
+            </p>
+          </div>
+        </div>
+      </section>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
         <section className="pk-panel-plain p-5 sm:p-6">

@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/Badge";
 import { ButtonLink } from "@/components/ui/Button";
 import { HomeDateHeader } from "@/components/home/HomeDateHeader";
 import { HomeInspirationSection } from "@/components/home/HomeInspirationSection";
+import { TodayMenuConcierge } from "@/components/home/TodayMenuConcierge";
 import { ClientOnly } from "@/components/common/ClientOnly";
 import { TodayRecommendationClient } from "./todayRecommendationClient";
 
@@ -13,6 +14,7 @@ export default function Home() {
         <ClientOnly>
           <HomeDateHeader />
           <TodayRecommendationClient />
+          <TodayMenuConcierge />
           <HomeInspirationSection />
         </ClientOnly>
 
@@ -26,9 +28,9 @@ export default function Home() {
         </div>
 
         <div className="pk-panel-plain p-4 sm:p-5">
-          <Badge tone="warm">提示</Badge>
+          <Badge tone="warm">私密厨房</Badge>
           <p className="mt-3 text-[13px] leading-6 text-[color:var(--muted)]">
-            首版数据保存在浏览器本地。清理浏览器数据会导致菜谱丢失；后续我们会补充导出/备份。
+            菜谱和今日菜单保存在本机浏览器，适合私人厨房先轻量使用。正式收费版可以继续扩展云备份、多人点单和微信小程序同步。
           </p>
         </div>
       </div>
