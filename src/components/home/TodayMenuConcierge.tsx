@@ -10,8 +10,10 @@ import { useKitchenPrepProgress } from "@/lib/today/useKitchenPrepProgress";
 import { buildGuestFitPlan, createGuestProfile, readGuestProfile, type GuestProfile } from "@/lib/today/guestProfile";
 import { buildPantryCoverage } from "@/lib/today/pantry";
 import { usePantry } from "@/lib/today/usePantry";
+import { buildDinnerInvitationText } from "@/lib/today/dinnerInvitation";
 
 const DINER_COUNT_KEY = "private-kitchen:diner-count:v1";
+const DINNER_TIME_KEY = "private-kitchen:dinner-time:v1";
 
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
@@ -33,6 +35,17 @@ function readDinerCount(): number {
   }
 }
 
+function readDinnerTime(): string {
+  if (typeof window === "undefined") return "19:00";
+
+  try {
+    const raw = window.localStorage.getItem(DINNER_TIME_KEY);
+    return raw && /^\d{1,2}:\d{2}$/.test(raw) ? raw : "19:00";
+  } catch {
+    return "19:00";
+  }
+}
+
 function formatNames(names: string[], fallback: string, max = 4): string {
   const visible = names.slice(0, max);
   if (!visible.length) return fallback;
@@ -44,11 +57,13 @@ export function TodayMenuConcierge() {
   const { ids } = useTodayCookbook();
   const pantry = usePantry();
   const [dinerCount, setDinerCount] = React.useState(2);
+  const [dinnerTime, setDinnerTime] = React.useState("19:00");
   const [copyTip, setCopyTip] = React.useState<string | null>(null);
   const [guestProfile, setGuestProfile] = React.useState<GuestProfile>(() => createGuestProfile());
 
   React.useEffect(() => {
     setDinerCount(readDinerCount());
+    setDinnerTime(readDinnerTime());
     setGuestProfile(readGuestProfile());
   }, []);
 
@@ -105,6 +120,25 @@ export function TodayMenuConcierge() {
         ].join("\n"),
       );
       setCopyTip("今日简报已复制。");
+    } catch {
+      setCopyTip("复制失败，可以直接截图总控台。");
+    }
+  };
+
+  const onCopyInvitation = async () => {
+    if (!selectedRecipes.length) return;
+
+    try {
+      await navigator.clipboard.writeText(
+        buildDinnerInvitationText({
+          recipes: selectedRecipes,
+          insights,
+          guestFit,
+          pantryCoverage,
+          dinnerTime,
+        }),
+      );
+      setCopyTip("家宴邀请已复制。");
     } catch {
       setCopyTip("复制失败，可以直接截图总控台。");
     }
@@ -282,15 +316,26 @@ export function TodayMenuConcierge() {
                   {selectedRecipes.length ? insights.crew.headline : "先把菜单定下来"}
                 </div>
               </div>
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-8 shrink-0 px-2.5 text-[12px]"
-                disabled={!selectedRecipes.length}
-                onClick={onCopyBrief}
-              >
-                复制简报
-              </Button>
+              <div className="grid shrink-0 grid-cols-2 gap-1.5">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 px-2 text-[12px]"
+                  disabled={!selectedRecipes.length}
+                  onClick={onCopyInvitation}
+                >
+                  邀请
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 px-2 text-[12px]"
+                  disabled={!selectedRecipes.length}
+                  onClick={onCopyBrief}
+                >
+                  简报
+                </Button>
+              </div>
             </div>
             <div className="mt-3 space-y-2">
               {insights.timeline.slice(0, 3).map((item) => (

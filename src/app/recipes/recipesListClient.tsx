@@ -36,6 +36,7 @@ import {
 } from "@/lib/today/guestProfile";
 import { buildPantryCoverage } from "@/lib/today/pantry";
 import { usePantry } from "@/lib/today/usePantry";
+import { buildDinnerConfirmationText, buildDinnerInvitationText } from "@/lib/today/dinnerInvitation";
 
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
@@ -913,6 +914,44 @@ export function RecipesListClient({
     }
   };
 
+  const onCopyDinnerInvitation = async () => {
+    if (!selectedRecipes.length) return;
+    setExportError(null);
+    try {
+      await navigator.clipboard.writeText(
+        buildDinnerInvitationText({
+          recipes: selectedRecipes,
+          insights: menuInsights,
+          guestFit,
+          pantryCoverage,
+          dinnerTime,
+        }),
+      );
+      setMenuTip("家宴邀请已复制，可以直接发给家里人。");
+    } catch {
+      setExportError("复制失败，可以直接截图这张邀请卡。");
+    }
+  };
+
+  const onCopyDinnerConfirmation = async () => {
+    if (!selectedRecipes.length) return;
+    setExportError(null);
+    try {
+      await navigator.clipboard.writeText(
+        buildDinnerConfirmationText({
+          recipes: selectedRecipes,
+          insights: menuInsights,
+          guestFit,
+          pantryCoverage,
+          dinnerTime,
+        }),
+      );
+      setMenuTip("菜单确认单已复制，可以发出去确认口味。");
+    } catch {
+      setExportError("复制失败，可以直接截图这张确认卡。");
+    }
+  };
+
   const onAddFillSuggestion = async (recipe: Recipe) => {
     setFillBusyId(recipe.id);
     setExportError(null);
@@ -1328,6 +1367,61 @@ export function RecipesListClient({
           {menuTip ? (
             <div className="mt-3 rounded-lg border border-[color:rgba(63,111,85,0.24)] bg-[color:rgba(63,111,85,0.08)] px-3 py-2 text-[12px] leading-5 text-[color:var(--accent)]">
               {menuTip}
+            </div>
+          ) : null}
+
+          {selectedRecipes.length ? (
+            <div className="mt-3 rounded-lg border border-[color:rgba(185,148,75,0.26)] bg-[linear-gradient(180deg,rgba(185,148,75,0.08),rgba(63,111,85,0.045))] p-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-[11px] text-[color:var(--muted-2)]">家宴邀请</div>
+                  <div className="pk-serif mt-1 text-[18px] leading-tight">
+                    {dinnerTime} 开饭 · {selectedRecipes.length} 道菜
+                  </div>
+                  <div className="mt-1 line-clamp-2 text-[11px] leading-5 text-[color:var(--muted)]">
+                    {selectedRecipes.slice(0, 4).map((recipe) => recipe.name).join("、")}
+                    {selectedRecipes.length > 4 ? "等" : ""}，{guestFit.label}，冰箱还买 {pantryCoverage.missing.length} 项。
+                  </div>
+                </div>
+                <Badge tone="warm" className="shrink-0">
+                  可发送
+                </Badge>
+              </div>
+
+              <div className="mt-3 grid grid-cols-3 gap-2">
+                <div className="rounded-md border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/72 px-2.5 py-2">
+                  <div className="text-[10px] text-[color:var(--muted-2)]">开饭</div>
+                  <div className="mt-1 text-[12px] font-medium text-[color:var(--foreground)]">{dinnerTime}</div>
+                </div>
+                <div className="rounded-md border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/72 px-2.5 py-2">
+                  <div className="text-[10px] text-[color:var(--muted-2)]">客人</div>
+                  <div className="mt-1 truncate text-[12px] font-medium text-[color:var(--accent)]">{guestFit.label}</div>
+                </div>
+                <div className="rounded-md border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/72 px-2.5 py-2">
+                  <div className="text-[10px] text-[color:var(--muted-2)]">采购</div>
+                  <div className="mt-1 text-[12px] font-medium text-[color:var(--warm)]">缺 {pantryCoverage.missing.length}</div>
+                </div>
+              </div>
+
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-9 text-[12px]"
+                  disabled={actionBusy}
+                  onClick={onCopyDinnerInvitation}
+                >
+                  复制邀请
+                </Button>
+                <Button
+                  size="sm"
+                  className="h-9 text-[12px]"
+                  disabled={actionBusy}
+                  onClick={onCopyDinnerConfirmation}
+                >
+                  确认菜单
+                </Button>
+              </div>
             </div>
           ) : null}
 
