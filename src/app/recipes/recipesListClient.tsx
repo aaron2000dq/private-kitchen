@@ -97,6 +97,48 @@ function buildMenuFillSuggestions(
   return picked.slice(0, max);
 }
 
+function menuSwapScore(
+  candidate: Recipe,
+  original: Recipe,
+  selectedRecipes: Recipe[],
+  recentIds: Set<string>,
+): number {
+  const candidateRole = mealRoleOf(candidate);
+  const originalRole = mealRoleOf(original);
+  const roleScore = candidateRole === originalRole ? 90 : candidateRole === "home" ? 6 : 22;
+  const imageScore = candidate.images?.length ? 5 : 0;
+  const ratingScore = (candidate.rating ?? 0) * 2.5;
+  const categoryScore = candidate.category === original.category ? 2 : 5;
+  const recentPenalty = recentIds.has(candidate.id) ? -22 : 0;
+  const duplicateRolePenalty = selectedRecipes.some(
+    (recipe) => recipe.id !== original.id && mealRoleOf(recipe) === candidateRole,
+  )
+    ? -4
+    : 0;
+
+  return roleScore + imageScore + ratingScore + categoryScore + recentPenalty + duplicateRolePenalty;
+}
+
+function pickSwapCandidate(
+  recipes: Recipe[],
+  selectedRecipes: Recipe[],
+  original: Recipe,
+  recentRecipeIds: string[],
+): Recipe | null {
+  const selectedIds = new Set(selectedRecipes.map((recipe) => recipe.id));
+  const recentIds = new Set(recentRecipeIds);
+  const originalRole = mealRoleOf(original);
+  const candidates = recipes
+    .filter((recipe) => !selectedIds.has(recipe.id))
+    .map((recipe) => ({ recipe, score: menuSwapScore(recipe, original, selectedRecipes, recentIds) }))
+    .sort((a, b) => b.score - a.score || a.recipe.name.localeCompare(b.recipe.name, "zh-CN"));
+
+  const sameRoleTop = candidates.filter((entry) => mealRoleOf(entry.recipe) === originalRole).slice(0, 6);
+  const pool = sameRoleTop.length ? sameRoleTop : candidates.slice(0, 6);
+  if (!pool.length) return null;
+  return pool[Math.floor(Math.random() * pool.length)]?.recipe ?? null;
+}
+
 export function RecipesListClient({
   showHeader = false,
   showTodayShelf = true,
@@ -127,6 +169,7 @@ export function RecipesListClient({
   const [busy, setBusy] = React.useState(false);
   const [recordBusy, setRecordBusy] = React.useState(false);
   const [fillBusyId, setFillBusyId] = React.useState<string | null>(null);
+  const [swapBusyId, setSwapBusyId] = React.useState<string | null>(null);
   const [exportError, setExportError] = React.useState<string | null>(null);
   const [menuTip, setMenuTip] = React.useState<string | null>(null);
   const [planScene, setPlanScene] = React.useState<MenuPlanScene>("balanced");
@@ -179,7 +222,7 @@ export function RecipesListClient({
   );
   const prepProgress = useKitchenPrepProgress(menuKey, menuInsights.shoppingList);
   const latestHistory = historyEntries[0];
-  const actionBusy = busy || recordBusy || fillBusyId != null;
+  const actionBusy = busy || recordBusy || fillBusyId != null || swapBusyId != null;
   const shoppingTotal = menuInsights.shoppingList.length;
   const shoppingPercent = shoppingTotal ? Math.round((prepProgress.doneCount / shoppingTotal) * 100) : 0;
 
@@ -258,6 +301,29 @@ export function RecipesListClient({
       setExportError(e instanceof Error ? e.message : "加入失败");
     } finally {
       setFillBusyId(null);
+    }
+  };
+
+  const onSwapRecipe = async (recipe: Recipe) => {
+    const index = todayIds.indexOf(recipe.id);
+    if (index < 0) return;
+
+    setSwapBusyId(recipe.id);
+    setExportError(null);
+    try {
+      const nextRecipe = pickSwapCandidate(recipes, selectedRecipes, recipe, recentRecipeIds);
+      if (!nextRecipe) {
+        setExportError("暂时没有可替换的菜。");
+        return;
+      }
+      const nextIds = [...todayIds];
+      nextIds[index] = nextRecipe.id;
+      await replace(nextIds);
+      setMenuTip(`已把「${recipe.name}」换成「${nextRecipe.name}」，仍然保留${MEAL_ROLE_META[mealRoleOf(nextRecipe)].label}位置。`);
+    } catch (e) {
+      setExportError(e instanceof Error ? e.message : "换菜失败");
+    } finally {
+      setSwapBusyId(null);
     }
   };
 
@@ -672,15 +738,26 @@ export function RecipesListClient({
                       <div className="pk-serif line-clamp-2 min-h-[2rem] text-[13px] leading-4">
                         {recipe.name}
                       </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-8 w-full text-[12px]"
-                        disabled={actionBusy}
-                        onClick={() => void removeFromToday(recipe.id)}
-                      >
-                        移除
-                      </Button>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 whitespace-nowrap px-1.5 text-[12px] leading-none"
+                          disabled={actionBusy || !hydrated || recipes.length <= selectedRecipes.length}
+                          onClick={() => void onSwapRecipe(recipe)}
+                        >
+                          {swapBusyId === recipe.id ? "换中" : "换一道"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 whitespace-nowrap px-1.5 text-[12px] leading-none"
+                          disabled={actionBusy}
+                          onClick={() => void removeFromToday(recipe.id)}
+                        >
+                          移除
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 );
