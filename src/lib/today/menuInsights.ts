@@ -11,6 +11,10 @@ type MenuPlanPreset = {
   avoid?: RegExp;
 };
 
+type MenuPlanOptions = {
+  recentRecipeIds?: Iterable<string>;
+};
+
 export const MENU_PLAN_PRESETS: Record<MenuPlanScene, MenuPlanPreset> = {
   balanced: {
     label: "家常一桌",
@@ -63,12 +67,13 @@ function recipeText(recipe: Recipe): string {
   return `${recipe.name} ${recipe.category} ${recipe.description} ${(recipe.tags ?? []).join(" ")}`;
 }
 
-function sceneWeight(recipe: Recipe, preset: MenuPlanPreset): number {
+function sceneWeight(recipe: Recipe, preset: MenuPlanPreset, recentIds: Set<string>): number {
   const text = recipeText(recipe);
   const base = recipe.rating + (recipe.images.length ? 2 : 0) + 1;
   const preferBonus = preset.prefer.test(text) ? 5 : 0;
   const avoidPenalty = preset.avoid?.test(text) ? -4 : 0;
-  return base + preferBonus + avoidPenalty;
+  const recentPenalty = recentIds.has(recipe.id) ? -8 : 0;
+  return base + preferBonus + avoidPenalty + recentPenalty;
 }
 
 function roleOf(recipe: Recipe): MenuRole {
@@ -105,24 +110,29 @@ function pickFromRole(
   role: MenuRole,
   pickedIds: Set<string>,
   preset: MenuPlanPreset,
+  recentIds: Set<string>,
 ): Recipe | null {
   const candidates = recipes.filter((recipe) => !pickedIds.has(recipe.id) && roleOf(recipe) === role);
-  return weightedRandom(candidates, (recipe) => sceneWeight(recipe, preset));
+  const fresh = candidates.filter((recipe) => !recentIds.has(recipe.id));
+  const pool = fresh.length ? fresh : candidates;
+  return weightedRandom(pool, (recipe) => sceneWeight(recipe, preset, recentIds));
 }
 
 export function pickBalancedTodayMenu(
   recipes: Recipe[],
   max = 10,
   scene: MenuPlanScene = "balanced",
+  options: MenuPlanOptions = {},
 ): Recipe[] {
   const preset = MENU_PLAN_PRESETS[scene];
+  const recentIds = new Set(options.recentRecipeIds ?? []);
   const targetCount = Math.min(max, recipes.length, preset.targetCount);
   const picked: Recipe[] = [];
   const pickedIds = new Set<string>();
 
   for (const role of preset.requiredRoles) {
     if (picked.length >= targetCount) break;
-    const recipe = pickFromRole(recipes, role, pickedIds, preset);
+    const recipe = pickFromRole(recipes, role, pickedIds, preset, recentIds);
     if (!recipe) continue;
     picked.push(recipe);
     pickedIds.add(recipe.id);
@@ -130,10 +140,12 @@ export function pickBalancedTodayMenu(
 
   while (picked.length < targetCount) {
     const remaining = recipes.filter((recipe) => !pickedIds.has(recipe.id));
-    const recipe = weightedRandom(remaining, (item) => {
+    const freshRemaining = remaining.filter((recipe) => !recentIds.has(recipe.id));
+    const pool = freshRemaining.length >= targetCount - picked.length ? freshRemaining : remaining;
+    const recipe = weightedRandom(pool, (item) => {
       const roleBonus = picked.some((pickedRecipe) => roleOf(pickedRecipe) === roleOf(item)) ? 1 : 3;
       const categoryBonus = picked.some((pickedRecipe) => pickedRecipe.category === item.category) ? 1 : 2;
-      return sceneWeight(item, preset) + roleBonus + categoryBonus;
+      return sceneWeight(item, preset, recentIds) + roleBonus + categoryBonus;
     });
     if (!recipe) break;
     picked.push(recipe);

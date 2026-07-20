@@ -3,6 +3,7 @@
 import * as React from "react";
 import { AppLink as Link } from "@/components/ui/AppLink";
 import { useRecipes } from "@/lib/recipes/useRecipes";
+import { useCookHistory } from "@/lib/today/useCookHistory";
 import { useTodayCookbook } from "@/lib/today/useTodayCookbook";
 import { exportTodayCookbookToPng } from "@/lib/today/exportTodayCookbookToImage";
 import { recipeImageThumbUrl, recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
@@ -20,6 +21,12 @@ import {
 
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
+}
+
+function formatCookedDate(iso: string): string {
+  const date = new Date(iso);
+  if (!Number.isFinite(date.getTime())) return "最近";
+  return `${date.getMonth() + 1}月${date.getDate()}日`;
 }
 
 export function RecipesListClient({
@@ -40,9 +47,17 @@ export function RecipesListClient({
     clear,
     max: todayMax,
   } = useTodayCookbook();
+  const {
+    hydrated: historyHydrated,
+    entries: historyEntries,
+    recentRecipeIds,
+    recentWindowDays,
+    record: recordCooked,
+  } = useCookHistory();
   const [q, setQ] = React.useState("");
   const [activeCategory, setActiveCategory] = React.useState("全部");
   const [busy, setBusy] = React.useState(false);
+  const [recordBusy, setRecordBusy] = React.useState(false);
   const [exportError, setExportError] = React.useState<string | null>(null);
   const [menuTip, setMenuTip] = React.useState<string | null>(null);
   const [planScene, setPlanScene] = React.useState<MenuPlanScene>("balanced");
@@ -84,6 +99,8 @@ export function RecipesListClient({
     () => buildTodayMenuInsights(selectedRecipes),
     [selectedRecipes],
   );
+  const latestHistory = historyEntries[0];
+  const actionBusy = busy || recordBusy;
 
   const filtered = React.useMemo(() => {
     const query = q.trim().toLowerCase();
@@ -112,11 +129,25 @@ export function RecipesListClient({
   };
 
   const onShuffleMenu = async () => {
-    const picked = pickBalancedTodayMenu(recipes, todayMax, planScene);
+    const picked = pickBalancedTodayMenu(recipes, todayMax, planScene, { recentRecipeIds });
     if (!picked.length) return;
     await replace(picked.map((recipe) => recipe.id));
     setExportError(null);
-    setMenuTip(`已按「${MENU_PLAN_PRESETS[planScene].label}」配好 ${picked.length} 道：${picked.slice(0, 3).map((recipe) => recipe.name).join("、")}${picked.length > 3 ? "等" : ""}`);
+    setMenuTip(`已按「${MENU_PLAN_PRESETS[planScene].label}」${recentRecipeIds.length ? "避开近期重复，" : ""}配好 ${picked.length} 道：${picked.slice(0, 3).map((recipe) => recipe.name).join("、")}${picked.length > 3 ? "等" : ""}`);
+  };
+
+  const onRecordCooked = async () => {
+    if (!selectedRecipes.length) return;
+    setRecordBusy(true);
+    setExportError(null);
+    try {
+      await recordCooked(selectedRecipes, planScene, menuInsights.score);
+      setMenuTip(`已记入最近吃过：${selectedRecipes.slice(0, 3).map((recipe) => recipe.name).join("、")}${selectedRecipes.length > 3 ? "等" : ""}`);
+    } catch (e) {
+      setExportError(e instanceof Error ? e.message : "记录失败");
+    } finally {
+      setRecordBusy(false);
+    }
   };
 
   const onExport = async () => {
@@ -156,27 +187,35 @@ export function RecipesListClient({
                 {todayHydrated ? `${selectedRecipes.length}/${todayMax} 道` : "读取中"}
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-2 sm:flex sm:shrink-0 sm:items-center">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0 sm:items-center">
               <Button
                 size="sm"
                 variant="outline"
                 onClick={onShuffleMenu}
-                disabled={!todayHydrated || !hydrated || recipes.length === 0 || busy}
+                disabled={!todayHydrated || !hydrated || recipes.length === 0 || actionBusy}
               >
                 配一桌
               </Button>
               <Button
                 size="sm"
                 variant="outline"
+                onClick={onRecordCooked}
+                disabled={!todayHydrated || selectedRecipes.length === 0 || actionBusy}
+              >
+                {recordBusy ? "记录中" : "记为吃过"}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
                 onClick={onClear}
-                disabled={!todayHydrated || selectedRecipes.length === 0 || busy}
+                disabled={!todayHydrated || selectedRecipes.length === 0 || actionBusy}
               >
                 清空
               </Button>
               <Button
                 size="sm"
                 onClick={onExport}
-                disabled={!todayHydrated || selectedRecipes.length === 0 || busy}
+                disabled={!todayHydrated || selectedRecipes.length === 0 || actionBusy}
               >
                 {busy ? "生成中" : "分享小票"}
               </Button>
@@ -208,6 +247,20 @@ export function RecipesListClient({
                 </button>
               );
             })}
+          </div>
+
+          <div className="mt-3 flex items-center justify-between gap-3 rounded-lg border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/72 px-3 py-2.5">
+            <div className="min-w-0">
+              <div className="text-[11px] text-[color:var(--muted-2)]">最近吃过</div>
+              <div className="mt-1 truncate text-[12px] text-[color:var(--muted)]">
+                {historyHydrated && latestHistory
+                  ? `${formatCookedDate(latestHistory.cookedAt)} · ${latestHistory.recipeNames.slice(0, 3).join("、")}${latestHistory.recipeNames.length > 3 ? "等" : ""}`
+                  : "还没有记录"}
+              </div>
+            </div>
+            <Badge tone={recentRecipeIds.length ? "accent" : "muted"}>
+              {recentWindowDays}天避重 {recentRecipeIds.length}
+            </Badge>
           </div>
 
           {exportError ? (
@@ -291,7 +344,7 @@ export function RecipesListClient({
                         size="sm"
                         variant="outline"
                         className="h-8 w-full text-[12px]"
-                        disabled={busy}
+                        disabled={actionBusy}
                         onClick={() => void removeFromToday(recipe.id)}
                       >
                         移除
