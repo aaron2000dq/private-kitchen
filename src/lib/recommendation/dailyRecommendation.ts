@@ -1,4 +1,10 @@
 import type { Recipe } from "@/lib/recipes/types";
+import {
+  DISH_FEEDBACK_META,
+  feedbackEntryFor,
+  feedbackScoreFor,
+  type DishFeedbackEntry,
+} from "@/lib/today/dishFeedback";
 import { todayLocalIso } from "./recommendationDb";
 import { getSeasonName } from "./seasonal";
 
@@ -72,7 +78,11 @@ function tagOverlap(a: Recipe, picked: Recipe[]): number {
   return overlap;
 }
 
-function reasonFor(date: Date, picked: Recipe[]): string {
+function feedbackMemoryScore(recipe: Recipe, feedbackEntries: DishFeedbackEntry[]): number {
+  return feedbackScoreFor(recipe.id, feedbackEntries) * 0.12;
+}
+
+function reasonFor(date: Date, picked: Recipe[], feedbackEntries: DishFeedbackEntry[] = []): string {
   if (picked.length === 0) {
     return "先收进几道常做的菜，今天的菜单就会自动搭起来。";
   }
@@ -80,19 +90,26 @@ function reasonFor(date: Date, picked: Recipe[]): string {
   const season = getSeasonName(date.getMonth() + 1);
   const roles = Array.from(new Set(picked.map((recipe) => ROLE_LABEL[roleOf(recipe)]))).slice(0, 3);
   const names = picked.map((recipe) => recipe.name).join("、");
-  return `${season}天适合吃得有层次些：${names}。${roles.join("、")}都照顾到，今天这餐会比较顺。`;
+  const memoryNames = picked
+    .map((recipe) => feedbackEntryFor(recipe.id, feedbackEntries))
+    .filter((entry): entry is DishFeedbackEntry => entry !== null && entry.tone !== "avoid")
+    .map((entry) => `${entry.recipeName}（${DISH_FEEDBACK_META[entry.tone].shortLabel}）`)
+    .slice(0, 2);
+  const memoryLine = memoryNames.length ? `也回访了家里反馈好的：${memoryNames.join("、")}。` : "";
+  return `${season}天适合吃得有层次些：${names}。${roles.join("、")}都照顾到，今天这餐会比较顺。${memoryLine}`;
 }
 
 export function recommendRecipesForDay(
   recipes: Recipe[],
   date: Date = new Date(),
   count = 3,
+  feedbackEntries: DishFeedbackEntry[] = [],
 ): DayRecommendation {
   const target = Math.min(count, recipes.length);
   if (target <= 0) {
     return {
       recommendedRecipeIds: [],
-      reason: reasonFor(date, []),
+      reason: reasonFor(date, [], feedbackEntries),
     };
   }
 
@@ -110,7 +127,11 @@ export function recommendRecipesForDay(
 
       const role = roleOf(recipe);
       const random = hashUnit(`${dateKey}:${recipe.id}:${picked.length}`);
-      let score = random * 2.8 + (recipe.rating ?? 0) * 0.18 + seasonScore(recipe, date);
+      let score =
+        random * 2.8 +
+        (recipe.rating ?? 0) * 0.18 +
+        seasonScore(recipe, date) +
+        feedbackMemoryScore(recipe, feedbackEntries);
 
       if (pickedCategories.has(recipe.category)) score -= 0.8;
       if (pickedRoles.has(role)) score -= 0.55;
@@ -128,6 +149,6 @@ export function recommendRecipesForDay(
 
   return {
     recommendedRecipeIds: picked.map((recipe) => recipe.id),
-    reason: reasonFor(date, picked),
+    reason: reasonFor(date, picked, feedbackEntries),
   };
 }

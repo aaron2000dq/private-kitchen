@@ -11,10 +11,13 @@ import { recipeImageThumbUrl, recipeImageUrl } from "@/lib/recipes/recipeImageUr
 import { recipeDetailHref } from "@/lib/recipes/recipeRoutes";
 import { formatRecipeIngredientsPreview } from "@/lib/recipes/formatIngredientsPreview";
 import { VisuallyLosslessThumb } from "@/components/recipes/VisuallyLosslessThumb";
+import { DISH_FEEDBACK_META, feedbackEntryFor } from "@/lib/today/dishFeedback";
+import { useDishFeedback } from "@/lib/today/useDishFeedback";
 
 export function TodayRecommendationClient() {
   const { recipes, hydrated } = useRecipes();
-  const { data, loading } = useDailyRecommendation(recipes);
+  const dishFeedback = useDishFeedback();
+  const { data, loading } = useDailyRecommendation(recipes, dishFeedback.entries);
   const { ids: todayIds, has: isTodaySelected, add: addToToday, max: todayMax } =
     useTodayCookbook();
 
@@ -37,13 +40,22 @@ export function TodayRecommendationClient() {
   }, [recipes, todayIds]);
 
   const display = selectedRecipes.length ? selectedRecipes : recommended;
+  const memoryHitCount = React.useMemo(
+    () =>
+      display.filter((recipe) => {
+        const entry = feedbackEntryFor(recipe.id, dishFeedback.entries);
+        return entry && entry.tone !== "avoid";
+      }).length,
+    [dishFeedback.entries, display],
+  );
+  const sectionLabel = todayIds.length ? "今日菜单" : memoryHitCount ? "私房记忆" : "今日推荐";
 
   return (
     <section className="pk-panel">
       <div className="px-4 py-5 sm:px-6">
         <div className="flex items-start justify-between gap-4 border-b border-dashed border-[color:rgba(24,33,29,0.18)] pb-4">
           <div className="min-w-0 space-y-2">
-            <Badge tone="warm">{todayIds.length ? "今日菜单" : "今日推荐"}</Badge>
+            <Badge tone={todayIds.length ? "warm" : memoryHitCount ? "accent" : "warm"}>{sectionLabel}</Badge>
             <h2 className="pk-serif text-[24px] leading-tight text-[color:var(--foreground)]">
               今天吃这几道
             </h2>
@@ -68,6 +80,12 @@ export function TodayRecommendationClient() {
             const canAdd = !selected && todayIds.length < todayMax;
             const ingPreview = formatRecipeIngredientsPreview(r, 2, 2);
             const href = recipeDetailHref(r.id);
+            const memoryEntry = feedbackEntryFor(r.id, dishFeedback.entries);
+            const memoryMeta = memoryEntry ? DISH_FEEDBACK_META[memoryEntry.tone] : null;
+            const memoryToneClass =
+              memoryEntry?.tone === "avoid"
+                ? "border-[color:rgba(184,92,56,0.28)] bg-[color:rgba(184,92,56,0.10)] text-[color:var(--warm)]"
+                : "border-[color:rgba(63,111,85,0.28)] bg-[color:rgba(63,111,85,0.10)] text-[color:var(--accent)]";
             return (
               <article
                 key={r.id}
@@ -96,7 +114,7 @@ export function TodayRecommendationClient() {
                 <div className="px-3 py-3">
                   <Link
                     href={href}
-                  className="pk-serif line-clamp-2 text-[16px] leading-tight transition-colors hover:text-[color:var(--warm)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]"
+                    className="pk-serif line-clamp-2 text-[16px] leading-tight transition-colors hover:text-[color:var(--warm)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]"
                   >
                     {r.name}
                   </Link>
@@ -107,6 +125,11 @@ export function TodayRecommendationClient() {
                   {ingPreview ? (
                     <div className="mt-2 line-clamp-2 text-[11px] leading-4 text-[color:var(--muted)]">
                       {ingPreview}
+                    </div>
+                  ) : null}
+                  {memoryEntry && memoryMeta ? (
+                    <div className={`mt-2 rounded-md border px-2.5 py-2 text-[11px] leading-4 ${memoryToneClass}`}>
+                      私房{memoryMeta.shortLabel} · {memoryMeta.hint}
                     </div>
                   ) : null}
                   <div className="mt-3">

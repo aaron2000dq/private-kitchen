@@ -9,6 +9,7 @@ import { recipeDetailHref } from "@/lib/recipes/recipeRoutes";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { VisuallyLosslessThumb } from "@/components/recipes/VisuallyLosslessThumb";
+import { DISH_FEEDBACK_META, type DishFeedbackEntry } from "@/lib/today/dishFeedback";
 
 function formatDate(iso: string) {
   try {
@@ -23,6 +24,7 @@ function formatDate(iso: string) {
 
 export function RecipeCard({
   recipe,
+  memoryEntry,
   showTodayAction = false,
   todaySelected = false,
   onTodayAction,
@@ -34,6 +36,7 @@ export function RecipeCard({
   onCategoryChange,
 }: {
   recipe: Recipe;
+  memoryEntry?: DishFeedbackEntry | null;
   showTodayAction?: boolean;
   todaySelected?: boolean;
   onTodayAction?: () => void;
@@ -65,6 +68,11 @@ export function RecipeCard({
   const href = recipeDetailHref(recipe.id);
   const image = recipe.images?.[0];
   const ingredientsPreview = formatRecipeIngredientsPreview(recipe);
+  const memoryMeta = memoryEntry ? DISH_FEEDBACK_META[memoryEntry.tone] : null;
+  const memoryToneClass =
+    memoryEntry?.tone === "avoid"
+      ? "border-[color:rgba(184,92,56,0.28)] bg-[color:rgba(184,92,56,0.10)] text-[color:var(--warm)]"
+      : "border-[color:rgba(63,111,85,0.28)] bg-[color:rgba(63,111,85,0.10)] text-[color:var(--accent)]";
 
   return (
     <article
@@ -95,6 +103,13 @@ export function RecipeCard({
         {recipe.rating ? (
           <div className="absolute right-2 top-2 rounded-md border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/92 px-2 py-1 text-[11px] font-medium text-[color:var(--warm)] shadow-[var(--shadow-soft)]">
             {recipe.rating}/5
+          </div>
+        ) : null}
+        {memoryEntry && memoryMeta ? (
+          <div
+            className={`absolute left-2 top-2 rounded-md border px-2 py-1 text-[11px] font-medium shadow-[var(--shadow-soft)] backdrop-blur ${memoryToneClass}`}
+          >
+            私房{memoryMeta.shortLabel}
           </div>
         ) : null}
       </Link>
@@ -165,6 +180,13 @@ export function RecipeCard({
             </Badge>
           ))}
         </div>
+
+        {memoryEntry && memoryMeta ? (
+          <div className={`mt-2 rounded-md border px-2.5 py-2 text-[11px] leading-4 ${memoryToneClass}`}>
+            {memoryMeta.label} · {memoryMeta.hint}
+            {memoryEntry.count > 1 ? ` · ${memoryEntry.count} 次` : ""}
+          </div>
+        ) : null}
 
         <Link
           href={href}

@@ -2516,6 +2516,7 @@ export function RecipesListClient({
               <RecipeCard
                 key={recipe.id}
                 recipe={recipe}
+                memoryEntry={feedbackEntryFor(recipe.id, dishFeedback.entries)}
                 showTodayAction
                 todaySelected={selected}
                 onTodayAction={
