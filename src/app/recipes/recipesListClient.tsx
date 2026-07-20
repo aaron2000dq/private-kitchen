@@ -37,6 +37,15 @@ import {
 import { buildPantryCoverage } from "@/lib/today/pantry";
 import { usePantry } from "@/lib/today/usePantry";
 import { buildDinnerConfirmationText, buildDinnerInvitationText } from "@/lib/today/dinnerInvitation";
+import {
+  DISH_FEEDBACK_META,
+  buildDishFeedbackSummary,
+  feedbackEntryFor,
+  feedbackScoreFor,
+  type DishFeedbackEntry,
+  type DishFeedbackTone,
+} from "@/lib/today/dishFeedback";
+import { useDishFeedback } from "@/lib/today/useDishFeedback";
 
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
@@ -286,6 +295,7 @@ function menuFillScore(
   wantedRole: MealRole,
   selectedRecipes: Recipe[],
   recentIds: Set<string>,
+  feedbackEntries: DishFeedbackEntry[] = [],
 ): number {
   const role = mealRoleOf(candidate);
   const roleScore = role === wantedRole ? 90 : role === "home" ? 8 : 18;
@@ -293,13 +303,14 @@ function menuFillScore(
   const ratingScore = (candidate.rating ?? 0) * 2.5;
   const categoryScore = selectedRecipes.some((recipe) => recipe.category === candidate.category) ? 1 : 5;
   const recentPenalty = recentIds.has(candidate.id) ? -22 : 0;
-  return roleScore + imageScore + ratingScore + categoryScore + recentPenalty;
+  return roleScore + imageScore + ratingScore + categoryScore + recentPenalty + feedbackScoreFor(candidate.id, feedbackEntries);
 }
 
 function buildMenuFillSuggestions(
   recipes: Recipe[],
   selectedRecipes: Recipe[],
   recentRecipeIds: string[],
+  feedbackEntries: DishFeedbackEntry[] = [],
   max = 3,
 ): Recipe[] {
   const selectedIds = new Set(selectedRecipes.map((recipe) => recipe.id));
@@ -313,7 +324,7 @@ function buildMenuFillSuggestions(
     if (picked.length >= max) break;
     const best = recipes
       .filter((recipe) => !selectedIds.has(recipe.id) && !pickedIds.has(recipe.id) && mealRoleOf(recipe) === role)
-      .sort((a, b) => menuFillScore(b, role, selectedRecipes, recentIds) - menuFillScore(a, role, selectedRecipes, recentIds))[0];
+      .sort((a, b) => menuFillScore(b, role, selectedRecipes, recentIds, feedbackEntries) - menuFillScore(a, role, selectedRecipes, recentIds, feedbackEntries))[0];
     if (!best) continue;
     picked.push(best);
     pickedIds.add(best.id);
@@ -323,7 +334,7 @@ function buildMenuFillSuggestions(
     if (picked.length >= max) break;
     const best = recipes
       .filter((recipe) => !selectedIds.has(recipe.id) && !pickedIds.has(recipe.id))
-      .sort((a, b) => menuFillScore(b, role, selectedRecipes, recentIds) - menuFillScore(a, role, selectedRecipes, recentIds))[0];
+      .sort((a, b) => menuFillScore(b, role, selectedRecipes, recentIds, feedbackEntries) - menuFillScore(a, role, selectedRecipes, recentIds, feedbackEntries))[0];
     if (!best) continue;
     picked.push(best);
     pickedIds.add(best.id);
@@ -336,6 +347,7 @@ function buildRoleSlotSuggestions(
   recipes: Recipe[],
   selectedRecipes: Recipe[],
   recentRecipeIds: string[],
+  feedbackEntries: DishFeedbackEntry[] = [],
 ): Partial<Record<TableMealRole, Recipe>> {
   const selectedIds = new Set(selectedRecipes.map((recipe) => recipe.id));
   const selectedRoles = new Set(selectedRecipes.map(tableRoleOf));
@@ -347,7 +359,7 @@ function buildRoleSlotSuggestions(
     if (selectedRoles.has(role)) continue;
     const best = recipes
       .filter((recipe) => !selectedIds.has(recipe.id) && !suggestionIds.has(recipe.id) && tableRoleOf(recipe) === role)
-      .sort((a, b) => menuFillScore(b, role, selectedRecipes, recentIds) - menuFillScore(a, role, selectedRecipes, recentIds))[0];
+      .sort((a, b) => menuFillScore(b, role, selectedRecipes, recentIds, feedbackEntries) - menuFillScore(a, role, selectedRecipes, recentIds, feedbackEntries))[0];
     if (!best) continue;
     suggestions[role] = best;
     suggestionIds.add(best.id);
@@ -361,6 +373,7 @@ function menuSwapScore(
   original: Recipe,
   selectedRecipes: Recipe[],
   recentIds: Set<string>,
+  feedbackEntries: DishFeedbackEntry[] = [],
 ): number {
   const candidateRole = mealRoleOf(candidate);
   const originalRole = mealRoleOf(original);
@@ -375,7 +388,7 @@ function menuSwapScore(
     ? -4
     : 0;
 
-  return roleScore + imageScore + ratingScore + categoryScore + recentPenalty + duplicateRolePenalty;
+  return roleScore + imageScore + ratingScore + categoryScore + recentPenalty + duplicateRolePenalty + feedbackScoreFor(candidate.id, feedbackEntries);
 }
 
 function pickSwapCandidate(
@@ -383,13 +396,14 @@ function pickSwapCandidate(
   selectedRecipes: Recipe[],
   original: Recipe,
   recentRecipeIds: string[],
+  feedbackEntries: DishFeedbackEntry[] = [],
 ): Recipe | null {
   const selectedIds = new Set(selectedRecipes.map((recipe) => recipe.id));
   const recentIds = new Set(recentRecipeIds);
   const originalRole = mealRoleOf(original);
   const candidates = recipes
     .filter((recipe) => !selectedIds.has(recipe.id))
-    .map((recipe) => ({ recipe, score: menuSwapScore(recipe, original, selectedRecipes, recentIds) }))
+    .map((recipe) => ({ recipe, score: menuSwapScore(recipe, original, selectedRecipes, recentIds, feedbackEntries) }))
     .sort((a, b) => b.score - a.score || a.recipe.name.localeCompare(b.recipe.name, "zh-CN"));
 
   const sameRoleTop = candidates.filter((entry) => mealRoleOf(entry.recipe) === originalRole).slice(0, 6);
@@ -451,6 +465,7 @@ export function RecipesListClient({
     record: recordCooked,
   } = useCookHistory();
   const pantry = usePantry();
+  const dishFeedback = useDishFeedback();
   const [q, setQ] = React.useState("");
   const [activeCategory, setActiveCategory] = React.useState("全部");
   const [busy, setBusy] = React.useState(false);
@@ -609,11 +624,17 @@ export function RecipesListClient({
   );
   const fillSuggestions = React.useMemo(() => {
     if (!selectedRecipes.length || selectedRecipes.length >= todayMax) return [];
-    return buildMenuFillSuggestions(guestAwareRecipePool, selectedRecipes, recentRecipeIds, Math.min(3, todayMax - selectedRecipes.length));
-  }, [guestAwareRecipePool, recentRecipeIds, selectedRecipes, todayMax]);
+    return buildMenuFillSuggestions(
+      guestAwareRecipePool,
+      selectedRecipes,
+      recentRecipeIds,
+      dishFeedback.entries,
+      Math.min(3, todayMax - selectedRecipes.length),
+    );
+  }, [dishFeedback.entries, guestAwareRecipePool, recentRecipeIds, selectedRecipes, todayMax]);
   const roleSlotSuggestions = React.useMemo(
-    () => buildRoleSlotSuggestions(guestAwareRecipePool, selectedRecipes, recentRecipeIds),
-    [guestAwareRecipePool, recentRecipeIds, selectedRecipes],
+    () => buildRoleSlotSuggestions(guestAwareRecipePool, selectedRecipes, recentRecipeIds, dishFeedback.entries),
+    [dishFeedback.entries, guestAwareRecipePool, recentRecipeIds, selectedRecipes],
   );
   const roleSlotSuggestionIds = React.useMemo(
     () =>
@@ -645,6 +666,10 @@ export function RecipesListClient({
   const pantryCoverage = React.useMemo(
     () => buildPantryCoverage(menuInsights.shoppingList, pantry.items),
     [menuInsights.shoppingList, pantry.items],
+  );
+  const feedbackSummary = React.useMemo(
+    () => buildDishFeedbackSummary(selectedRecipes, dishFeedback.entries),
+    [dishFeedback.entries, selectedRecipes],
   );
   const latestHistory = historyEntries[0];
   const actionBusy = busy || recordBusy || fillBusyId != null || swapBusyId != null || templateBusyId != null;
@@ -952,6 +977,32 @@ export function RecipesListClient({
     }
   };
 
+  const onSetDishFeedback = (recipe: Recipe, tone: DishFeedbackTone) => {
+    dishFeedback.setFeedback(recipe, tone);
+    setMenuTip(`已记录「${recipe.name}」：${DISH_FEEDBACK_META[tone].label}。`);
+    setExportError(null);
+  };
+
+  const onCopyDinnerReview = async () => {
+    if (!selectedRecipes.length) return;
+    setExportError(null);
+    try {
+      const lines = [
+        "私房家宴 · 宴后复盘",
+        `已复盘：${feedbackSummary.reviewedCount}/${selectedRecipes.length} 道`,
+        ...selectedRecipes.map((recipe) => {
+          const entry = feedbackEntryFor(recipe.id, dishFeedback.entries);
+          return `${entry ? DISH_FEEDBACK_META[entry.tone].shortLabel : "未评"} · ${recipe.name}`;
+        }),
+        ...feedbackSummary.notes.map((note) => `提示：${note}`),
+      ];
+      await navigator.clipboard.writeText(lines.join("\n"));
+      setMenuTip("宴后复盘已复制。");
+    } catch {
+      setExportError("复制失败，可以直接截图复盘卡。");
+    }
+  };
+
   const onAddFillSuggestion = async (recipe: Recipe) => {
     setFillBusyId(recipe.id);
     setExportError(null);
@@ -983,9 +1034,9 @@ export function RecipesListClient({
     setSwapBusyId(recipe.id);
     setExportError(null);
     try {
-      let nextRecipe = pickSwapCandidate(guestAwareRecipePool, selectedRecipes, recipe, recentRecipeIds);
+      let nextRecipe = pickSwapCandidate(guestAwareRecipePool, selectedRecipes, recipe, recentRecipeIds, dishFeedback.entries);
       if (!nextRecipe) {
-        nextRecipe = pickSwapCandidate(recipes, selectedRecipes, recipe, recentRecipeIds);
+        nextRecipe = pickSwapCandidate(recipes, selectedRecipes, recipe, recentRecipeIds, dishFeedback.entries);
         if (!nextRecipe) {
           setExportError("暂时没有可替换的菜。");
           return;
@@ -1420,6 +1471,103 @@ export function RecipesListClient({
                   onClick={onCopyDinnerConfirmation}
                 >
                   确认菜单
+                </Button>
+              </div>
+            </div>
+          ) : null}
+
+          {selectedRecipes.length ? (
+            <div className="mt-3 rounded-lg border border-[color:rgba(63,111,85,0.22)] bg-[linear-gradient(180deg,rgba(63,111,85,0.07),rgba(255,253,246,0.52))] p-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-[11px] text-[color:var(--muted-2)]">宴后复盘</div>
+                  <div className="pk-serif mt-1 text-[18px] leading-tight">
+                    {feedbackSummary.headline}
+                  </div>
+                  <div className="mt-1 line-clamp-2 text-[11px] leading-5 text-[color:var(--muted)]">
+                    {feedbackSummary.notes.join("；")}
+                  </div>
+                </div>
+                <Badge
+                  tone={feedbackSummary.avoidCount ? "warm" : feedbackSummary.reviewedCount ? "accent" : "muted"}
+                  className="shrink-0"
+                >
+                  {feedbackSummary.label}
+                </Badge>
+              </div>
+
+              <div className="mt-3 grid gap-2">
+                {selectedRecipes.slice(0, 6).map((recipe) => {
+                  const entry = feedbackEntryFor(recipe.id, dishFeedback.entries);
+                  return (
+                    <div
+                      key={recipe.id}
+                      className="rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)]/72 p-2.5"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="truncate text-[13px] text-[color:var(--foreground)]">{recipe.name}</div>
+                          <div className="mt-0.5 text-[10px] text-[color:var(--muted-2)]">
+                            {entry ? `${DISH_FEEDBACK_META[entry.tone].label} · ${entry.count} 次` : "还没记录"}
+                          </div>
+                        </div>
+                        {entry ? (
+                          <button
+                            type="button"
+                            className="h-7 shrink-0 rounded-md border border-[color:var(--menu-line-soft)] px-2 text-[11px] text-[color:var(--muted)]"
+                            onClick={() => dishFeedback.removeFeedback(recipe.id)}
+                          >
+                            重置
+                          </button>
+                        ) : null}
+                      </div>
+                      <div className="mt-2 grid grid-cols-3 gap-1.5">
+                        {(["love", "again", "avoid"] as const).map((tone) => {
+                          const active = entry?.tone === tone;
+                          return (
+                            <button
+                              key={tone}
+                              type="button"
+                              aria-pressed={active}
+                              className={cn(
+                                "h-8 rounded-md border px-2 text-[11px] transition-colors",
+                                active
+                                  ? tone === "avoid"
+                                    ? "border-[color:rgba(184,92,56,0.30)] bg-[color:rgba(184,92,56,0.09)] text-[color:var(--warm)]"
+                                    : "border-[color:rgba(63,111,85,0.30)] bg-[color:rgba(63,111,85,0.09)] text-[color:var(--accent)]"
+                                  : "border-[color:var(--menu-line-soft)] bg-[color:var(--paper-strong)]/60 text-[color:var(--muted)]",
+                              )}
+                              disabled={!dishFeedback.hydrated}
+                              onClick={() => onSetDishFeedback(recipe, tone)}
+                            >
+                              {DISH_FEEDBACK_META[tone].shortLabel}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-9 text-[12px]"
+                  disabled={!feedbackSummary.reviewedCount}
+                  onClick={onCopyDinnerReview}
+                >
+                  复制复盘
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-9 text-[12px]"
+                  disabled={!feedbackSummary.reviewedCount || actionBusy}
+                  onClick={onRecordCooked}
+                >
+                  {recordBusy ? "记录中" : "记为吃过"}
                 </Button>
               </div>
             </div>
