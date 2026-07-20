@@ -720,7 +720,11 @@ export function RecipesListClient({
                     key={recipe.id}
                     className="w-36 shrink-0 overflow-hidden rounded-lg border border-[color:var(--line)] bg-[color:var(--paper-strong)] shadow-[0_1px_0_rgba(24,33,29,0.04)]"
                   >
-                    <div className="aspect-[4/3] bg-[color:var(--wash)]">
+                    <Link
+                      href={recipeDetailHref(recipe.id)}
+                      className="block aspect-[4/3] bg-[color:var(--wash)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]"
+                      aria-label={`打开菜谱：${recipe.name}`}
+                    >
                       {image ? (
                         <VisuallyLosslessThumb
                           src={recipeImageThumbUrl(image)}
@@ -733,11 +737,14 @@ export function RecipesListClient({
                           无图
                         </div>
                       )}
-                    </div>
+                    </Link>
                     <div className="space-y-2 p-2.5">
-                      <div className="pk-serif line-clamp-2 min-h-[2rem] text-[13px] leading-4">
+                      <Link
+                        href={recipeDetailHref(recipe.id)}
+                        className="pk-serif line-clamp-2 min-h-[2rem] text-[13px] leading-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]"
+                      >
                         {recipe.name}
-                      </div>
+                      </Link>
                       <div className="grid grid-cols-2 gap-1.5">
                         <Button
                           size="sm"
