@@ -7,6 +7,8 @@ import type { Recipe, RecipeIngredient, RecipeStep } from "@/lib/recipes/types";
 import { MEAL_ROLE_META, mealRoleOf, type MealRole } from "@/lib/recipes/mealRole";
 import { recipeDetailHref } from "@/lib/recipes/recipeRoutes";
 import { useRecipes } from "@/lib/recipes/useRecipes";
+import { buildTodayMenuInsights } from "@/lib/today/menuInsights";
+import { useCookHistory } from "@/lib/today/useCookHistory";
 import { useTodayCookbook } from "@/lib/today/useTodayCookbook";
 import { recipeImageThumbUrl, recipeImageUrl } from "@/lib/recipes/recipeImageUrl";
 import { Badge } from "@/components/ui/Badge";
@@ -51,6 +53,9 @@ const PAIRING_TARGETS: Record<MealRole, MealRole[]> = {
   small: ["main", "vegetable", "soup"],
   home: ["main", "vegetable", "soup"],
 };
+
+type TodayCookbookControls = ReturnType<typeof useTodayCookbook>;
+type CookHistoryControls = ReturnType<typeof useCookHistory>;
 
 function sharedTagCount(a: Recipe, b: Recipe): number {
   const tags = new Set(a.tags ?? []);
@@ -256,9 +261,102 @@ function StepsScoreboard({ steps }: { steps: RecipeStep[] }) {
   );
 }
 
-function PairingShelf({ recipe }: { recipe: Recipe }) {
+function RecipeActionPanel({
+  recipe,
+  today,
+  cookHistory,
+}: {
+  recipe: Recipe;
+  today: TodayCookbookControls;
+  cookHistory: CookHistoryControls;
+}) {
+  const [addBusy, setAddBusy] = React.useState(false);
+  const [recordBusy, setRecordBusy] = React.useState(false);
+  const [notice, setNotice] = React.useState<string | null>(null);
+  const selected = today.has(recipe.id);
+  const full = today.ids.length >= today.max && !selected;
+  const recentlyCooked = cookHistory.recentRecipeIds.includes(recipe.id);
+
+  const onAddCurrent = async () => {
+    setAddBusy(true);
+    setNotice(null);
+    try {
+      const result = await today.add(recipe.id);
+      if (result.added) {
+        setNotice("已加入今日菜单，可以继续搭配配菜或去分享小票。");
+      } else if (result.ok) {
+        setNotice("这道菜已经在今日菜单里。");
+      } else {
+        setNotice("今日菜单已满，可以先移除一道再加入。");
+      }
+    } finally {
+      setAddBusy(false);
+    }
+  };
+
+  const onRecordCooked = async () => {
+    setRecordBusy(true);
+    setNotice(null);
+    try {
+      const score = buildTodayMenuInsights([recipe]).score;
+      await cookHistory.record([recipe], "balanced", score);
+      setNotice("已记入最近吃过，之后自动配菜会尽量避开重复。");
+    } finally {
+      setRecordBusy(false);
+    }
+  };
+
+  return (
+    <div className="mt-5 rounded-lg border border-[color:var(--line)] bg-[color:var(--paper-strong)]/72 p-3 shadow-[0_1px_0_rgba(24,33,29,0.04)]">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-[11px] text-[color:var(--muted-2)]">上桌动作</div>
+          <div className="pk-serif mt-1 text-[18px] leading-tight">
+            {selected ? "这道菜已在今日菜单" : "把这道菜放进今天"}
+          </div>
+        </div>
+        <Badge tone={recentlyCooked ? "warm" : "accent"}>
+          今日 {today.ids.length}/{today.max}
+        </Badge>
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-[1fr_1fr_auto]">
+        <Button
+          size="sm"
+          variant={selected ? "outline" : "primary"}
+          disabled={!today.hydrated || selected || full || addBusy}
+          onClick={() => void onAddCurrent()}
+        >
+          {selected ? "已加入" : full ? "今日已满" : addBusy ? "加入中" : "加入今日"}
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={!cookHistory.hydrated || recordBusy}
+          onClick={() => void onRecordCooked()}
+        >
+          {recordBusy ? "记录中" : recentlyCooked ? "再记一次" : "记为吃过"}
+        </Button>
+        <ButtonLink href="/recipes" size="sm" variant="ghost" className="col-span-2 sm:col-span-1">
+          去配一桌
+        </ButtonLink>
+      </div>
+
+      {notice ? (
+        <div className="mt-3 rounded-md border border-[color:rgba(63,111,85,0.20)] bg-[color:rgba(63,111,85,0.07)] px-3 py-2 text-[12px] leading-5 text-[color:var(--accent)]">
+          {notice}
+        </div>
+      ) : recentlyCooked ? (
+        <div className="mt-3 text-[12px] leading-5 text-[color:var(--muted-2)]">
+          近 {cookHistory.recentWindowDays} 天做过这道，配一桌时会自动降低重复概率。
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function PairingShelf({ recipe, today }: { recipe: Recipe; today: TodayCookbookControls }) {
   const { recipes, hydrated } = useRecipes();
-  const { hydrated: todayHydrated, ids, has, add, max } = useTodayCookbook();
   const [pendingId, setPendingId] = React.useState<string | null>(null);
   const pairings = React.useMemo(
     () => (hydrated ? buildPairings(recipe, recipes) : []),
@@ -269,7 +367,7 @@ function PairingShelf({ recipe }: { recipe: Recipe }) {
   const onAdd = async (recipeId: string) => {
     setPendingId(recipeId);
     try {
-      await add(recipeId);
+      await today.add(recipeId);
     } finally {
       setPendingId(null);
     }
@@ -294,8 +392,8 @@ function PairingShelf({ recipe }: { recipe: Recipe }) {
 
       <div className="grid gap-3 p-3 sm:grid-cols-2 lg:grid-cols-4">
         {pairings.map((candidate, index) => {
-          const selected = has(candidate.id);
-          const full = ids.length >= max && !selected;
+          const selected = today.has(candidate.id);
+          const full = today.ids.length >= today.max && !selected;
           const role = MEAL_ROLE_META[mealRoleOf(candidate)].label;
           const image = candidate.images?.[0];
           return (
@@ -336,7 +434,7 @@ function PairingShelf({ recipe }: { recipe: Recipe }) {
                 size="sm"
                 variant={selected ? "outline" : "primary"}
                 className="mt-3 w-full"
-                disabled={!todayHydrated || selected || full || pendingId === candidate.id}
+                disabled={!today.hydrated || selected || full || pendingId === candidate.id}
                 onClick={() => void onAdd(candidate.id)}
               >
                 {selected ? "已在菜单" : full ? "今日已满" : pendingId === candidate.id ? "加入中" : "加入今日"}
@@ -352,6 +450,8 @@ function PairingShelf({ recipe }: { recipe: Recipe }) {
 export function RecipeDetailClient({ id }: { id: string }) {
   const [recipe, setRecipe] = React.useState<Recipe | null>(null);
   const [hydrated, setHydrated] = React.useState(false);
+  const today = useTodayCookbook();
+  const cookHistory = useCookHistory();
 
   React.useEffect(() => {
     setHydrated(true);
@@ -425,6 +525,8 @@ export function RecipeDetailClient({ id }: { id: string }) {
               </div>
             </div>
 
+            <RecipeActionPanel recipe={recipe} today={today} cookHistory={cookHistory} />
+
             <div className="mt-5 grid grid-cols-4 overflow-hidden rounded-lg border border-[color:var(--line)] bg-[color:var(--paper-strong)]/66">
               <DetailStat label="用料" value={`${totalIngredients}项`} />
               <DetailStat label="步骤" value={`${steps.length}步`} />
@@ -444,7 +546,7 @@ export function RecipeDetailClient({ id }: { id: string }) {
         </div>
       </section>
 
-      <PairingShelf recipe={recipe} />
+      <PairingShelf recipe={recipe} today={today} />
 
       <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
         <section className="pk-panel-plain overflow-hidden">
