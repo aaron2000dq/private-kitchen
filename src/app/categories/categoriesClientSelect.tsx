@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
+import { AppLink as Link } from "@/components/ui/AppLink";
 import type { Recipe } from "@/lib/recipes/types";
 import { useRecipes } from "@/lib/recipes/useRecipes";
 import { RecipeRepository } from "@/lib/recipes/repository";

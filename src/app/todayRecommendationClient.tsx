@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { AppLink as Link } from "@/components/ui/AppLink";
 import * as React from "react";
 import { useRecipes } from "@/lib/recipes/useRecipes";
 import { useDailyRecommendation } from "@/lib/recommendation/useDailyRecommendation";

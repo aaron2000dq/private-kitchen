@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import * as React from "react";
+import { AppLink } from "@/components/ui/AppLink";
 
 type Variant = "primary" | "ghost" | "outline" | "danger";
 type Size = "sm" | "md";
@@ -60,9 +60,9 @@ export function ButtonLink({
   variant = "primary",
   size = "md",
   ...props
-}: React.ComponentProps<typeof Link> & {
+}: React.ComponentProps<typeof AppLink> & {
   variant?: Variant;
   size?: Size;
 }) {
-  return <Link className={buttonClassName({ className, variant, size })} {...props} />;
+  return <AppLink className={buttonClassName({ className, variant, size })} {...props} />;
 }

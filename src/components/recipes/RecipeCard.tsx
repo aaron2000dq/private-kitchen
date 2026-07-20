@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { AppLink as Link } from "@/components/ui/AppLink";
 import * as React from "react";
 import type { Recipe } from "@/lib/recipes/types";
 import { recipeImageThumbUrl, recipeImageUrl } from "@/lib/recipes/recipeImageUrl";

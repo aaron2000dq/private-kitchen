@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
+import { AppLink as Link } from "@/components/ui/AppLink";
 import { useRecipes } from "@/lib/recipes/useRecipes";
 import { useTodayCookbook } from "@/lib/today/useTodayCookbook";
 import { exportTodayCookbookToPng } from "@/lib/today/exportTodayCookbookToImage";
