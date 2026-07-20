@@ -248,6 +248,12 @@ function budgetTone(label: string): "warm" | "accent" | "muted" {
   return "muted";
 }
 
+function palateTone(label: string): "warm" | "accent" | "muted" {
+  if (label === "辣味上头" || label === "浓香偏重") return "warm";
+  if (label === "节奏完整" || label === "清爽一桌") return "accent";
+  return "muted";
+}
+
 function menuFillScore(
   candidate: Recipe,
   wantedRole: MealRole,
@@ -764,6 +770,7 @@ export function RecipesListClient({
       const lines = [
         `${menuInsights.serving.diners}人份 · 菜场路线`,
         `菜场预算：${menuInsights.budget.range} · ${menuInsights.budget.perPerson}`,
+        `口味节奏：${menuInsights.palate.label} · ${menuInsights.palate.score}分`,
         ...menuInsights.shoppingGroups.flatMap((group) => [
           `【${group.label}】`,
           ...group.items.map((item) => `□ ${item}`),
@@ -1145,6 +1152,73 @@ export function RecipesListClient({
                   ? menuInsights.shoppingList.slice(0, 5).join("、")
                   : "选菜后自动整理"}
               </div>
+            </div>
+          </div>
+
+          <div className="mt-3 rounded-lg border border-[color:rgba(63,111,85,0.20)] bg-[linear-gradient(180deg,rgba(63,111,85,0.065),rgba(185,148,75,0.045))] p-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-[11px] text-[color:var(--muted-2)]">口味罗盘</div>
+                <div className="pk-serif mt-1 text-[18px] leading-tight">
+                  {menuInsights.palate.headline}
+                </div>
+                <div className="mt-1 line-clamp-2 text-[11px] leading-5 text-[color:var(--muted)]">
+                  {menuInsights.palate.summary}
+                </div>
+              </div>
+              <Badge tone={palateTone(menuInsights.palate.label)} className="shrink-0">
+                {menuInsights.palate.label}
+              </Badge>
+            </div>
+
+            <div className="mt-3 space-y-2">
+              {menuInsights.palate.axes.map((axis) => (
+                <div
+                  key={axis.key}
+                  className="rounded-md border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/72 px-2.5 py-2"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-[12px] font-medium leading-none text-[color:var(--foreground)]">
+                        {axis.label}
+                      </div>
+                      <div className="mt-1 truncate text-[10px] text-[color:var(--muted-2)]">{axis.hint}</div>
+                    </div>
+                    <div
+                      className={cn(
+                        "shrink-0 text-[12px] font-medium",
+                        axis.tone === "warm" && "text-[color:var(--warm)]",
+                        axis.tone === "accent" && "text-[color:var(--accent)]",
+                        axis.tone === "muted" && "text-[color:var(--muted)]",
+                      )}
+                    >
+                      {axis.value}
+                    </div>
+                  </div>
+                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[color:rgba(24,33,29,0.08)]">
+                    <div
+                      className={cn(
+                        "h-full rounded-full transition-[width]",
+                        axis.tone === "warm" && "bg-[color:var(--warm)]",
+                        axis.tone === "accent" && "bg-[color:var(--accent)]",
+                        axis.tone === "muted" && "bg-[color:var(--accent-2)]",
+                      )}
+                      style={{ width: `${axis.value}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {menuInsights.palate.notes.map((note) => (
+                <span
+                  key={note}
+                  className="rounded-md border border-[color:rgba(63,111,85,0.18)] bg-[color:rgba(63,111,85,0.07)] px-2 py-1 text-[11px] leading-none text-[color:var(--accent)]"
+                >
+                  {note}
+                </span>
+              ))}
             </div>
           </div>
 

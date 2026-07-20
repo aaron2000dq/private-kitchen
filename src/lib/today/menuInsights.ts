@@ -112,6 +112,20 @@ export type TodayMenuInsights = {
       tone: "warm" | "accent" | "muted";
     }>;
   };
+  palate: {
+    label: string;
+    score: number;
+    headline: string;
+    summary: string;
+    notes: string[];
+    axes: Array<{
+      key: "fresh" | "rich" | "spicy" | "soup" | "staple";
+      label: string;
+      value: number;
+      hint: string;
+      tone: "warm" | "accent" | "muted";
+    }>;
+  };
   roleLabels: string[];
   missing: string[];
   shoppingList: string[];
@@ -617,6 +631,132 @@ function buildKitchenCrewPlan(
   };
 }
 
+function flavorValue(value: number, max: number): number {
+  if (max <= 0) return 0;
+  return Math.min(100, Math.max(0, Math.round((value / max) * 100)));
+}
+
+function buildPalatePlan(recipes: Recipe[]): TodayMenuInsights["palate"] {
+  if (recipes.length === 0) {
+    return {
+      label: "待品鉴",
+      score: 0,
+      headline: "选菜后判断口味节奏",
+      summary: "清爽、浓香、辣意、汤水和主食会一起看，避免一桌菜吃起来太单调。",
+      notes: ["先选 3 道以上更好判断", "主菜、青菜、汤羹和主食搭开更稳"],
+      axes: [
+        { key: "fresh", label: "清爽", value: 0, hint: "青菜、清蒸、汤粥", tone: "accent" },
+        { key: "rich", label: "浓香", value: 0, hint: "红烧、煲炖、油香", tone: "warm" },
+        { key: "spicy", label: "辣意", value: 0, hint: "辣椒、剁椒、麻辣", tone: "warm" },
+        { key: "soup", label: "汤水", value: 0, hint: "汤羹、粥、煲", tone: "muted" },
+        { key: "staple", label: "主食", value: 0, hint: "饭面粉粥", tone: "muted" },
+      ],
+    };
+  }
+
+  let fresh = 0;
+  let rich = 0;
+  let spicy = 0;
+  let soup = 0;
+  let staple = 0;
+  const richNames: string[] = [];
+  const spicyNames: string[] = [];
+
+  for (const recipe of recipes) {
+    const text = recipeText(recipe);
+    const role = roleOf(recipe);
+
+    if (role === "蔬菜") fresh += 2.4;
+    if (role === "汤羹") soup += 2.8;
+    if (role === "主食") staple += 2.8;
+    if (role === "主菜" || role === "家常") rich += 1.5;
+
+    if (/(清|蒸|汤|粥|丝瓜|白菜|菠菜|生菜|青菜|空心菜|油麦菜|番茄|豆腐|菌菇|萝卜)/.test(text)) fresh += 1.1;
+    if (/(红烧|卤|烧|焖|炖|煲|砂锅|黄油|蒜蓉|炸|烤|五花|肥牛|牛腩|排骨|猪蹄|腊|香煎)/.test(text)) {
+      rich += 1.6;
+      richNames.push(recipe.name);
+    }
+    if (/(辣|椒|麻辣|剁椒|酸辣|小炒|回锅|牛蛙|火锅)/.test(text)) {
+      spicy += 2.1;
+      spicyNames.push(recipe.name);
+    }
+    if (/(汤|羹|粥|煲|炖|水煮|汤面|粉汤)/.test(text)) soup += 1.1;
+    if (/(饭|面|粉|米粉|河粉|粥|煲仔|焖饭|主食|粉丝|饼)/.test(text)) staple += 1.2;
+  }
+
+  const count = Math.max(1, recipes.length);
+  const axes: TodayMenuInsights["palate"]["axes"] = [
+    { key: "fresh", label: "清爽", value: flavorValue(fresh, count * 2.4), hint: "青菜、清蒸、汤粥", tone: "accent" },
+    { key: "rich", label: "浓香", value: flavorValue(rich, count * 2.4), hint: "红烧、煲炖、油香", tone: "warm" },
+    { key: "spicy", label: "辣意", value: flavorValue(spicy, count * 2.0), hint: "辣椒、剁椒、麻辣", tone: "warm" },
+    { key: "soup", label: "汤水", value: flavorValue(soup, count * 2.2), hint: "汤羹、粥、煲", tone: "muted" },
+    { key: "staple", label: "主食", value: flavorValue(staple, count * 2.0), hint: "饭面粉粥", tone: "muted" },
+  ];
+  const values = Object.fromEntries(axes.map((axis) => [axis.key, axis.value])) as Record<
+    TodayMenuInsights["palate"]["axes"][number]["key"],
+    number
+  >;
+  const notes: string[] = [];
+
+  if (values.rich >= 70 && values.fresh < 45) {
+    notes.push(`浓香偏重，配一道清口青菜更舒服`);
+  } else if (values.fresh >= 65 && values.rich < 40) {
+    notes.push("这桌很清爽，可加一道撑场主菜");
+  } else {
+    notes.push("清爽和浓香有来有回");
+  }
+
+  if (values.spicy >= 58) {
+    notes.push(`辣味明显：${compactNames(spicyNames, "辣味菜", 2)}，记得留无辣菜`);
+  } else if (values.spicy <= 18 && values.rich >= 45) {
+    notes.push("辣意不高，适合更多人一起吃");
+  }
+
+  if (values.soup < 35) {
+    notes.push("少一口汤水，饭桌收尾会干一些");
+  } else {
+    notes.push("汤水感够，开饭节奏更完整");
+  }
+
+  if (values.staple < 35) {
+    notes.push("主食存在感偏弱，可补饭面粉粥");
+  }
+
+  const score = Math.round(
+    Math.min(values.fresh, 72) * 0.22 +
+      Math.min(values.rich, 78) * 0.22 +
+      (100 - Math.max(0, values.spicy - 46)) * 0.12 +
+      Math.min(values.soup, 75) * 0.20 +
+      Math.min(values.staple, 70) * 0.16 +
+      Math.min(12, recipes.length * 1.6),
+  );
+  const label =
+    values.spicy >= 62
+      ? "辣味上头"
+      : values.rich >= 72 && values.fresh < 45
+        ? "浓香偏重"
+        : values.fresh >= 68 && values.rich < 45
+          ? "清爽一桌"
+          : values.soup >= 40 && values.staple >= 38 && score >= 72
+            ? "节奏完整"
+            : "家常平衡";
+  const anchorNames = [
+    ...richNames.slice(0, 1),
+    ...spicyNames.filter((name) => !richNames.includes(name)).slice(0, 1),
+  ];
+
+  return {
+    label,
+    score: Math.min(98, Math.max(30, score)),
+    headline: `${label} · 口味分 ${Math.min(98, Math.max(30, score))}`,
+    summary: anchorNames.length
+      ? `${compactNames(anchorNames, "这桌菜", 2)}带起主调，再用青菜、汤水和主食收住。`
+      : "这桌菜没有特别极端的口味，适合按家常节奏上桌。",
+    notes: notes.slice(0, 4),
+    axes,
+  };
+}
+
 function buildServingPlan(recipes: Recipe[], dinersInput: number, roles: Set<MenuRole>): TodayMenuInsights["serving"] {
   const diners = clampDiners(dinersInput);
   const count = recipes.length;
@@ -834,6 +974,7 @@ export function buildTodayMenuInsights(recipes: Recipe[], dinersInput = 2): Toda
   const serving = buildServingPlan(recipes, dinersInput, roles);
   const budget = buildBudgetPlan(recipes, dinersInput);
   const crew = buildKitchenCrewPlan(recipes, dinersInput, shoppingGroups);
+  const palate = buildPalatePlan(recipes);
 
   return {
     count: recipes.length,
@@ -845,6 +986,7 @@ export function buildTodayMenuInsights(recipes: Recipe[], dinersInput = 2): Toda
     serving,
     budget,
     crew,
+    palate,
     roleLabels,
     missing,
     shoppingList,
