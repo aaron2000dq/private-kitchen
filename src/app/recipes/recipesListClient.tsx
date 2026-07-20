@@ -28,11 +28,27 @@ function cn(...parts: Array<string | false | null | undefined>) {
 }
 
 type KitchenGuideMode = "shopping" | "prep";
+type TableMealRole = Exclude<MealRole, "home">;
 
 const FILL_ROLE_PRIORITY: MealRole[] = ["main", "vegetable", "soup", "staple", "small"];
+const TABLE_ROLE_ORDER: TableMealRole[] = ["main", "vegetable", "soup", "staple", "small"];
 const LOCKED_MENU_KEY = "private-kitchen:locked-today-menu:v1";
 const MENU_TEMPLATES_KEY = "private-kitchen:menu-templates:v1";
 const MENU_TEMPLATE_LIMIT = 6;
+
+const MENU_TABLE_SLOTS: Array<{
+  key: TableMealRole;
+  title: string;
+  note: string;
+  empty: string;
+  tone: "accent" | "warm" | "muted";
+}> = [
+  { key: "main", title: "撑场主菜", note: "压住席面", empty: "缺一道硬菜", tone: "warm" },
+  { key: "vegetable", title: "时蔬清口", note: "留一口清爽", empty: "缺一道蔬菜", tone: "accent" },
+  { key: "soup", title: "汤羹暖碗", note: "收住烟火", empty: "缺一碗汤", tone: "muted" },
+  { key: "staple", title: "主食点心", note: "把餐桌压稳", empty: "缺一道主食", tone: "muted" },
+  { key: "small", title: "小食添兴", note: "让桌面更活", empty: "可添小食", tone: "muted" },
+];
 
 type MenuTemplate = {
   id: string;
@@ -138,6 +154,11 @@ function sameOrderedIds(a: string[], b: string[]): boolean {
   return a.length === b.length && a.every((id, index) => id === b[index]);
 }
 
+function tableRoleOf(recipe: Recipe): TableMealRole {
+  const role = mealRoleOf(recipe);
+  return role === "home" ? "small" : role;
+}
+
 function makeTemplateId() {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
@@ -218,6 +239,30 @@ function buildMenuFillSuggestions(
   }
 
   return picked.slice(0, max);
+}
+
+function buildRoleSlotSuggestions(
+  recipes: Recipe[],
+  selectedRecipes: Recipe[],
+  recentRecipeIds: string[],
+): Partial<Record<TableMealRole, Recipe>> {
+  const selectedIds = new Set(selectedRecipes.map((recipe) => recipe.id));
+  const selectedRoles = new Set(selectedRecipes.map(tableRoleOf));
+  const recentIds = new Set(recentRecipeIds);
+  const suggestions: Partial<Record<TableMealRole, Recipe>> = {};
+  const suggestionIds = new Set<string>();
+
+  for (const role of TABLE_ROLE_ORDER) {
+    if (selectedRoles.has(role)) continue;
+    const best = recipes
+      .filter((recipe) => !selectedIds.has(recipe.id) && !suggestionIds.has(recipe.id) && tableRoleOf(recipe) === role)
+      .sort((a, b) => menuFillScore(b, role, selectedRecipes, recentIds) - menuFillScore(a, role, selectedRecipes, recentIds))[0];
+    if (!best) continue;
+    suggestions[role] = best;
+    suggestionIds.add(best.id);
+  }
+
+  return suggestions;
 }
 
 function menuSwapScore(
@@ -421,6 +466,32 @@ export function RecipesListClient({
     if (!selectedRecipes.length || selectedRecipes.length >= todayMax) return [];
     return buildMenuFillSuggestions(recipes, selectedRecipes, recentRecipeIds, Math.min(3, todayMax - selectedRecipes.length));
   }, [recipes, recentRecipeIds, selectedRecipes, todayMax]);
+  const roleSlotSuggestions = React.useMemo(
+    () => buildRoleSlotSuggestions(recipes, selectedRecipes, recentRecipeIds),
+    [recipes, recentRecipeIds, selectedRecipes],
+  );
+  const roleSlotSuggestionIds = React.useMemo(
+    () =>
+      new Set(
+        Object.values(roleSlotSuggestions)
+          .filter((recipe): recipe is Recipe => Boolean(recipe))
+          .map((recipe) => recipe.id),
+      ),
+    [roleSlotSuggestions],
+  );
+  const visibleFillSuggestions = React.useMemo(
+    () => fillSuggestions.filter((recipe) => !roleSlotSuggestionIds.has(recipe.id)),
+    [fillSuggestions, roleSlotSuggestionIds],
+  );
+  const menuTableSlots = React.useMemo(
+    () =>
+      MENU_TABLE_SLOTS.map((slot) => ({
+        ...slot,
+        recipes: selectedRecipes.filter((recipe) => tableRoleOf(recipe) === slot.key),
+        suggestion: roleSlotSuggestions[slot.key],
+      })),
+    [roleSlotSuggestions, selectedRecipes],
+  );
   const menuKey = React.useMemo(
     () => selectedRecipes.map((recipe) => recipe.id).join("|"),
     [selectedRecipes],
@@ -883,18 +954,122 @@ export function RecipesListClient({
             </div>
           </div>
 
-          {fillSuggestions.length ? (
+          {selectedRecipes.length ? (
+            <div className="mt-3 rounded-lg border border-[color:rgba(63,111,85,0.20)] bg-[linear-gradient(180deg,rgba(63,111,85,0.075),rgba(185,148,75,0.045))] p-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-[11px] text-[color:var(--muted-2)]">宴席台面</div>
+                  <div className="pk-serif mt-1 text-[18px] leading-tight">按席位看这一桌</div>
+                  <div className="mt-1 line-clamp-1 text-[11px] text-[color:var(--muted)]">
+                    主菜、时蔬、汤羹、主食和小食齐一些，开饭更稳。
+                  </div>
+                </div>
+                <Badge tone="accent" className="shrink-0">
+                  {menuTableSlots.filter((slot) => slot.recipes.length).length}/{menuTableSlots.length}席
+                </Badge>
+              </div>
+
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {menuTableSlots.map((slot) => {
+                  const hasRecipes = slot.recipes.length > 0;
+                  const suggestion = slot.suggestion;
+                  return (
+                    <div
+                      key={slot.key}
+                      className={cn(
+                        "min-h-[128px] rounded-lg border p-2.5 transition-colors",
+                        hasRecipes
+                          ? "border-[color:var(--line)] bg-[color:var(--paper)]/80"
+                          : "border-dashed border-[color:rgba(185,148,75,0.42)] bg-[color:var(--paper)]/50",
+                      )}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <div className="pk-serif truncate text-[14px] leading-tight">{slot.title}</div>
+                          <div className="mt-0.5 truncate text-[10px] text-[color:var(--muted-2)]">{slot.note}</div>
+                        </div>
+                        <Badge tone={hasRecipes ? slot.tone : "muted"} className="shrink-0 px-1.5 py-0.5 text-[10px]">
+                          {hasRecipes ? `${slot.recipes.length}道` : "空位"}
+                        </Badge>
+                      </div>
+
+                      {hasRecipes ? (
+                        <div className="mt-2 space-y-1.5">
+                          {slot.recipes.slice(0, 2).map((recipe, index) => {
+                            const image = recipe.images?.[0];
+                            return (
+                              <Link
+                                key={recipe.id}
+                                href={recipeDetailHref(recipe.id)}
+                                className="grid grid-cols-[34px_minmax(0,1fr)] items-center gap-2 rounded-md border border-[color:rgba(24,33,29,0.08)] bg-[color:var(--paper-strong)]/70 p-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]"
+                              >
+                                <span className="h-[34px] w-[34px] overflow-hidden rounded-md border border-[color:var(--line)] bg-[color:var(--wash)]">
+                                  {image ? (
+                                    <VisuallyLosslessThumb
+                                      src={recipeImageThumbUrl(image)}
+                                      fallbackSrc={recipeImageUrl(image)}
+                                      alt={recipe.name}
+                                      loading={index === 0 ? "eager" : "lazy"}
+                                      fetchPriority={index === 0 ? "high" : "auto"}
+                                      className="h-full w-full object-cover"
+                                    />
+                                  ) : (
+                                    <span className="flex h-full items-center justify-center text-[9px] text-[color:var(--muted-2)]">
+                                      无图
+                                    </span>
+                                  )}
+                                </span>
+                                <span className="min-w-0">
+                                  <span className="block truncate text-[12px] leading-4">{recipe.name}</span>
+                                  <span className="mt-0.5 block truncate text-[10px] text-[color:var(--muted-2)]">
+                                    {lockedIds.has(recipe.id) ? "已锁定" : "可换可移"}
+                                  </span>
+                                </span>
+                              </Link>
+                            );
+                          })}
+                          {slot.recipes.length > 2 ? (
+                            <div className="rounded-md border border-[color:var(--menu-line-soft)] px-2 py-1 text-[10px] text-[color:var(--muted)]">
+                              还有 {slot.recipes.length - 2} 道在这一席
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : suggestion ? (
+                        <button
+                          type="button"
+                          className="mt-2 flex min-h-[58px] w-full flex-col justify-center rounded-md border border-[color:rgba(63,111,85,0.24)] bg-[color:rgba(63,111,85,0.08)] px-2.5 py-2 text-left text-[color:var(--accent)] transition-colors hover:bg-[color:rgba(63,111,85,0.12)] disabled:opacity-50"
+                          disabled={!todayHydrated || actionBusy}
+                          onClick={() => void onAddFillSuggestion(suggestion)}
+                        >
+                          <span className="text-[10px] text-[color:var(--muted-2)]">{slot.empty}</span>
+                          <span className="mt-0.5 line-clamp-2 text-[12px] leading-4">
+                            补上「{suggestion.name}」
+                          </span>
+                        </button>
+                      ) : (
+                        <div className="mt-2 flex min-h-[58px] items-center rounded-md border border-dashed border-[color:var(--menu-line-soft)] px-2.5 text-[11px] leading-5 text-[color:var(--muted)]">
+                          {slot.empty}，可以从下方菜谱库挑一道。
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
+
+          {visibleFillSuggestions.length ? (
             <div className="mt-3 rounded-lg border border-[color:rgba(63,111,85,0.20)] bg-[color:rgba(63,111,85,0.06)] p-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="text-[11px] text-[color:var(--muted-2)]">补齐建议</div>
                   <div className="pk-serif mt-1 text-[18px] leading-tight">让这桌更完整</div>
                 </div>
-                <Badge tone="accent">可补 {fillSuggestions.length}</Badge>
+                <Badge tone="accent">可补 {visibleFillSuggestions.length}</Badge>
               </div>
 
               <div className="mt-3 grid gap-2">
-                {fillSuggestions.map((recipe, index) => {
+                {visibleFillSuggestions.map((recipe, index) => {
                   const image = recipe.images?.[0];
                   const role = mealRoleOf(recipe);
                   return (
