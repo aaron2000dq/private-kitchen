@@ -83,6 +83,22 @@ export type TodayMenuInsights = {
       tone: "warm" | "accent" | "muted";
     }>;
   };
+  budget: {
+    label: string;
+    range: string;
+    perPerson: string;
+    headline: string;
+    detail: string;
+    meter: number;
+    premiumNames: string[];
+    notes: string[];
+    bands: Array<{
+      label: string;
+      value: string;
+      hint: string;
+      tone: "warm" | "accent" | "muted";
+    }>;
+  };
   roleLabels: string[];
   missing: string[];
   shoppingList: string[];
@@ -322,6 +338,173 @@ function servingScaleLabel(diners: number): string {
   return "家宴大份";
 }
 
+function roundMoney(value: number): number {
+  return Math.max(0, Math.round(value / 5) * 5);
+}
+
+function recipeBaseCost(recipe: Recipe): {
+  low: number;
+  high: number;
+  premium: boolean;
+} {
+  const text = recipeText(recipe);
+  const role = roleOf(recipe);
+  const base =
+    role === "蔬菜"
+      ? { low: 8, high: 16 }
+      : role === "主食"
+        ? { low: 7, high: 18 }
+        : role === "汤羹"
+          ? { low: 16, high: 34 }
+          : role === "小食"
+            ? { low: 12, high: 28 }
+            : role === "家常"
+              ? { low: 18, high: 38 }
+              : { low: 26, high: 56 };
+
+  let low = base.low;
+  let high = base.high;
+  let premium = false;
+
+  if (/(蟹|小龙虾|鲈鱼|海鲜|鲜虾|虾仁|虾|牛蛙|牛排|羊肚菌|鲍|瑶柱)/.test(text)) {
+    low += 22;
+    high += 46;
+    premium = true;
+  } else if (/(牛腩|肥牛|牛肉|黄牛肉|排骨|猪蹄|五花|腊肉|腊肠|鸡翅|鸡腿|鸡|鸭|鱼|肉丸)/.test(text)) {
+    low += 10;
+    high += 24;
+  }
+
+  if (/(火锅|套餐|拼盘)/.test(text)) {
+    low += 26;
+    high += 54;
+    premium = true;
+  }
+
+  if (/(青菜|白菜|菠菜|生菜|空心菜|油麦菜|丝瓜|番茄|土豆|豆腐|蛋|粉|面|饭|粥)/.test(text) && role !== "主菜") {
+    low -= 2;
+    high -= 4;
+  }
+
+  return {
+    low: Math.max(6, low),
+    high: Math.max(low + 8, high),
+    premium,
+  };
+}
+
+function budgetBandKey(recipe: Recipe): "main" | "produce" | "soup" | "support" {
+  const role = roleOf(recipe);
+  if (role === "主菜" || role === "家常") return "main";
+  if (role === "蔬菜") return "produce";
+  if (role === "汤羹") return "soup";
+  return "support";
+}
+
+function budgetBandMeta(key: "main" | "produce" | "soup" | "support"): {
+  label: string;
+  hint: string;
+  tone: "warm" | "accent" | "muted";
+} {
+  if (key === "main") return { label: "硬菜主料", hint: "先看肉蛋水产", tone: "warm" };
+  if (key === "produce") return { label: "时蔬清口", hint: "按新鲜度补齐", tone: "accent" };
+  if (key === "soup") return { label: "汤羹底味", hint: "骨汤菌菇类会抬升", tone: "muted" };
+  return { label: "主食小食", hint: "稳定人均成本", tone: "muted" };
+}
+
+function buildBudgetPlan(recipes: Recipe[], dinersInput: number): TodayMenuInsights["budget"] {
+  const diners = clampDiners(dinersInput);
+
+  if (recipes.length === 0) {
+    return {
+      label: "待估",
+      range: "待选菜",
+      perPerson: "待定",
+      headline: "选菜后估算菜场预算",
+      detail: "按菜品主料和人数做规则估算，适合出门买菜前快速判断。",
+      meter: 0,
+      premiumNames: [],
+      notes: [`先按 ${diners} 人份搭菜单`, "预算会随硬菜和海鲜数量变化"],
+      bands: [],
+    };
+  }
+
+  const scale = diners <= 2 ? 1 : 1 + (diners - 2) * 0.31;
+  const entries = recipes.map((recipe) => {
+    const cost = recipeBaseCost(recipe);
+    return {
+      recipe,
+      low: cost.low * scale,
+      high: cost.high * scale,
+      premium: cost.premium,
+      bandKey: budgetBandKey(recipe),
+    };
+  });
+  const totalLow = roundMoney(entries.reduce((sum, entry) => sum + entry.low, 0));
+  const totalHigh = Math.max(totalLow + 10, roundMoney(entries.reduce((sum, entry) => sum + entry.high, 0)));
+  const perLow = roundMoney(totalLow / diners);
+  const perHigh = Math.max(perLow + 5, roundMoney(totalHigh / diners));
+  const perHighRaw = totalHigh / diners;
+  const label =
+    perHighRaw <= 26
+      ? "省心家常"
+      : perHighRaw <= 42
+        ? "舒适一桌"
+        : perHighRaw <= 62
+          ? "家宴级"
+          : "硬菜拉满";
+  const premiumNames = entries
+    .filter((entry) => entry.premium)
+    .map((entry) => entry.recipe.name)
+    .slice(0, 3);
+  const bandTotals = new Map<"main" | "produce" | "soup" | "support", { low: number; high: number }>();
+
+  for (const entry of entries) {
+    const total = bandTotals.get(entry.bandKey) ?? { low: 0, high: 0 };
+    total.low += entry.low;
+    total.high += entry.high;
+    bandTotals.set(entry.bandKey, total);
+  }
+
+  const notes: string[] = [];
+  if (premiumNames.length) {
+    notes.push(`贵价主料：${premiumNames.join("、")}`);
+  }
+  if (entries.filter((entry) => entry.bandKey === "main").length >= Math.max(2, Math.ceil(recipes.length / 2))) {
+    notes.push("硬菜占比高，先确认主料预算");
+  }
+  if (entries.some((entry) => entry.bandKey === "produce") && entries.some((entry) => entry.bandKey === "support")) {
+    notes.push("蔬菜和主食能把人均压稳");
+  }
+  if (!notes.length) {
+    notes.push("预算结构均衡，适合家常晚餐");
+  }
+
+  const bands = (["main", "produce", "soup", "support"] as const)
+    .map((key) => {
+      const total = bandTotals.get(key);
+      if (!total) return null;
+      const meta = budgetBandMeta(key);
+      return {
+        ...meta,
+        value: `¥${roundMoney(total.low)}-${Math.max(roundMoney(total.low) + 5, roundMoney(total.high))}`,
+      };
+    })
+    .filter((band): band is NonNullable<typeof band> => Boolean(band));
+
+  return {
+    label,
+    range: `¥${totalLow}-${totalHigh}`,
+    perPerson: `人均 ¥${perLow}-${perHigh}`,
+    headline: `${diners} 人份预计 ${label}`,
+    detail: "基于菜品主料、硬菜比例和人数的规则估算，实际以菜场价格为准。",
+    meter: Math.min(100, Math.max(8, Math.round(perHighRaw * 1.45))),
+    premiumNames,
+    notes: notes.slice(0, 3),
+    bands,
+  };
+}
+
 function buildServingPlan(recipes: Recipe[], dinersInput: number, roles: Set<MenuRole>): TodayMenuInsights["serving"] {
   const diners = clampDiners(dinersInput);
   const count = recipes.length;
@@ -537,6 +720,7 @@ export function buildTodayMenuInsights(recipes: Recipe[], dinersInput = 2): Toda
   const shoppingGroups = buildShoppingGroups(shoppingList);
   const mainNames = recipes.slice(0, 3).map((recipe) => recipe.name);
   const serving = buildServingPlan(recipes, dinersInput, roles);
+  const budget = buildBudgetPlan(recipes, dinersInput);
 
   return {
     count: recipes.length,
@@ -546,6 +730,7 @@ export function buildTodayMenuInsights(recipes: Recipe[], dinersInput = 2): Toda
       ? `${mainNames.join("、")} ${recipes.length > 3 ? "等" : ""}已进入今日菜单，当前结构评分 ${score}/100，${serving.diners} 人份。`
       : "选好几道菜后，这里会自动给出结构评分、采购清单和备菜节奏。",
     serving,
+    budget,
     roleLabels,
     missing,
     shoppingList,

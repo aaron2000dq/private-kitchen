@@ -242,6 +242,12 @@ function fillSuggestionReason(role: MealRole): string {
   return "让菜单更完整";
 }
 
+function budgetTone(label: string): "warm" | "accent" | "muted" {
+  if (label === "家宴级" || label === "硬菜拉满") return "warm";
+  if (label === "省心家常" || label === "舒适一桌") return "accent";
+  return "muted";
+}
+
 function menuFillScore(
   candidate: Recipe,
   wantedRole: MealRole,
@@ -744,6 +750,7 @@ export function RecipesListClient({
     try {
       const lines = [
         `${menuInsights.serving.diners}人份 · 菜场路线`,
+        `菜场预算：${menuInsights.budget.range} · ${menuInsights.budget.perPerson}`,
         ...menuInsights.shoppingGroups.flatMap((group) => [
           `【${group.label}】`,
           ...group.items.map((item) => `□ ${item}`),
@@ -1150,6 +1157,86 @@ export function RecipesListClient({
                   {note}
                 </span>
               ))}
+            </div>
+          </div>
+
+          <div className="mt-3 rounded-lg border border-[color:rgba(184,92,56,0.18)] bg-[linear-gradient(180deg,rgba(184,92,56,0.065),rgba(255,253,246,0.50))] p-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-[11px] text-[color:var(--muted-2)]">菜场预算</div>
+                <div className="pk-serif mt-1 text-[18px] leading-tight">
+                  {menuInsights.budget.headline}
+                </div>
+              </div>
+              <Badge tone={budgetTone(menuInsights.budget.label)} className="shrink-0">
+                {menuInsights.budget.label}
+              </Badge>
+            </div>
+
+            <div className="mt-3 flex items-end justify-between gap-3 rounded-lg border border-[color:rgba(184,92,56,0.18)] bg-[color:var(--paper)]/70 px-3 py-3">
+              <div>
+                <div className="text-[10px] text-[color:var(--muted-2)]">估算总额</div>
+                <div className="pk-serif mt-1 text-[24px] leading-none text-[color:var(--warm)]">
+                  {menuInsights.budget.range}
+                </div>
+              </div>
+              <div className="shrink-0 text-right">
+                <div className="text-[12px] font-medium text-[color:var(--foreground)]">
+                  {menuInsights.budget.perPerson}
+                </div>
+                <div className="mt-1 text-[10px] text-[color:var(--muted-2)]">规则估算</div>
+              </div>
+            </div>
+
+            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[color:rgba(24,33,29,0.08)]">
+              <div
+                className="h-full rounded-full bg-[linear-gradient(90deg,var(--accent),var(--warm))] transition-[width]"
+                style={{ width: `${menuInsights.budget.meter}%` }}
+              />
+            </div>
+
+            {menuInsights.budget.bands.length ? (
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {menuInsights.budget.bands.map((band) => (
+                  <div
+                    key={band.label}
+                    className="rounded-md border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/72 px-2.5 py-2"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate text-[11px] text-[color:var(--muted-2)]">{band.label}</span>
+                      <span
+                        className={cn(
+                          "shrink-0 text-[12px] font-medium",
+                          band.tone === "warm" && "text-[color:var(--warm)]",
+                          band.tone === "accent" && "text-[color:var(--accent)]",
+                          band.tone === "muted" && "text-[color:var(--muted)]",
+                        )}
+                      >
+                        {band.value}
+                      </span>
+                    </div>
+                    <div className="mt-1 truncate text-[10px] text-[color:var(--muted-2)]">{band.hint}</div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-3 rounded-md border border-dashed border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/52 px-3 py-3 text-[12px] leading-5 text-[color:var(--muted)]">
+                先配一桌菜，预算会自动拆成主料、时蔬、汤羹和主食。
+              </div>
+            )}
+
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {menuInsights.budget.notes.map((note) => (
+                <span
+                  key={note}
+                  className="rounded-md border border-[color:rgba(184,92,56,0.18)] bg-[color:rgba(184,92,56,0.07)] px-2 py-1 text-[11px] leading-none text-[color:var(--warm)]"
+                >
+                  {note}
+                </span>
+              ))}
+            </div>
+            <div className="mt-2 text-[10px] leading-4 text-[color:var(--muted-2)]">
+              {menuInsights.budget.detail}
             </div>
           </div>
 
