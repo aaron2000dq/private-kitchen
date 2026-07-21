@@ -481,6 +481,8 @@ export function RecipesListClient({
   const [menuTip, setMenuTip] = React.useState<string | null>(null);
   const [planScene, setPlanScene] = React.useState<MenuPlanScene>("balanced");
   const [guideMode, setGuideMode] = React.useState<KitchenGuideMode>("shopping");
+  const [setupOpen, setSetupOpen] = React.useState(false);
+  const [toolsOpen, setToolsOpen] = React.useState(false);
   const [dinnerTime, setDinnerTime] = React.useState("19:00");
   const [dinnerTimeHydrated, setDinnerTimeHydrated] = React.useState(false);
   const [dinerCount, setDinerCount] = React.useState(2);
@@ -1077,7 +1079,7 @@ export function RecipesListClient({
               {hydrated ? `${recipes.length} 道家常菜` : "读取本地菜谱"}
             </p>
           </div>
-          <ButtonLink href="/recipes/new">新增</ButtonLink>
+          <ButtonLink href="/recipes/new" variant="outline">新增</ButtonLink>
         </div>
       ) : null}
 
@@ -1092,10 +1094,11 @@ export function RecipesListClient({
                   : "读取中"}
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0 sm:items-center">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0 sm:flex-wrap sm:items-center sm:justify-end">
               <Button
                 size="sm"
-                variant="outline"
+                variant={selectedRecipes.length ? "outline" : "primary"}
+                className="h-10"
                 onClick={onShuffleMenu}
                 disabled={!todayHydrated || !hydrated || !locksHydrated || recipes.length === 0 || actionBusy}
               >
@@ -1103,22 +1106,8 @@ export function RecipesListClient({
               </Button>
               <Button
                 size="sm"
-                variant="outline"
-                onClick={onRecordCooked}
-                disabled={!todayHydrated || selectedRecipes.length === 0 || actionBusy}
-              >
-                {recordBusy ? "记录中" : "记为吃过"}
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={onClear}
-                disabled={!todayHydrated || selectedRecipes.length === 0 || actionBusy}
-              >
-                清空
-              </Button>
-              <Button
-                size="sm"
+                variant={selectedRecipes.length ? "primary" : "outline"}
+                className="h-10"
                 onClick={onExport}
                 disabled={!todayHydrated || selectedRecipes.length === 0 || actionBusy}
               >
@@ -1154,6 +1143,8 @@ export function RecipesListClient({
             })}
           </div>
 
+          {setupOpen ? (
+            <>
           <div className="mt-3 rounded-lg border border-[color:rgba(185,148,75,0.24)] bg-[color:var(--paper)]/72 p-3">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
@@ -1327,7 +1318,37 @@ export function RecipesListClient({
               {recentWindowDays}天避重 {recentRecipeIds.length}
             </Badge>
           </div>
+            </>
+          ) : (
+            <button
+              type="button"
+              className="mt-3 flex w-full items-center justify-between gap-3 rounded-lg border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/72 px-3 py-3 text-left transition-colors hover:bg-[color:rgba(185,148,75,0.07)]"
+              onClick={() => setSetupOpen(true)}
+            >
+              <span className="min-w-0">
+                <span className="block text-[11px] text-[color:var(--muted-2)]">用餐设置</span>
+                <span className="mt-1 block truncate text-[13px] text-[color:var(--foreground)]">
+                  {menuInsights.serving.diners} 人份 · {guestFit.label} · {recentRecipeIds.length ? `${recentWindowDays}天避重 ${recentRecipeIds.length}` : "无避重记录"}
+                </span>
+              </span>
+              <span className="shrink-0 text-[12px] text-[color:var(--accent)]">编辑</span>
+            </button>
+          )}
 
+          {exportError ? (
+            <div className="mt-3 rounded-lg border border-[color:rgba(184,92,56,0.35)] bg-[color:rgba(184,92,56,0.10)] px-3 py-2 text-[12px] text-[color:var(--warm)]">
+              {exportError}
+            </div>
+          ) : null}
+
+          {menuTip ? (
+            <div className="mt-3 rounded-lg border border-[color:rgba(63,111,85,0.24)] bg-[color:rgba(63,111,85,0.08)] px-3 py-2 text-[12px] leading-5 text-[color:var(--accent)]">
+              {menuTip}
+            </div>
+          ) : null}
+
+          {toolsOpen ? (
+            <>
           {templatesHydrated && (selectedRecipes.length || menuTemplateViews.length) ? (
             <div className="mt-3 rounded-lg border border-[color:rgba(185,148,75,0.24)] bg-[color:rgba(185,148,75,0.06)] p-3">
               <div className="flex items-start justify-between gap-3">
@@ -1409,18 +1430,6 @@ export function RecipesListClient({
             </div>
           ) : null}
 
-          {exportError ? (
-            <div className="mt-3 rounded-lg border border-[color:rgba(184,92,56,0.35)] bg-[color:rgba(184,92,56,0.10)] px-3 py-2 text-[12px] text-[color:var(--warm)]">
-              {exportError}
-            </div>
-          ) : null}
-
-          {menuTip ? (
-            <div className="mt-3 rounded-lg border border-[color:rgba(63,111,85,0.24)] bg-[color:rgba(63,111,85,0.08)] px-3 py-2 text-[12px] leading-5 text-[color:var(--accent)]">
-              {menuTip}
-            </div>
-          ) : null}
-
           {selectedRecipes.length ? (
             <div className="mt-3 rounded-lg border border-[color:rgba(185,148,75,0.26)] bg-[linear-gradient(180deg,rgba(185,148,75,0.08),rgba(63,111,85,0.045))] p-3">
               <div className="flex items-start justify-between gap-3">
@@ -1454,7 +1463,7 @@ export function RecipesListClient({
                 </div>
               </div>
 
-              <div className="mt-3 grid grid-cols-2 gap-2">
+              <div className="mt-3 grid grid-cols-3 gap-2">
                 <Button
                   size="sm"
                   variant="outline"
@@ -1569,238 +1578,251 @@ export function RecipesListClient({
                 >
                   {recordBusy ? "记录中" : "记为吃过"}
                 </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-9 text-[12px] text-[color:var(--muted)]"
+                  disabled={!todayHydrated || actionBusy}
+                  onClick={onClear}
+                >
+                  清空
+                </Button>
               </div>
             </div>
           ) : null}
 
-          <div className="mt-3 grid gap-2 sm:grid-cols-[0.8fr_1.2fr]">
-            <div className="rounded-lg border border-[color:var(--line)] bg-[color:var(--paper-strong)]/72 p-3">
-              <div className="flex items-end justify-between gap-3">
-                <div>
-                  <div className="text-[11px] text-[color:var(--muted-2)]">菜单完成度</div>
-                  <div className="pk-serif mt-1 text-[28px] leading-none text-[color:var(--accent)]">
-                    {menuInsights.score}
+          {selectedRecipes.length ? (
+            <>
+              <div className="mt-3 grid gap-2 sm:grid-cols-[0.8fr_1.2fr]">
+                <div className="rounded-lg border border-[color:var(--line)] bg-[color:var(--paper-strong)]/72 p-3">
+                  <div className="flex items-end justify-between gap-3">
+                    <div>
+                      <div className="text-[11px] text-[color:var(--muted-2)]">菜单完成度</div>
+                      <div className="pk-serif mt-1 text-[28px] leading-none text-[color:var(--accent)]">
+                        {menuInsights.score}
+                      </div>
+                    </div>
+                    <div className="text-right text-[12px] leading-5 text-[color:var(--muted)]">
+                      {menuInsights.stats.map((stat) => (
+                        <div key={stat.label}>
+                          {stat.label} · {stat.value}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
-                <div className="text-right text-[12px] leading-5 text-[color:var(--muted)]">
-                  {menuInsights.stats.map((stat) => (
-                    <div key={stat.label}>
-                      {stat.label} · {stat.value}
+                <div className="rounded-lg border border-[color:var(--line)] bg-[color:var(--paper-strong)]/72 p-3">
+                  <div className="flex flex-wrap gap-1.5">
+                    {menuInsights.missing.map((item) => (
+                      <span
+                        key={item}
+                        className="rounded-md border border-[color:rgba(184,92,56,0.22)] bg-[color:rgba(184,92,56,0.07)] px-2 py-1 text-[11px] text-[color:var(--warm)]"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="mt-2 line-clamp-1 text-[11px] text-[color:var(--muted-2)]">
+                    采购预览：
+                    {menuInsights.shoppingList.length
+                      ? menuInsights.shoppingList.slice(0, 5).join("、")
+                      : "选菜后自动整理"}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-3 rounded-lg border border-[color:rgba(63,111,85,0.20)] bg-[linear-gradient(180deg,rgba(63,111,85,0.065),rgba(185,148,75,0.045))] p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="text-[11px] text-[color:var(--muted-2)]">口味罗盘</div>
+                    <div className="pk-serif mt-1 text-[18px] leading-tight">
+                      {menuInsights.palate.headline}
+                    </div>
+                    <div className="mt-1 line-clamp-2 text-[11px] leading-5 text-[color:var(--muted)]">
+                      {menuInsights.palate.summary}
+                    </div>
+                  </div>
+                  <Badge tone={palateTone(menuInsights.palate.label)} className="shrink-0">
+                    {menuInsights.palate.label}
+                  </Badge>
+                </div>
+
+                <div className="mt-3 space-y-2">
+                  {menuInsights.palate.axes.map((axis) => (
+                    <div
+                      key={axis.key}
+                      className="rounded-md border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/72 px-2.5 py-2"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="text-[12px] font-medium leading-none text-[color:var(--foreground)]">
+                            {axis.label}
+                          </div>
+                          <div className="mt-1 truncate text-[10px] text-[color:var(--muted-2)]">{axis.hint}</div>
+                        </div>
+                        <div
+                          className={cn(
+                            "shrink-0 text-[12px] font-medium",
+                            axis.tone === "warm" && "text-[color:var(--warm)]",
+                            axis.tone === "accent" && "text-[color:var(--accent)]",
+                            axis.tone === "muted" && "text-[color:var(--muted)]",
+                          )}
+                        >
+                          {axis.value}
+                        </div>
+                      </div>
+                      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[color:rgba(24,33,29,0.08)]">
+                        <div
+                          className={cn(
+                            "h-full rounded-full transition-[width]",
+                            axis.tone === "warm" && "bg-[color:var(--warm)]",
+                            axis.tone === "accent" && "bg-[color:var(--accent)]",
+                            axis.tone === "muted" && "bg-[color:var(--accent-2)]",
+                          )}
+                          style={{ width: `${axis.value}%` }}
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
-              </div>
-            </div>
-            <div className="rounded-lg border border-[color:var(--line)] bg-[color:var(--paper-strong)]/72 p-3">
-              <div className="flex flex-wrap gap-1.5">
-                {menuInsights.missing.map((item) => (
-                  <span
-                    key={item}
-                    className="rounded-md border border-[color:rgba(184,92,56,0.22)] bg-[color:rgba(184,92,56,0.07)] px-2 py-1 text-[11px] text-[color:var(--warm)]"
-                  >
-                    {item}
-                  </span>
-                ))}
-              </div>
-              <div className="mt-2 line-clamp-1 text-[11px] text-[color:var(--muted-2)]">
-                采购预览：
-                {menuInsights.shoppingList.length
-                  ? menuInsights.shoppingList.slice(0, 5).join("、")
-                  : "选菜后自动整理"}
-              </div>
-            </div>
-          </div>
 
-          <div className="mt-3 rounded-lg border border-[color:rgba(63,111,85,0.20)] bg-[linear-gradient(180deg,rgba(63,111,85,0.065),rgba(185,148,75,0.045))] p-3">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <div className="text-[11px] text-[color:var(--muted-2)]">口味罗盘</div>
-                <div className="pk-serif mt-1 text-[18px] leading-tight">
-                  {menuInsights.palate.headline}
-                </div>
-                <div className="mt-1 line-clamp-2 text-[11px] leading-5 text-[color:var(--muted)]">
-                  {menuInsights.palate.summary}
-                </div>
-              </div>
-              <Badge tone={palateTone(menuInsights.palate.label)} className="shrink-0">
-                {menuInsights.palate.label}
-              </Badge>
-            </div>
-
-            <div className="mt-3 space-y-2">
-              {menuInsights.palate.axes.map((axis) => (
-                <div
-                  key={axis.key}
-                  className="rounded-md border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/72 px-2.5 py-2"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="text-[12px] font-medium leading-none text-[color:var(--foreground)]">
-                        {axis.label}
-                      </div>
-                      <div className="mt-1 truncate text-[10px] text-[color:var(--muted-2)]">{axis.hint}</div>
-                    </div>
-                    <div
-                      className={cn(
-                        "shrink-0 text-[12px] font-medium",
-                        axis.tone === "warm" && "text-[color:var(--warm)]",
-                        axis.tone === "accent" && "text-[color:var(--accent)]",
-                        axis.tone === "muted" && "text-[color:var(--muted)]",
-                      )}
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {menuInsights.palate.notes.map((note) => (
+                    <span
+                      key={note}
+                      className="rounded-md border border-[color:rgba(63,111,85,0.18)] bg-[color:rgba(63,111,85,0.07)] px-2 py-1 text-[11px] leading-none text-[color:var(--accent)]"
                     >
-                      {axis.value}
+                      {note}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-3 rounded-lg border border-[color:rgba(63,111,85,0.20)] bg-[linear-gradient(180deg,rgba(63,111,85,0.07),rgba(255,253,246,0.52))] p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="text-[11px] text-[color:var(--muted-2)]">份量小台</div>
+                    <div className="pk-serif mt-1 text-[18px] leading-tight">
+                      {menuInsights.serving.scaleLabel}
                     </div>
                   </div>
-                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[color:rgba(24,33,29,0.08)]">
+                  <Badge tone={menuInsights.serving.status === "很稳" ? "accent" : menuInsights.serving.status === "略紧" ? "warm" : "muted"} className="shrink-0">
+                    {menuInsights.serving.status}
+                  </Badge>
+                </div>
+                <div className="mt-3 grid grid-cols-3 gap-2">
+                  {menuInsights.serving.stats.map((stat) => (
                     <div
-                      className={cn(
-                        "h-full rounded-full transition-[width]",
-                        axis.tone === "warm" && "bg-[color:var(--warm)]",
-                        axis.tone === "accent" && "bg-[color:var(--accent)]",
-                        axis.tone === "muted" && "bg-[color:var(--accent-2)]",
-                      )}
-                      style={{ width: `${axis.value}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {menuInsights.palate.notes.map((note) => (
-                <span
-                  key={note}
-                  className="rounded-md border border-[color:rgba(63,111,85,0.18)] bg-[color:rgba(63,111,85,0.07)] px-2 py-1 text-[11px] leading-none text-[color:var(--accent)]"
-                >
-                  {note}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-3 rounded-lg border border-[color:rgba(63,111,85,0.20)] bg-[linear-gradient(180deg,rgba(63,111,85,0.07),rgba(255,253,246,0.52))] p-3">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <div className="text-[11px] text-[color:var(--muted-2)]">份量小台</div>
-                <div className="pk-serif mt-1 text-[18px] leading-tight">
-                  {menuInsights.serving.scaleLabel}
-                </div>
-              </div>
-              <Badge tone={menuInsights.serving.status === "很稳" ? "accent" : menuInsights.serving.status === "略紧" ? "warm" : "muted"} className="shrink-0">
-                {menuInsights.serving.status}
-              </Badge>
-            </div>
-            <div className="mt-3 grid grid-cols-3 gap-2">
-              {menuInsights.serving.stats.map((stat) => (
-                <div
-                  key={stat.label}
-                  className="rounded-md border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/72 px-2 py-2 text-center"
-                >
-                  <div className="text-[10px] text-[color:var(--muted-2)]">{stat.label}</div>
-                  <div
-                    className={cn(
-                      "mt-1 truncate text-[12px] font-medium",
-                      stat.tone === "accent" && "text-[color:var(--accent)]",
-                      stat.tone === "warm" && "text-[color:var(--warm)]",
-                      stat.tone === "muted" && "text-[color:var(--muted)]",
-                    )}
-                  >
-                    {stat.value}
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {menuInsights.serving.notes.map((note) => (
-                <span
-                  key={note}
-                  className="rounded-md border border-[color:rgba(63,111,85,0.18)] bg-[color:rgba(63,111,85,0.07)] px-2 py-1 text-[11px] leading-none text-[color:var(--accent)]"
-                >
-                  {note}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-3 rounded-lg border border-[color:rgba(184,92,56,0.18)] bg-[linear-gradient(180deg,rgba(184,92,56,0.065),rgba(255,253,246,0.50))] p-3">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <div className="text-[11px] text-[color:var(--muted-2)]">菜场预算</div>
-                <div className="pk-serif mt-1 text-[18px] leading-tight">
-                  {menuInsights.budget.headline}
-                </div>
-              </div>
-              <Badge tone={budgetTone(menuInsights.budget.label)} className="shrink-0">
-                {menuInsights.budget.label}
-              </Badge>
-            </div>
-
-            <div className="mt-3 flex items-end justify-between gap-3 rounded-lg border border-[color:rgba(184,92,56,0.18)] bg-[color:var(--paper)]/70 px-3 py-3">
-              <div>
-                <div className="text-[10px] text-[color:var(--muted-2)]">估算总额</div>
-                <div className="pk-serif mt-1 text-[24px] leading-none text-[color:var(--warm)]">
-                  {menuInsights.budget.range}
-                </div>
-              </div>
-              <div className="shrink-0 text-right">
-                <div className="text-[12px] font-medium text-[color:var(--foreground)]">
-                  {menuInsights.budget.perPerson}
-                </div>
-                <div className="mt-1 text-[10px] text-[color:var(--muted-2)]">规则估算</div>
-              </div>
-            </div>
-
-            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[color:rgba(24,33,29,0.08)]">
-              <div
-                className="h-full rounded-full bg-[linear-gradient(90deg,var(--accent),var(--warm))] transition-[width]"
-                style={{ width: `${menuInsights.budget.meter}%` }}
-              />
-            </div>
-
-            {menuInsights.budget.bands.length ? (
-              <div className="mt-3 grid grid-cols-2 gap-2">
-                {menuInsights.budget.bands.map((band) => (
-                  <div
-                    key={band.label}
-                    className="rounded-md border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/72 px-2.5 py-2"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="truncate text-[11px] text-[color:var(--muted-2)]">{band.label}</span>
-                      <span
+                      key={stat.label}
+                      className="rounded-md border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/72 px-2 py-2 text-center"
+                    >
+                      <div className="text-[10px] text-[color:var(--muted-2)]">{stat.label}</div>
+                      <div
                         className={cn(
-                          "shrink-0 text-[12px] font-medium",
-                          band.tone === "warm" && "text-[color:var(--warm)]",
-                          band.tone === "accent" && "text-[color:var(--accent)]",
-                          band.tone === "muted" && "text-[color:var(--muted)]",
+                          "mt-1 truncate text-[12px] font-medium",
+                          stat.tone === "accent" && "text-[color:var(--accent)]",
+                          stat.tone === "warm" && "text-[color:var(--warm)]",
+                          stat.tone === "muted" && "text-[color:var(--muted)]",
                         )}
                       >
-                        {band.value}
-                      </span>
+                        {stat.value}
+                      </div>
                     </div>
-                    <div className="mt-1 truncate text-[10px] text-[color:var(--muted-2)]">{band.hint}</div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {menuInsights.serving.notes.map((note) => (
+                    <span
+                      key={note}
+                      className="rounded-md border border-[color:rgba(63,111,85,0.18)] bg-[color:rgba(63,111,85,0.07)] px-2 py-1 text-[11px] leading-none text-[color:var(--accent)]"
+                    >
+                      {note}
+                    </span>
+                  ))}
+                </div>
               </div>
-            ) : (
-              <div className="mt-3 rounded-md border border-dashed border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/52 px-3 py-3 text-[12px] leading-5 text-[color:var(--muted)]">
-                先配一桌菜，预算会自动拆成主料、时蔬、汤羹和主食。
-              </div>
-            )}
 
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {menuInsights.budget.notes.map((note) => (
-                <span
-                  key={note}
-                  className="rounded-md border border-[color:rgba(184,92,56,0.18)] bg-[color:rgba(184,92,56,0.07)] px-2 py-1 text-[11px] leading-none text-[color:var(--warm)]"
-                >
-                  {note}
-                </span>
-              ))}
-            </div>
-            <div className="mt-2 text-[10px] leading-4 text-[color:var(--muted-2)]">
-              {menuInsights.budget.detail}
-            </div>
-          </div>
+              <div className="mt-3 rounded-lg border border-[color:rgba(184,92,56,0.18)] bg-[linear-gradient(180deg,rgba(184,92,56,0.065),rgba(255,253,246,0.50))] p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="text-[11px] text-[color:var(--muted-2)]">菜场预算</div>
+                    <div className="pk-serif mt-1 text-[18px] leading-tight">
+                      {menuInsights.budget.headline}
+                    </div>
+                  </div>
+                  <Badge tone={budgetTone(menuInsights.budget.label)} className="shrink-0">
+                    {menuInsights.budget.label}
+                  </Badge>
+                </div>
+
+                <div className="mt-3 flex items-end justify-between gap-3 rounded-lg border border-[color:rgba(184,92,56,0.18)] bg-[color:var(--paper)]/70 px-3 py-3">
+                  <div>
+                    <div className="text-[10px] text-[color:var(--muted-2)]">估算总额</div>
+                    <div className="pk-serif mt-1 text-[24px] leading-none text-[color:var(--warm)]">
+                      {menuInsights.budget.range}
+                    </div>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <div className="text-[12px] font-medium text-[color:var(--foreground)]">
+                      {menuInsights.budget.perPerson}
+                    </div>
+                    <div className="mt-1 text-[10px] text-[color:var(--muted-2)]">规则估算</div>
+                  </div>
+                </div>
+
+                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[color:rgba(24,33,29,0.08)]">
+                  <div
+                    className="h-full rounded-full bg-[linear-gradient(90deg,var(--accent),var(--warm))] transition-[width]"
+                    style={{ width: `${menuInsights.budget.meter}%` }}
+                  />
+                </div>
+
+                {menuInsights.budget.bands.length ? (
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    {menuInsights.budget.bands.map((band) => (
+                      <div
+                        key={band.label}
+                        className="rounded-md border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/72 px-2.5 py-2"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="truncate text-[11px] text-[color:var(--muted-2)]">{band.label}</span>
+                          <span
+                            className={cn(
+                              "shrink-0 text-[12px] font-medium",
+                              band.tone === "warm" && "text-[color:var(--warm)]",
+                              band.tone === "accent" && "text-[color:var(--accent)]",
+                              band.tone === "muted" && "text-[color:var(--muted)]",
+                            )}
+                          >
+                            {band.value}
+                          </span>
+                        </div>
+                        <div className="mt-1 truncate text-[10px] text-[color:var(--muted-2)]">{band.hint}</div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mt-3 rounded-md border border-dashed border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/52 px-3 py-3 text-[12px] leading-5 text-[color:var(--muted)]">
+                    先配一桌菜，预算会自动拆成主料、时蔬、汤羹和主食。
+                  </div>
+                )}
+
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {menuInsights.budget.notes.map((note) => (
+                    <span
+                      key={note}
+                      className="rounded-md border border-[color:rgba(184,92,56,0.18)] bg-[color:rgba(184,92,56,0.07)] px-2 py-1 text-[11px] leading-none text-[color:var(--warm)]"
+                    >
+                      {note}
+                    </span>
+                  ))}
+                </div>
+                <div className="mt-2 text-[10px] leading-4 text-[color:var(--muted-2)]">
+                  {menuInsights.budget.detail}
+                </div>
+              </div>
+            </>
+          ) : null}
 
           {selectedRecipes.length ? (
             <div className="mt-3 rounded-lg border border-[color:rgba(63,111,85,0.20)] bg-[linear-gradient(180deg,rgba(63,111,85,0.075),rgba(185,148,75,0.045))] p-3">
@@ -2345,6 +2367,23 @@ export function RecipesListClient({
             </div>
           ) : null}
 
+            </>
+          ) : selectedRecipes.length || menuTemplateViews.length ? (
+            <button
+              type="button"
+              className="mt-3 flex w-full items-center justify-between gap-3 rounded-lg border border-[color:rgba(63,111,85,0.20)] bg-[linear-gradient(180deg,rgba(63,111,85,0.06),rgba(255,253,246,0.50))] px-3 py-3 text-left transition-colors hover:bg-[color:rgba(63,111,85,0.09)]"
+              onClick={() => setToolsOpen(true)}
+            >
+              <span className="min-w-0">
+                <span className="block text-[11px] text-[color:var(--muted-2)]">更多工具</span>
+                <span className="mt-1 block truncate text-[13px] text-[color:var(--foreground)]">
+                  邀请、复盘、预算、采购和备菜都在这里
+                </span>
+              </span>
+              <span className="shrink-0 text-[12px] text-[color:var(--accent)]">展开</span>
+            </button>
+          ) : null}
+
           {selectedRecipes.length ? (
             <div className="pk-scrollbar mt-3 flex gap-3 overflow-x-auto pb-1">
               {selectedRecipes.map((recipe) => {
@@ -2426,7 +2465,7 @@ export function RecipesListClient({
             </div>
           ) : (
             <p className="mt-3 text-[13px] leading-6 text-[color:var(--muted)]">
-              还没定下来，先从下面挑两三道。
+              还没定下来，先配一桌看看。
             </p>
           )}
         </section>
