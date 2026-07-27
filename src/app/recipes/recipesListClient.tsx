@@ -196,6 +196,12 @@ function normalizeDinerCount(value: number): number {
   return Math.min(10, Math.max(1, Math.round(value)));
 }
 
+function scrollToPanel(element: HTMLElement | null) {
+  if (!element) return;
+  const top = element.getBoundingClientRect().top + window.scrollY - 88;
+  window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+}
+
 function readDinerCount(): number {
   if (typeof window === "undefined") return 2;
 
@@ -489,6 +495,8 @@ export function RecipesListClient({
   const [dinerCountHydrated, setDinerCountHydrated] = React.useState(false);
   const [guestProfile, setGuestProfile] = React.useState<GuestProfile>(() => createGuestProfile());
   const [guestHydrated, setGuestHydrated] = React.useState(false);
+  const todayShelfRef = React.useRef<HTMLElement | null>(null);
+  const libraryRef = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
     setLockedIds(new Set(readLockedMenuIds()));
@@ -717,6 +725,14 @@ export function RecipesListClient({
     setLockedIds(new Set());
     await clear();
     setMenuTip(null);
+  };
+
+  const onJumpToLibrary = () => {
+    scrollToPanel(libraryRef.current);
+  };
+
+  const onJumpToToday = () => {
+    scrollToPanel(todayShelfRef.current);
   };
 
   const onShuffleMenu = async () => {
@@ -1084,7 +1100,7 @@ export function RecipesListClient({
       ) : null}
 
       {showTodayShelf ? (
-        <section className="pk-panel p-3 pb-5 sm:p-4 sm:pb-5">
+        <section ref={todayShelfRef} className="pk-panel p-3 pb-5 sm:p-4 sm:pb-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0 space-y-1">
               <Badge tone="warm">今日菜单</Badge>
@@ -1108,10 +1124,10 @@ export function RecipesListClient({
                 size="sm"
                 variant={selectedRecipes.length ? "primary" : "outline"}
                 className="h-10"
-                onClick={onExport}
-                disabled={!todayHydrated || selectedRecipes.length === 0 || actionBusy}
+                onClick={selectedRecipes.length ? onExport : onJumpToLibrary}
+                disabled={!todayHydrated || actionBusy || (!selectedRecipes.length && !hydrated)}
               >
-                {busy ? "生成中" : "分享小票"}
+                {busy ? "生成中" : selectedRecipes.length ? "分享小票" : "手动挑菜"}
               </Button>
             </div>
           </div>
@@ -1145,6 +1161,16 @@ export function RecipesListClient({
 
           {setupOpen ? (
             <>
+              <div className="mt-3 flex items-center justify-between gap-3">
+                <div className="text-[12px] text-[color:var(--muted-2)]">先定人数和忌口，再配菜会更准。</div>
+                <button
+                  type="button"
+                  className="shrink-0 rounded-md px-2 py-1 text-[12px] text-[color:var(--accent)] transition-colors hover:bg-[color:rgba(63,111,85,0.08)]"
+                  onClick={() => setSetupOpen(false)}
+                >
+                  收起设置
+                </button>
+              </div>
           <div className="mt-3 rounded-lg border border-[color:rgba(185,148,75,0.24)] bg-[color:var(--paper)]/72 p-3">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
@@ -1318,6 +1344,26 @@ export function RecipesListClient({
               {recentWindowDays}天避重 {recentRecipeIds.length}
             </Badge>
           </div>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-9 text-[12px]"
+                  onClick={() => setSetupOpen(false)}
+                >
+                  收起设置
+                </Button>
+                <Button
+                  size="sm"
+                  className="h-9 text-[12px]"
+                  onClick={() => {
+                    void onShuffleMenu().then(() => setSetupOpen(false));
+                  }}
+                  disabled={!todayHydrated || !hydrated || !locksHydrated || recipes.length === 0 || actionBusy}
+                >
+                  按设置配一桌
+                </Button>
+              </div>
             </>
           ) : (
             <button
@@ -1349,6 +1395,16 @@ export function RecipesListClient({
 
           {toolsOpen ? (
             <>
+              <div className="mt-3 flex items-center justify-between gap-3">
+                <div className="text-[12px] text-[color:var(--muted-2)]">这些是进阶工具，用完可以随时收起。</div>
+                <button
+                  type="button"
+                  className="shrink-0 rounded-md px-2 py-1 text-[12px] text-[color:var(--accent)] transition-colors hover:bg-[color:rgba(63,111,85,0.08)]"
+                  onClick={() => setToolsOpen(false)}
+                >
+                  收起工具
+                </button>
+              </div>
           {templatesHydrated && (selectedRecipes.length || menuTemplateViews.length) ? (
             <div className="mt-3 rounded-lg border border-[color:rgba(185,148,75,0.24)] bg-[color:rgba(185,148,75,0.06)] p-3">
               <div className="flex items-start justify-between gap-3">
@@ -2465,13 +2521,13 @@ export function RecipesListClient({
             </div>
           ) : (
             <p className="mt-3 text-[13px] leading-6 text-[color:var(--muted)]">
-              还没定下来，先配一桌看看。
+              还没定下来，先配一桌看看；也可以手动挑菜。
             </p>
           )}
         </section>
       ) : null}
 
-      <div className="sticky top-14 z-20 -mx-4 space-y-3 border-y border-[color:var(--line)] bg-[color:var(--background)]/94 px-4 py-3 backdrop-blur sm:static sm:mx-0 sm:rounded-lg sm:border sm:bg-[color:var(--paper)]/88 sm:p-3 sm:shadow-[var(--shadow-soft)]">
+      <div ref={libraryRef} className="sticky top-14 z-20 -mx-4 space-y-3 border-y border-[color:var(--line)] bg-[color:var(--background)]/94 px-4 py-3 backdrop-blur sm:static sm:mx-0 sm:rounded-lg sm:border sm:bg-[color:var(--paper)]/88 sm:p-3 sm:shadow-[var(--shadow-soft)]">
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
@@ -2508,18 +2564,31 @@ export function RecipesListClient({
         </div>
         <div className="flex items-center justify-between gap-3 text-[12px] text-[color:var(--muted-2)]">
           <span>{hydrated ? `${filtered.length} 道菜` : "读取中"}</span>
-          {activeCategory !== "全部" || q.trim() ? (
-            <button
-              type="button"
-              className="rounded-md px-2 py-1 text-[color:var(--foreground)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
-              onClick={() => {
-                setQ("");
-                setActiveCategory("全部");
-              }}
-            >
-              重置
-            </button>
-          ) : null}
+          <div className="flex shrink-0 items-center gap-2">
+            {selectedRecipes.length ? (
+              <button
+                type="button"
+                className="rounded-md px-2 py-1 text-[color:var(--accent)] hover:bg-[color:rgba(63,111,85,0.08)]"
+                onClick={onJumpToToday}
+              >
+                查看今日 {selectedRecipes.length}/{todayMax}
+              </button>
+            ) : (
+              <span>点“加入今日”手动挑</span>
+            )}
+            {activeCategory !== "全部" || q.trim() ? (
+              <button
+                type="button"
+                className="rounded-md px-2 py-1 text-[color:var(--foreground)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
+                onClick={() => {
+                  setQ("");
+                  setActiveCategory("全部");
+                }}
+              >
+                重置
+              </button>
+            ) : null}
+          </div>
         </div>
       </div>
 
