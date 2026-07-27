@@ -8,6 +8,7 @@ import { formatRecipeIngredientsPreview } from "@/lib/recipes/formatIngredientsP
 import { recipeDetailHref } from "@/lib/recipes/recipeRoutes";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { StarRating } from "@/components/ui/StarRating";
 import { VisuallyLosslessThumb } from "@/components/recipes/VisuallyLosslessThumb";
 import { DISH_FEEDBACK_META, type DishFeedbackEntry } from "@/lib/today/dishFeedback";
 
@@ -34,6 +35,7 @@ export function RecipeCard({
   categoryEditable = false,
   categoryOptions = [],
   onCategoryChange,
+  onRatingChange,
 }: {
   recipe: Recipe;
   memoryEntry?: DishFeedbackEntry | null;
@@ -46,8 +48,10 @@ export function RecipeCard({
   categoryEditable?: boolean;
   categoryOptions?: string[];
   onCategoryChange?: (next: string) => void | Promise<void>;
+  onRatingChange?: (next: number) => void | Promise<unknown>;
 }) {
   const [catMenuOpen, setCatMenuOpen] = React.useState(false);
+  const [ratingBusy, setRatingBusy] = React.useState(false);
   const catMenuRef = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
@@ -69,6 +73,7 @@ export function RecipeCard({
   const image = recipe.images?.[0];
   const ingredientsPreview = formatRecipeIngredientsPreview(recipe);
   const memoryMeta = memoryEntry ? DISH_FEEDBACK_META[memoryEntry.tone] : null;
+  const canRate = typeof onRatingChange === "function";
   const memoryToneClass =
     memoryEntry?.tone === "avoid"
       ? "border-[color:rgba(184,92,56,0.28)] bg-[color:rgba(184,92,56,0.10)] text-[color:var(--warm)]"
@@ -187,6 +192,34 @@ export function RecipeCard({
             {memoryEntry.count > 1 ? ` · ${memoryEntry.count} 次` : ""}
           </div>
         ) : null}
+
+        <div
+          className="mt-3 rounded-lg border border-[color:var(--menu-line-soft)] bg-[color:var(--paper-strong)]/62 px-2.5 py-2"
+          data-rating-action="1"
+          onClick={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-[10px] leading-none text-[color:var(--muted-2)]">私房评分</div>
+            <div className="text-[11px] leading-none text-[color:var(--muted)]">
+              {recipe.rating ? `${recipe.rating}/5` : "还没打分"}
+            </div>
+          </div>
+          <StarRating
+            value={recipe.rating ?? 0}
+            size="sm"
+            className="mt-1"
+            disabled={!canRate || ratingBusy}
+            onChange={
+              canRate
+                ? (next) => {
+                    setRatingBusy(true);
+                    void Promise.resolve(onRatingChange(next)).finally(() => setRatingBusy(false));
+                  }
+                : undefined
+            }
+          />
+        </div>
 
         <Link
           href={href}

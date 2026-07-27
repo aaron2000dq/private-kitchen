@@ -206,7 +206,7 @@ export function CategoriesClient() {
               onPointerDown={(e) => {
                 if (!dragEnabled) return;
                 const target = e.target as HTMLElement | null;
-                if (target?.closest("[data-today-action='1']")) return;
+                if (target?.closest("[data-today-action='1'], [data-rating-action='1']")) return;
 
                 pendingRecipeIdRef.current = r.id;
                 pendingPointerIdRef.current = e.pointerId;
@@ -312,6 +312,7 @@ export function CategoriesClient() {
                 recipe={r}
                 showTodayAction
                 todaySelected={selected}
+                onRatingChange={(next) => update(r.id, { rating: next })}
                 onTodayAction={canAdd ? () => void addToToday(r.id) : undefined}
               />
             </div>

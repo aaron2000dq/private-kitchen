@@ -452,7 +452,7 @@ export function RecipesListClient({
   showHeader?: boolean;
   showTodayShelf?: boolean;
 }) {
-  const { recipes, hydrated } = useRecipes();
+  const { recipes, hydrated, update } = useRecipes();
   const {
     hydrated: todayHydrated,
     ids: todayIds,
@@ -2627,6 +2627,7 @@ export function RecipesListClient({
                 memoryEntry={feedbackEntryFor(recipe.id, dishFeedback.entries)}
                 showTodayAction
                 todaySelected={selected}
+                onRatingChange={(next) => update(recipe.id, { rating: next })}
                 onTodayAction={
                   selected || todayIds.length >= todayMax
                     ? undefined

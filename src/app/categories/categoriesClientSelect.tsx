@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/Button";
 import { useTodayCookbook } from "@/lib/today/useTodayCookbook";
 import { RecipeCard } from "@/components/recipes/RecipeCard";
 import { VisuallyLosslessThumb } from "@/components/recipes/VisuallyLosslessThumb";
+import { StarRating } from "@/components/ui/StarRating";
 
 type CategoryCount = {
   name: RecipeCategory;
@@ -77,25 +78,6 @@ function categoryMark(category: RecipeCategory) {
     火锅: "锅",
   };
   return marks[category];
-}
-
-function RatingStars({ rating }: { rating: number }) {
-  const rounded = Math.round(rating);
-  return (
-    <span className="inline-flex items-center gap-0.5" aria-label={rating ? `评分 ${rating}` : "未评分"}>
-      {Array.from({ length: 5 }).map((_, index) => (
-        <span
-          key={index}
-          className={cn(
-            "text-[11px] leading-none",
-            index < rounded ? "text-[color:var(--accent-2)]" : "text-black/15 dark:text-white/18",
-          )}
-        >
-          ★
-        </span>
-      ))}
-    </span>
-  );
 }
 
 function useIsDesktop() {
@@ -231,6 +213,9 @@ export function CategoriesClientSelect() {
           onCategoryChange={(id, nextCat) => {
             void onCategoryChange(id, nextCat);
           }}
+          onRatingChange={(id, next) => {
+            void update(id, { rating: next });
+          }}
           isTodaySelected={isTodaySelected}
         />
       ) : null}
@@ -264,6 +249,7 @@ export function CategoriesClientSelect() {
             void addToToday(id);
           }}
           onCategoryChange={onCategoryChange}
+          onRatingChange={(id, next) => update(id, { rating: next })}
           msgSetter={setMsg}
         />
       </div>
@@ -291,6 +277,7 @@ function MobileCategoryShelf({
   onRandomPick,
   onAddRecipe,
   onCategoryChange,
+  onRatingChange,
   isTodaySelected,
 }: {
   hydrated: boolean;
@@ -311,6 +298,7 @@ function MobileCategoryShelf({
   onRandomPick: () => void;
   onAddRecipe: (id: string) => void;
   onCategoryChange: (id: string, nextCat: RecipeCategory) => void;
+  onRatingChange: (id: string, next: number) => void;
   isTodaySelected: (id: string) => boolean;
 }) {
   return (
@@ -473,6 +461,7 @@ function MobileCategoryShelf({
                     canAdd={todayHydrated && todayCount < todayMax}
                     onAdd={() => onAddRecipe(recipe.id)}
                     onCategoryChange={(nextCat) => onCategoryChange(recipe.id, nextCat)}
+                    onRatingChange={(next) => onRatingChange(recipe.id, next)}
                   />
                 ))}
               </div>
@@ -536,59 +525,84 @@ function ShelfRecipeRow({
   canAdd,
   onAdd,
   onCategoryChange,
+  onRatingChange,
 }: {
   recipe: Recipe;
   selected: boolean;
   canAdd: boolean;
   onAdd: () => void;
   onCategoryChange: (nextCat: RecipeCategory) => void;
+  onRatingChange: (next: number) => void | Promise<unknown>;
 }) {
+  const [ratingBusy, setRatingBusy] = React.useState(false);
   const image = recipe.images?.[0];
   const ingredientsPreview = formatRecipeIngredientsPreview(recipe, 2, 1);
 
   return (
-    <article className="flex items-center gap-2 py-3">
-      <Link
-        href={recipeDetailHref(recipe.id)}
-        className="flex min-w-0 flex-1 gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]"
-      >
-        <div className="h-[76px] w-[76px] shrink-0 overflow-hidden rounded-lg bg-[color:var(--wash)]">
-          {image ? (
-            <VisuallyLosslessThumb
-              src={recipeImageThumbUrl(image)}
-              fallbackSrc={recipeImageUrl(image)}
-              alt={recipe.name}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center text-[11px] text-[color:var(--muted-2)]">
-              无图
-            </div>
-          )}
+    <article className="grid grid-cols-[minmax(0,1fr)_48px] gap-2 py-3">
+      <div className="min-w-0">
+        <div className="flex min-w-0 gap-3">
+          <Link
+            href={recipeDetailHref(recipe.id)}
+            className="h-[76px] w-[76px] shrink-0 overflow-hidden rounded-lg bg-[color:var(--wash)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]"
+            aria-label={`打开菜谱：${recipe.name}`}
+          >
+            {image ? (
+              <VisuallyLosslessThumb
+                src={recipeImageThumbUrl(image)}
+                fallbackSrc={recipeImageUrl(image)}
+                alt={recipe.name}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center text-[11px] text-[color:var(--muted-2)]">
+                无图
+              </div>
+            )}
+          </Link>
+
+          <div className="min-w-0 flex-1 py-0.5">
+            <Link
+              href={recipeDetailHref(recipe.id)}
+              className="block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--ring)]"
+            >
+              <h3 className="truncate text-[15px] font-semibold leading-5 text-[color:var(--foreground)]">
+                {recipe.name}
+              </h3>
+            </Link>
+            {ingredientsPreview ? (
+              <p className="mt-1 line-clamp-1 text-[11px] leading-4 text-[color:var(--muted-2)]">
+                {ingredientsPreview}
+              </p>
+            ) : (
+              <p className="mt-1 text-[11px] leading-4 text-[color:var(--muted-2)]">待补充食材</p>
+            )}
+            <p className="mt-1 text-[10px] leading-4 text-[color:var(--muted-2)]">
+              更新 {formatDate(recipe.updatedAt)}
+            </p>
+          </div>
         </div>
 
-        <div className="min-w-0 flex-1 py-0.5">
-          <h3 className="truncate text-[15px] font-semibold leading-5 text-[color:var(--foreground)]">
-            {recipe.name}
-          </h3>
-          <div className="mt-1 flex items-center gap-1.5">
-            <RatingStars rating={recipe.rating} />
-            <span className="text-[12px] text-[color:var(--muted)]">
-              {recipe.rating ? recipe.rating.toFixed(1) : "新菜"}
-            </span>
-          </div>
-          {ingredientsPreview ? (
-            <p className="mt-1 line-clamp-1 text-[11px] leading-4 text-[color:var(--muted-2)]">
-              {ingredientsPreview}
-            </p>
-          ) : (
-            <p className="mt-1 text-[11px] leading-4 text-[color:var(--muted-2)]">待补充食材</p>
-          )}
-          <p className="mt-1 text-[10px] leading-4 text-[color:var(--muted-2)]">
-            更新 {formatDate(recipe.updatedAt)}
-          </p>
+        <div
+          className="mt-2 flex items-center justify-between gap-2 rounded-lg border border-[color:var(--menu-line-soft)] bg-[color:var(--paper)]/78 px-2 py-1.5"
+          data-rating-action="1"
+          onClick={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          <span className="w-8 shrink-0 text-[11px] text-[color:var(--muted)]">
+            {recipe.rating ? `${recipe.rating}/5` : "未评"}
+          </span>
+          <StarRating
+            value={recipe.rating ?? 0}
+            size="sm"
+            disabled={ratingBusy}
+            onChange={(next) => {
+              setRatingBusy(true);
+              void Promise.resolve(onRatingChange(next)).finally(() => setRatingBusy(false));
+            }}
+          />
         </div>
-      </Link>
+      </div>
 
       <div className="flex w-[48px] shrink-0 flex-col items-end gap-2">
         <button
@@ -732,6 +746,7 @@ function DesktopCategoryGrid({
   isTodaySelected,
   onAddRecipe,
   onCategoryChange,
+  onRatingChange,
   msgSetter,
 }: {
   hydrated: boolean;
@@ -741,6 +756,7 @@ function DesktopCategoryGrid({
   isTodaySelected: (id: string) => boolean;
   onAddRecipe: (id: string) => void;
   onCategoryChange: (id: string, nextCat: RecipeCategory) => Promise<void>;
+  onRatingChange: (id: string, next: number) => void | Promise<unknown>;
   msgSetter: (msg: string | null) => void;
 }) {
   return (
@@ -764,6 +780,7 @@ function DesktopCategoryGrid({
             showTodayAction
             todaySelected={selected}
             onTodayAction={canAdd ? () => onAddRecipe(recipe.id) : undefined}
+            onRatingChange={(next) => onRatingChange(recipe.id, next)}
             categoryEditable
             categoryOptions={[...RecipeCategories]}
             onCategoryChange={async (nextCat) => {
